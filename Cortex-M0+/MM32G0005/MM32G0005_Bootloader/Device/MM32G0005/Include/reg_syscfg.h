@@ -1,0 +1,298 @@
+/***********************************************************************************************************************
+    @file     reg_syscfg.h
+    @author   VV TEAM
+    @brief    This flie contains all the SYSCFG's register and its field definition.
+  **********************************************************************************************************************
+    @attention
+
+    <h2><center>&copy; Copyright(c) <2023> <MindMotion></center></h2>
+
+      Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+    following conditions are met:
+    1. Redistributions of source code must retain the above copyright notice,
+       this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
+       the following disclaimer in the documentation and/or other materials provided with the distribution.
+    3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or
+       promote products derived from this software without specific prior written permission.
+
+      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+    INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  *********************************************************************************************************************/
+
+/* Define to prevent recursive inclusion -----------------------------------------------------------------------------*/
+
+#ifndef __REG_SYSCFG_H
+#define __REG_SYSCFG_H
+
+
+/* Files includes ----------------------------------------------------------------------------------------------------*/
+#include "core_cm0plus.h"
+
+
+
+/**
+  * @brief SYSCFG Base Address Definition
+  */
+#define  SYSCFG_BASE                               0x40010000                                       /*!<Base Address: 0x40010000*/
+
+/**
+  * @brief SYSCFG Register Structure Definition
+  */
+typedef struct
+{
+    __IO uint32_t CFGR;                           /*!<SYSCFG SYSCFG configuration register 1         offset: 0x00       */
+    __IO uint32_t RESERVED0x04[1];                /*!<                                               offset: 0x04       */
+    __IO uint32_t EXTICR1;                        /*!<SYSCFG SYSCFG external interrupt               offset: 0x08
+                                                      configuration register 1                                          */
+    __IO uint32_t EXTICR2;                        /*!<SYSCFG SYSCFG external interrupt               offset: 0x0C
+                                                      configuration register 2                                          */
+    __IO uint32_t EXTICR3;                        /*!<SYSCFG SYSCFG external interrupt               offset: 0x10
+                                                      configuration register 3                                          */
+    __IO uint32_t EXTICR4;                        /*!<SYSCFG SYSCFG external interrupt               offset: 0x14
+                                                      configuration register 4                                          */
+    __IO uint32_t RESERVED0x18[1];                /*!<                                               offset: 0x18       */
+    __IO uint32_t SENSORCR;                       /*!<                                               offset: 0x1C       */
+    __IO uint32_t LEDIOCR;                        /*!<                                               offset: 0x20       */
+    __IO uint32_t HCIOCR;                         /*!<                                               offset: 0x24       */
+} SYSCFG_TypeDef;
+
+/**
+  * @brief SYSCFG type pointer Definition
+  */
+#define SYSCFG                                    ((SYSCFG_TypeDef *)SYSCFG_BASE)
+
+/**
+  * @brief SYSCFG_CFGR Register Bit Definition
+  */
+#define  SYSCFG_CFGR_MEM_MODE_Pos                 (0)
+#define  SYSCFG_CFGR_MEM_MODE_Msk                 (0x3U << SYSCFG_CFGR_MEM_MODE_Pos)                /*!<Memory selection Bit*/
+#define  SYSCFG_CFGR_MEM_MODE                     SYSCFG_CFGR_MEM_MODE_Msk
+#define  SYSCFG_CFGR_MEM_MODE_Bit0                (0x1U << SYSCFG_CFGR_MEM_MODE_Pos) 
+#define  SYSCFG_CFGR_MEM_MODE_Bit1                (0x2U << SYSCFG_CFGR_MEM_MODE_Pos) 
+
+/**
+  * @brief SYSCFG_EXTICR1 Register Bit Definition
+  */
+#define  SYSCFG_EXTICR1_EXTI0_Pos                 (0)
+#define  SYSCFG_EXTICR1_EXTI0_Msk                 (0xFU << SYSCFG_EXTICR1_EXTI0_Pos)                /*!<EXTIx configuration(x=0 ...3)*/
+#define  SYSCFG_EXTICR1_EXTI0                     SYSCFG_EXTICR1_EXTI0_Msk
+#define  SYSCFG_EXTICR1_EXTI0_Bit0                (0x1U << SYSCFG_EXTICR1_EXTI0_Pos) 
+#define  SYSCFG_EXTICR1_EXTI0_Bit1                (0x2U << SYSCFG_EXTICR1_EXTI0_Pos) 
+#define  SYSCFG_EXTICR1_EXTI0_Bit2                (0x4U << SYSCFG_EXTICR1_EXTI0_Pos) 
+#define  SYSCFG_EXTICR1_EXTI0_Bit3                (0x8U << SYSCFG_EXTICR1_EXTI0_Pos) 
+#define  SYSCFG_EXTICR1_EXTI1_Pos                 (4)
+#define  SYSCFG_EXTICR1_EXTI1_Msk                 (0xFU << SYSCFG_EXTICR1_EXTI1_Pos)                /*!<EXTIx configuration(x=0 ...3)*/
+#define  SYSCFG_EXTICR1_EXTI1                     SYSCFG_EXTICR1_EXTI1_Msk
+#define  SYSCFG_EXTICR1_EXTI1_Bit0                (0x1U << SYSCFG_EXTICR1_EXTI1_Pos) 
+#define  SYSCFG_EXTICR1_EXTI1_Bit1                (0x2U << SYSCFG_EXTICR1_EXTI1_Pos) 
+#define  SYSCFG_EXTICR1_EXTI1_Bit2                (0x4U << SYSCFG_EXTICR1_EXTI1_Pos) 
+#define  SYSCFG_EXTICR1_EXTI1_Bit3                (0x8U << SYSCFG_EXTICR1_EXTI1_Pos) 
+#define  SYSCFG_EXTICR1_EXTI2_Pos                 (8)
+#define  SYSCFG_EXTICR1_EXTI2_Msk                 (0xFU << SYSCFG_EXTICR1_EXTI2_Pos)                /*!<EXTIx configuration(x=0 ...3)*/
+#define  SYSCFG_EXTICR1_EXTI2                     SYSCFG_EXTICR1_EXTI2_Msk
+#define  SYSCFG_EXTICR1_EXTI2_Bit0                (0x1U << SYSCFG_EXTICR1_EXTI2_Pos) 
+#define  SYSCFG_EXTICR1_EXTI2_Bit1                (0x2U << SYSCFG_EXTICR1_EXTI2_Pos) 
+#define  SYSCFG_EXTICR1_EXTI2_Bit2                (0x4U << SYSCFG_EXTICR1_EXTI2_Pos) 
+#define  SYSCFG_EXTICR1_EXTI2_Bit3                (0x8U << SYSCFG_EXTICR1_EXTI2_Pos) 
+#define  SYSCFG_EXTICR1_EXTI3_Pos                 (12)
+#define  SYSCFG_EXTICR1_EXTI3_Msk                 (0xFU << SYSCFG_EXTICR1_EXTI3_Pos)                /*!<EXTIx configuration(x=0 ...3)*/
+#define  SYSCFG_EXTICR1_EXTI3                     SYSCFG_EXTICR1_EXTI3_Msk
+#define  SYSCFG_EXTICR1_EXTI3_Bit0                (0x1U << SYSCFG_EXTICR1_EXTI3_Pos) 
+#define  SYSCFG_EXTICR1_EXTI3_Bit1                (0x2U << SYSCFG_EXTICR1_EXTI3_Pos) 
+#define  SYSCFG_EXTICR1_EXTI3_Bit2                (0x4U << SYSCFG_EXTICR1_EXTI3_Pos) 
+#define  SYSCFG_EXTICR1_EXTI3_Bit3                (0x8U << SYSCFG_EXTICR1_EXTI3_Pos) 
+
+/**
+  * @brief SYSCFG_EXTICR2 Register Bit Definition
+  */
+#define  SYSCFG_EXTICR2_EXTI4_Pos                 (0)
+#define  SYSCFG_EXTICR2_EXTI4_Msk                 (0xFU << SYSCFG_EXTICR2_EXTI4_Pos)                /*!<EXTIx configuration(x=4 ...7)*/
+#define  SYSCFG_EXTICR2_EXTI4                     SYSCFG_EXTICR2_EXTI4_Msk
+#define  SYSCFG_EXTICR2_EXTI4_Bit0                (0x1U << SYSCFG_EXTICR2_EXTI4_Pos) 
+#define  SYSCFG_EXTICR2_EXTI4_Bit1                (0x2U << SYSCFG_EXTICR2_EXTI4_Pos) 
+#define  SYSCFG_EXTICR2_EXTI4_Bit2                (0x4U << SYSCFG_EXTICR2_EXTI4_Pos) 
+#define  SYSCFG_EXTICR2_EXTI4_Bit3                (0x8U << SYSCFG_EXTICR2_EXTI4_Pos) 
+#define  SYSCFG_EXTICR2_EXTI5_Pos                 (4)
+#define  SYSCFG_EXTICR2_EXTI5_Msk                 (0xFU << SYSCFG_EXTICR2_EXTI5_Pos)                /*!<EXTIx configuration(x=4 ...7)*/
+#define  SYSCFG_EXTICR2_EXTI5                     SYSCFG_EXTICR2_EXTI5_Msk
+#define  SYSCFG_EXTICR2_EXTI5_Bit0                (0x1U << SYSCFG_EXTICR2_EXTI5_Pos) 
+#define  SYSCFG_EXTICR2_EXTI5_Bit1                (0x2U << SYSCFG_EXTICR2_EXTI5_Pos) 
+#define  SYSCFG_EXTICR2_EXTI5_Bit2                (0x4U << SYSCFG_EXTICR2_EXTI5_Pos) 
+#define  SYSCFG_EXTICR2_EXTI5_Bit3                (0x8U << SYSCFG_EXTICR2_EXTI5_Pos) 
+#define  SYSCFG_EXTICR2_EXTI6_Pos                 (8)
+#define  SYSCFG_EXTICR2_EXTI6_Msk                 (0xFU << SYSCFG_EXTICR2_EXTI6_Pos)                /*!<EXTIx configuration(x=4 ...7)*/
+#define  SYSCFG_EXTICR2_EXTI6                     SYSCFG_EXTICR2_EXTI6_Msk
+#define  SYSCFG_EXTICR2_EXTI6_Bit0                (0x1U << SYSCFG_EXTICR2_EXTI6_Pos) 
+#define  SYSCFG_EXTICR2_EXTI6_Bit1                (0x2U << SYSCFG_EXTICR2_EXTI6_Pos) 
+#define  SYSCFG_EXTICR2_EXTI6_Bit2                (0x4U << SYSCFG_EXTICR2_EXTI6_Pos) 
+#define  SYSCFG_EXTICR2_EXTI6_Bit3                (0x8U << SYSCFG_EXTICR2_EXTI6_Pos) 
+#define  SYSCFG_EXTICR2_EXTI7_Pos                 (12)
+#define  SYSCFG_EXTICR2_EXTI7_Msk                 (0xFU << SYSCFG_EXTICR2_EXTI7_Pos)                /*!<EXTIx configuration(x=4 ...7)*/
+#define  SYSCFG_EXTICR2_EXTI7                     SYSCFG_EXTICR2_EXTI7_Msk
+#define  SYSCFG_EXTICR2_EXTI7_Bit0                (0x1U << SYSCFG_EXTICR2_EXTI7_Pos) 
+#define  SYSCFG_EXTICR2_EXTI7_Bit1                (0x2U << SYSCFG_EXTICR2_EXTI7_Pos) 
+#define  SYSCFG_EXTICR2_EXTI7_Bit2                (0x4U << SYSCFG_EXTICR2_EXTI7_Pos) 
+#define  SYSCFG_EXTICR2_EXTI7_Bit3                (0x8U << SYSCFG_EXTICR2_EXTI7_Pos) 
+
+/**
+  * @brief SYSCFG_EXTICR3 Register Bit Definition
+  */
+#define  SYSCFG_EXTICR3_EXTI8_Pos                 (0)
+#define  SYSCFG_EXTICR3_EXTI8_Msk                 (0xFU << SYSCFG_EXTICR3_EXTI8_Pos)                /*!<EXTIx configuration(x=8 ...11)*/
+#define  SYSCFG_EXTICR3_EXTI8                     SYSCFG_EXTICR3_EXTI8_Msk
+#define  SYSCFG_EXTICR3_EXTI8_Bit0                (0x1U << SYSCFG_EXTICR3_EXTI8_Pos) 
+#define  SYSCFG_EXTICR3_EXTI8_Bit1                (0x2U << SYSCFG_EXTICR3_EXTI8_Pos) 
+#define  SYSCFG_EXTICR3_EXTI8_Bit2                (0x4U << SYSCFG_EXTICR3_EXTI8_Pos) 
+#define  SYSCFG_EXTICR3_EXTI8_Bit3                (0x8U << SYSCFG_EXTICR3_EXTI8_Pos) 
+#define  SYSCFG_EXTICR3_EXTI9_Pos                 (4)
+#define  SYSCFG_EXTICR3_EXTI9_Msk                 (0xFU << SYSCFG_EXTICR3_EXTI9_Pos)                /*!<EXTIx configuration(x=8 ...11)*/
+#define  SYSCFG_EXTICR3_EXTI9                     SYSCFG_EXTICR3_EXTI9_Msk
+#define  SYSCFG_EXTICR3_EXTI9_Bit0                (0x1U << SYSCFG_EXTICR3_EXTI9_Pos) 
+#define  SYSCFG_EXTICR3_EXTI9_Bit1                (0x2U << SYSCFG_EXTICR3_EXTI9_Pos) 
+#define  SYSCFG_EXTICR3_EXTI9_Bit2                (0x4U << SYSCFG_EXTICR3_EXTI9_Pos) 
+#define  SYSCFG_EXTICR3_EXTI9_Bit3                (0x8U << SYSCFG_EXTICR3_EXTI9_Pos) 
+#define  SYSCFG_EXTICR3_EXTI10_Pos                (8)
+#define  SYSCFG_EXTICR3_EXTI10_Msk                (0xFU << SYSCFG_EXTICR3_EXTI10_Pos)               /*!<EXTIx configuration(x=8 ...11)*/
+#define  SYSCFG_EXTICR3_EXTI10                    SYSCFG_EXTICR3_EXTI10_Msk
+#define  SYSCFG_EXTICR3_EXTI10_Bit0               (0x1U << SYSCFG_EXTICR3_EXTI10_Pos) 
+#define  SYSCFG_EXTICR3_EXTI10_Bit1               (0x2U << SYSCFG_EXTICR3_EXTI10_Pos) 
+#define  SYSCFG_EXTICR3_EXTI10_Bit2               (0x4U << SYSCFG_EXTICR3_EXTI10_Pos) 
+#define  SYSCFG_EXTICR3_EXTI10_Bit3               (0x8U << SYSCFG_EXTICR3_EXTI10_Pos) 
+#define  SYSCFG_EXTICR3_EXTI11_Pos                (12)
+#define  SYSCFG_EXTICR3_EXTI11_Msk                (0xFU << SYSCFG_EXTICR3_EXTI11_Pos)               /*!<EXTIx configuration(x=8 ...11)*/
+#define  SYSCFG_EXTICR3_EXTI11                    SYSCFG_EXTICR3_EXTI11_Msk
+#define  SYSCFG_EXTICR3_EXTI11_Bit0               (0x1U << SYSCFG_EXTICR3_EXTI11_Pos) 
+#define  SYSCFG_EXTICR3_EXTI11_Bit1               (0x2U << SYSCFG_EXTICR3_EXTI11_Pos) 
+#define  SYSCFG_EXTICR3_EXTI11_Bit2               (0x4U << SYSCFG_EXTICR3_EXTI11_Pos) 
+#define  SYSCFG_EXTICR3_EXTI11_Bit3               (0x8U << SYSCFG_EXTICR3_EXTI11_Pos) 
+
+/**
+  * @brief SYSCFG_EXTICR4 Register Bit Definition
+  */
+#define  SYSCFG_EXTICR4_EXTI12_Pos                (0)
+#define  SYSCFG_EXTICR4_EXTI12_Msk                (0xFU << SYSCFG_EXTICR4_EXTI12_Pos)               /*!<EXTIx configuration(x=12 ...15)*/
+#define  SYSCFG_EXTICR4_EXTI12                    SYSCFG_EXTICR4_EXTI12_Msk
+#define  SYSCFG_EXTICR4_EXTI12_Bit0               (0x1U << SYSCFG_EXTICR4_EXTI12_Pos) 
+#define  SYSCFG_EXTICR4_EXTI12_Bit1               (0x2U << SYSCFG_EXTICR4_EXTI12_Pos) 
+#define  SYSCFG_EXTICR4_EXTI12_Bit2               (0x4U << SYSCFG_EXTICR4_EXTI12_Pos) 
+#define  SYSCFG_EXTICR4_EXTI12_Bit3               (0x8U << SYSCFG_EXTICR4_EXTI12_Pos) 
+#define  SYSCFG_EXTICR4_EXTI13_Pos                (4)
+#define  SYSCFG_EXTICR4_EXTI13_Msk                (0xFU << SYSCFG_EXTICR4_EXTI13_Pos)               /*!<EXTIx configuration(x=12 ...15)*/
+#define  SYSCFG_EXTICR4_EXTI13                    SYSCFG_EXTICR4_EXTI13_Msk
+#define  SYSCFG_EXTICR4_EXTI13_Bit0               (0x1U << SYSCFG_EXTICR4_EXTI13_Pos) 
+#define  SYSCFG_EXTICR4_EXTI13_Bit1               (0x2U << SYSCFG_EXTICR4_EXTI13_Pos) 
+#define  SYSCFG_EXTICR4_EXTI13_Bit2               (0x4U << SYSCFG_EXTICR4_EXTI13_Pos) 
+#define  SYSCFG_EXTICR4_EXTI13_Bit3               (0x8U << SYSCFG_EXTICR4_EXTI13_Pos) 
+#define  SYSCFG_EXTICR4_EXTI14_Pos                (8)
+#define  SYSCFG_EXTICR4_EXTI14_Msk                (0xFU << SYSCFG_EXTICR4_EXTI14_Pos)               /*!<EXTIx configuration(x=12 ...15)*/
+#define  SYSCFG_EXTICR4_EXTI14                    SYSCFG_EXTICR4_EXTI14_Msk
+#define  SYSCFG_EXTICR4_EXTI14_Bit0               (0x1U << SYSCFG_EXTICR4_EXTI14_Pos) 
+#define  SYSCFG_EXTICR4_EXTI14_Bit1               (0x2U << SYSCFG_EXTICR4_EXTI14_Pos) 
+#define  SYSCFG_EXTICR4_EXTI14_Bit2               (0x4U << SYSCFG_EXTICR4_EXTI14_Pos) 
+#define  SYSCFG_EXTICR4_EXTI14_Bit3               (0x8U << SYSCFG_EXTICR4_EXTI14_Pos) 
+#define  SYSCFG_EXTICR4_EXTI15_Pos                (12)
+#define  SYSCFG_EXTICR4_EXTI15_Msk                (0xFU << SYSCFG_EXTICR4_EXTI15_Pos)               /*!<EXTIx configuration(x=12 ...15)*/
+#define  SYSCFG_EXTICR4_EXTI15                    SYSCFG_EXTICR4_EXTI15_Msk
+#define  SYSCFG_EXTICR4_EXTI15_Bit0               (0x1U << SYSCFG_EXTICR4_EXTI15_Pos) 
+#define  SYSCFG_EXTICR4_EXTI15_Bit1               (0x2U << SYSCFG_EXTICR4_EXTI15_Pos) 
+#define  SYSCFG_EXTICR4_EXTI15_Bit2               (0x4U << SYSCFG_EXTICR4_EXTI15_Pos) 
+#define  SYSCFG_EXTICR4_EXTI15_Bit3               (0x8U << SYSCFG_EXTICR4_EXTI15_Pos) 
+
+/**
+  * @brief SYSCFG_SENSORCR Register Bit Definition
+  */
+#define  SYSCFG_SENSORCR_VS_EN_Pos                (0)
+#define  SYSCFG_SENSORCR_VS_EN_Msk                (0x1U << SYSCFG_SENSORCR_VS_EN_Pos)               /*!<*/
+#define  SYSCFG_SENSORCR_VS_EN                    SYSCFG_SENSORCR_VS_EN_Msk
+#define  SYSCFG_SENSORCR_TS_EN_Pos                (1)
+#define  SYSCFG_SENSORCR_TS_EN_Msk                (0x1U << SYSCFG_SENSORCR_TS_EN_Pos)               /*!<*/
+#define  SYSCFG_SENSORCR_TS_EN                    SYSCFG_SENSORCR_TS_EN_Msk
+
+/**
+  * @brief SYSCFG_LEDIOCR Register Bit Definition
+  */
+#define  SYSCFG_LEDIOCR_LEDIO0_Pos                (0)
+#define  SYSCFG_LEDIOCR_LEDIO0_Msk                (0xFU << SYSCFG_LEDIOCR_LEDIO0_Pos)               /*!<*/
+#define  SYSCFG_LEDIOCR_LEDIO0                    SYSCFG_LEDIOCR_LEDIO0_Msk
+#define  SYSCFG_LEDIOCR_LEDIO0_Bit0               (0x1U << SYSCFG_LEDIOCR_LEDIO0_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO0_Bit1               (0x2U << SYSCFG_LEDIOCR_LEDIO0_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO0_Bit2               (0x4U << SYSCFG_LEDIOCR_LEDIO0_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO0_Bit3               (0x8U << SYSCFG_LEDIOCR_LEDIO0_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO1_Pos                (4)
+#define  SYSCFG_LEDIOCR_LEDIO1_Msk                (0xFU << SYSCFG_LEDIOCR_LEDIO1_Pos)               /*!<*/
+#define  SYSCFG_LEDIOCR_LEDIO1                    SYSCFG_LEDIOCR_LEDIO1_Msk
+#define  SYSCFG_LEDIOCR_LEDIO1_Bit0               (0x1U << SYSCFG_LEDIOCR_LEDIO1_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO1_Bit1               (0x2U << SYSCFG_LEDIOCR_LEDIO1_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO1_Bit2               (0x4U << SYSCFG_LEDIOCR_LEDIO1_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO1_Bit3               (0x8U << SYSCFG_LEDIOCR_LEDIO1_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO2_Pos                (8)
+#define  SYSCFG_LEDIOCR_LEDIO2_Msk                (0xFU << SYSCFG_LEDIOCR_LEDIO2_Pos)               /*!<*/
+#define  SYSCFG_LEDIOCR_LEDIO2                    SYSCFG_LEDIOCR_LEDIO2_Msk
+#define  SYSCFG_LEDIOCR_LEDIO2_Bit0               (0x1U << SYSCFG_LEDIOCR_LEDIO2_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO2_Bit1               (0x2U << SYSCFG_LEDIOCR_LEDIO2_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO2_Bit2               (0x4U << SYSCFG_LEDIOCR_LEDIO2_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO2_Bit3               (0x8U << SYSCFG_LEDIOCR_LEDIO2_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO3_Pos                (12)
+#define  SYSCFG_LEDIOCR_LEDIO3_Msk                (0xFU << SYSCFG_LEDIOCR_LEDIO3_Pos)               /*!<*/
+#define  SYSCFG_LEDIOCR_LEDIO3                    SYSCFG_LEDIOCR_LEDIO3_Msk
+#define  SYSCFG_LEDIOCR_LEDIO3_Bit0               (0x1U << SYSCFG_LEDIOCR_LEDIO3_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO3_Bit1               (0x2U << SYSCFG_LEDIOCR_LEDIO3_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO3_Bit2               (0x4U << SYSCFG_LEDIOCR_LEDIO3_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO3_Bit3               (0x8U << SYSCFG_LEDIOCR_LEDIO3_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO4_Pos                (16)
+#define  SYSCFG_LEDIOCR_LEDIO4_Msk                (0xFU << SYSCFG_LEDIOCR_LEDIO4_Pos)               /*!<*/
+#define  SYSCFG_LEDIOCR_LEDIO4                    SYSCFG_LEDIOCR_LEDIO4_Msk
+#define  SYSCFG_LEDIOCR_LEDIO4_Bit0               (0x1U << SYSCFG_LEDIOCR_LEDIO4_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO4_Bit1               (0x2U << SYSCFG_LEDIOCR_LEDIO4_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO4_Bit2               (0x4U << SYSCFG_LEDIOCR_LEDIO4_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO4_Bit3               (0x8U << SYSCFG_LEDIOCR_LEDIO4_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO5_Pos                (20)
+#define  SYSCFG_LEDIOCR_LEDIO5_Msk                (0xFU << SYSCFG_LEDIOCR_LEDIO5_Pos)               /*!<*/
+#define  SYSCFG_LEDIOCR_LEDIO5                    SYSCFG_LEDIOCR_LEDIO5_Msk
+#define  SYSCFG_LEDIOCR_LEDIO5_Bit0               (0x1U << SYSCFG_LEDIOCR_LEDIO5_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO5_Bit1               (0x2U << SYSCFG_LEDIOCR_LEDIO5_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO5_Bit2               (0x4U << SYSCFG_LEDIOCR_LEDIO5_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO5_Bit3               (0x8U << SYSCFG_LEDIOCR_LEDIO5_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO6_Pos                (24)
+#define  SYSCFG_LEDIOCR_LEDIO6_Msk                (0xFU << SYSCFG_LEDIOCR_LEDIO6_Pos)               /*!<*/
+#define  SYSCFG_LEDIOCR_LEDIO6                    SYSCFG_LEDIOCR_LEDIO6_Msk
+#define  SYSCFG_LEDIOCR_LEDIO6_Bit0               (0x1U << SYSCFG_LEDIOCR_LEDIO6_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO6_Bit1               (0x2U << SYSCFG_LEDIOCR_LEDIO6_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO6_Bit2               (0x4U << SYSCFG_LEDIOCR_LEDIO6_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO6_Bit3               (0x8U << SYSCFG_LEDIOCR_LEDIO6_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO7_Pos                (28)
+#define  SYSCFG_LEDIOCR_LEDIO7_Msk                (0xFU << SYSCFG_LEDIOCR_LEDIO7_Pos)               /*!<*/
+#define  SYSCFG_LEDIOCR_LEDIO7                    SYSCFG_LEDIOCR_LEDIO7_Msk
+#define  SYSCFG_LEDIOCR_LEDIO7_Bit0               (0x1U << SYSCFG_LEDIOCR_LEDIO7_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO7_Bit1               (0x2U << SYSCFG_LEDIOCR_LEDIO7_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO7_Bit2               (0x4U << SYSCFG_LEDIOCR_LEDIO7_Pos) 
+#define  SYSCFG_LEDIOCR_LEDIO7_Bit3               (0x8U << SYSCFG_LEDIOCR_LEDIO7_Pos) 
+
+/**
+  * @brief SYSCFG_HCIOCR Register Bit Definition
+  */
+#define  SYSCFG_HCIOCR_HCIO0_Pos                  (0)
+#define  SYSCFG_HCIOCR_HCIO0_Msk                  (0x1U << SYSCFG_HCIOCR_HCIO0_Pos)                 /*!<*/
+#define  SYSCFG_HCIOCR_HCIO0                      SYSCFG_HCIOCR_HCIO0_Msk
+#define  SYSCFG_HCIOCR_HCIO1_Pos                  (1)
+#define  SYSCFG_HCIOCR_HCIO1_Msk                  (0x1U << SYSCFG_HCIOCR_HCIO1_Pos)                 /*!<*/
+#define  SYSCFG_HCIOCR_HCIO1                      SYSCFG_HCIOCR_HCIO1_Msk
+#define  SYSCFG_HCIOCR_HCIO2_Pos                  (2)
+#define  SYSCFG_HCIOCR_HCIO2_Msk                  (0x1U << SYSCFG_HCIOCR_HCIO2_Pos)                 /*!<*/
+#define  SYSCFG_HCIOCR_HCIO2                      SYSCFG_HCIOCR_HCIO2_Msk
+#define  SYSCFG_HCIOCR_HCIO3_Pos                  (3)
+#define  SYSCFG_HCIOCR_HCIO3_Msk                  (0x1U << SYSCFG_HCIOCR_HCIO3_Pos)                 /*!<*/
+#define  SYSCFG_HCIOCR_HCIO3                      SYSCFG_HCIOCR_HCIO3_Msk
+#define  SYSCFG_HCIOCR_HCIO4_Pos                  (4)
+#define  SYSCFG_HCIOCR_HCIO4_Msk                  (0x1U << SYSCFG_HCIOCR_HCIO4_Pos)                 /*!<*/
+#define  SYSCFG_HCIOCR_HCIO4                      SYSCFG_HCIOCR_HCIO4_Msk
+
+
+#endif
+

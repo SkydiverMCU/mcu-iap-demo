@@ -1,32 +1,7 @@
 # MM32-IAP-Demo
 
 #### Description
-MM32MCU IAP 上位机/协议/源码，不定期收集分享开源资料，来源于https://gitee.com/jitingai/mm32_-iap_-demo
-
-#### Software Architecture
-Software architecture description
-
-#### Installation
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### Instructions
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### Contribution
-
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
-
-
-#### Gitee Feature
+MM32 MCU IAP host computer/protocol/source code, periodically collected and shared open-source materials, sourced from https://gitee.com/jitingai/mm32_-iap_-demo‌
 
 1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
 2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)

@@ -103,53 +103,22 @@ static uint8_t Check_data(u8 *txrxCmd)
     return (0);
 }
 
-static void FLASH_Write(const u8 *buff, u32 addr, u32 writeNumber) // MM32G0005 Flash 32 位写入
+static void FLASH_Write(const u8 *buff, u32 addr, u32 writeNumber)
 {
     u32 temp;
     u32 WriteAddress;
-    u32 Word;
-    uint8_t remainder = 0;
-    uint32_t integer = 0;
-
-    remainder = writeNumber % 4;
-    integer = writeNumber / 4;
+    u16 HalfWord;
 
     WriteAddress = addr;
 
     FLASH_Unlock();
-    FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR);
-
-    for (temp = 0; temp < (integer * 4); temp += 4)
+    FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR);
+    for (temp = 0; temp < writeNumber; temp += 2)
     {
-        Word = buff[temp];
-        Word = Word | (buff[temp + 1] << 8);
-        Word = Word | (buff[temp + 2] << 16);
-        Word = Word | (buff[temp + 3] << 24);
-
-
-        FLASH_ProgramWord(WriteAddress, Word);
-        WriteAddress = WriteAddress + 4;
-    }
-
-    switch (remainder)
-    {
-    case 3:
-        Word = Word | (buff[temp + 2] << 16);
-
-    case 2:
-        Word = Word | (buff[temp + 1] << 8);
-
-    case 1:
-        Word = Word | buff[temp];
-        FLASH_ProgramWord(WriteAddress, Word);
-
-    case 0:
-
-        break;
-
-    default:
-
-        break;
+        HalfWord = buff[temp];
+        HalfWord = HalfWord | (buff[temp + 1] << 8);
+        FLASH_ProgramHalfWord(WriteAddress, HalfWord);
+        WriteAddress = WriteAddress + 2;
     }
 
     FLASH_Lock();
@@ -159,45 +128,16 @@ void FLASH_Read(u8 *buff, u32 addr, u32 readNumber)
 {
     u32 temp;
     u32 Address;
-    u32 Word;
-    uint8_t remainder = 0;
-    uint32_t integer = 0;
-
-    remainder = readNumber % 4;
-    integer = readNumber / 4;
+    u16 halfword;
 
     Address = addr;
 
-    for (temp = 0; temp < (integer * 4); temp += 4)
+    for (temp = 0; temp < readNumber; temp += 2)
     {
-        Word = *(volatile uint32_t *)Address;
-        buff[temp] = Word & 0xFF;
-        buff[temp + 1] = (Word >> 8) & 0xFF;
-        buff[temp + 2] = (Word >> 16) & 0xFF;
-        buff[temp + 3] = (Word >> 24) & 0xFF;
-        Address += 4;
-    }
-
-    Word = *(volatile uint32_t *)Address;
-
-    switch (remainder)
-    {
-    case 3:
-        buff[temp + 2] = (Word >> 16) & 0xFF;
-
-    case 2:
-        buff[temp + 1] = (Word >> 8) & 0xFF;
-
-    case 1:
-        buff[temp] = Word & 0xFF;
-
-    case 0:
-
-        break;
-
-    default:
-
-        break;
+        halfword = *((vu16 *)Address) & 0xFFFF;
+        buff[temp] = halfword & 0xFF;
+        buff[temp + 1] = (halfword >> 8) & 0xFF;
+        Address += 2;
     }
 }
 
@@ -396,8 +336,8 @@ void eraseAppSpace(u8 *buff)
     FLASH_Lock();
     buff[0] = buff[0] | 0xC0;
     sum = CheckSum(buff, buff[1] - 2);
-    buff[4] = (sum >> 8) & 0xFF;
-    buff[5] = sum & 0xff;
+    buff[buff[1]-2] = (sum >> 8) & 0xFF;
+    buff[buff[1]-1] = sum & 0xff;
     UART_SendGroup(buff, Send_Size);
 }
 
@@ -406,7 +346,7 @@ void getVersion(u8 *buff)
     u16 sum = 0;
 
     memset(buff, 0, 0x40);
-    buff[0] = 0xC9;
+    buff[0] = GET_VERSION | 0xc0;
     buff[1] = 9;
     strncpy((char *)(buff + 2), BURN_VER, 5);
     sum = CheckSum(buff, buff[1] - 2);

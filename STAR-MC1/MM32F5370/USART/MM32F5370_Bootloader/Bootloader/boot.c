@@ -319,8 +319,8 @@ void eraseAppSpace(u8 *buff)
     FLASH_Lock();
     buff[0] = buff[0] | 0xC0;
     sum = CheckSum(buff, buff[1] - 2);
-    buff[4] = (sum >> 8) & 0xFF;
-    buff[5] = sum & 0xff;
+    buff[buff[1]-2] = (sum >> 8) & 0xFF;
+    buff[buff[1]-1] = sum & 0xff;
     UART_SendGroup(buff, Send_Size);
 }
 
@@ -329,7 +329,7 @@ void getVersion(u8 *buff)
     u16 sum = 0;
 
     memset(buff, 0, 0x40);
-    buff[0] = 0xC9;
+    buff[0] = GET_VERSION | 0xc0;
     buff[1] = 9;
     strncpy((char *)(buff + 2), BURN_VER, 5);
     sum = CheckSum(buff, buff[1] - 2);

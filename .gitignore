@@ -21,7 +21,7 @@
 *.pch
 
 # Libraries
-*.lib
+#*.lib
 *.a
 *.la
 *.lo
@@ -38,7 +38,7 @@
 *.app
 *.i*86
 *.x86_64
-*.hex
+#*.hex
 
 # Debug files
 *.dSYM/
@@ -56,15 +56,17 @@ Mkfile.old
 dkms.conf
 
 *.crf
-*.ini
-*.txt
+#*.ini
+#*.txt
 *.naprj
-*.bat
+#*.bat
 *.C1
 
 #Keil project temp files
 *.dep
 *.scvd
 *.uvguix.wenya
-*.uvoptx
-*.uvprojx
+#*.uvoptx
+#*.uvprojx
+
+venv/

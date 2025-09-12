@@ -15,9 +15,9 @@ from datetime import datetime  #用于版本信息
 
 class IAPControl:
     #版本信息常量
-    SOFTWARE_VERSION = "Version:0.0.9"
+    SOFTWARE_VERSION = "Version:0.1.0"
     BUILD_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 动态生成构建时间
-    BUILD_NUMBER = "2025091001"
+    BUILD_NUMBER = "2025091002"
     NAME = "Skydiver"
 
     # 宏定义HID设备参数
@@ -55,6 +55,11 @@ class IAPControl:
         self.segments = []  # 存储分段数据
         self.download_abort = False  # 下载中断标记
 
+        # HID设备状态跟踪
+        self.hid_connected = False
+        self.hid_monitor_thread = None
+        self.hid_monitor_running = False
+
         # 保存MCU返回的应用空间信息
         self.mcu_app_start_addr = 0  # MCU应用区起始地址
         self.mcu_app_total_size = 0  # MCU应用区总大小
@@ -66,6 +71,7 @@ class IAPControl:
         # 配置日志文本标签样式
         self.app.Message.tag_config("error", foreground="red")  # 错误日志红色
         self.app.Message.tag_config("normal", foreground="black")  # 普通日志黑色
+        self.app.Message.tag_config("info", foreground="blue")    # warning日志蓝色
 
         # 初始化4个段的信息，每个段包含长度、地址和校验和
         self.mcu_app_info = [
@@ -137,7 +143,7 @@ class IAPControl:
         self.app.Clear_Message.config(command=self.clear_message)
         self.app.Open_Port.config(command=self.toggle_port)
         self.app.Open_file.config(command=self.open_file)
-        self.app.Download.config(command=self.start_download_thread)#self.app.Download.config(command=self.download_firmware)
+        self.app.Download.config(command=self.start_download_thread)
         self.app.Port_Select.bind("<<ComboboxSelected>>", self.on_port_select_change)
 
     def _init_ui_elements(self):
@@ -146,8 +152,8 @@ class IAPControl:
         self.baud_rates = ["9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600"]
         self.app.BaudRate_Select['values'] = self.baud_rates
         self.app.BaudRate_Select.current(4)
-        self.set_mode_ui("HID")
         self.update_connection_state(False)
+        self.set_mode_ui("HID")
         # 新增：顶部中间版本信息标签（核心修改）
         self.version_label = tk.Label(
             self.app.top,  # 父容器
@@ -201,6 +207,170 @@ class IAPControl:
             self.hid_device = None
             self.hid_handle = None
             self.update_connection_state(False)
+
+
+    def on_port_select_change(self, event=None):
+        """端口选择变化时触发"""
+        selected_mode = self.app.Port_Select.get()
+        self.log(f"模式切换为：{selected_mode}")
+
+        if self.ser and self.ser.is_open:
+            self.ser.close()
+        if self.hid_handle:
+            self.hid_handle.close()
+            self.hid_handle = None
+        self.hid_device = None
+        self.set_mode_ui(selected_mode)
+
+    def detect_hid_device(self):
+        """检测符合VID和PID的HID设备"""
+        try:
+            # 查找所有HID设备
+            all_hid_devices = hid.find_all_hid_devices()
+            target_device = None
+
+            # 筛选符合VID和PID的设备
+            for device in all_hid_devices:
+                if device.vendor_id == self.USB_VID and device.product_id == self.USB_PID:
+                    target_device = device
+                    break
+
+            if target_device:
+                self.hid_device = target_device
+                self.hid_connected = True
+                self.log(f"发现HID设备: VID=0x{self.USB_VID:04X}, PID=0x{self.USB_PID:04X}", "INFO")
+                self.update_connection_state(True)
+                return True
+            else:
+                self.hid_device = None
+                self.hid_connected = False
+                self.log(f"未找到HID设备: VID=0x{self.USB_VID:04X}, PID=0x{self.USB_PID:04X}", "WARNING")
+                self.update_connection_state(False)
+                return False
+
+        except Exception as e:
+            self.log(f"HID设备检测失败: {str(e)}", "ERROR")
+            self.hid_connected = False
+            self.update_connection_state(False)
+            return False
+
+    def refresh_com_ports(self):
+        """刷新COM端口列表，严格按「设备描述 (端口名)」格式显示"""
+        ports = serial.tools.list_ports.comports()
+        port_list = []
+
+        for port in ports:
+            # 处理空描述（部分设备可能无描述，用“未知串行设备”兜底）
+            device_desc = port.description.strip() if port.description else "未知串行设备"
+            # 严格格式：设备描述 (端口名)（如“USB Serial Port (COM6)”）
+            display_text = f"{device_desc} ({port.device})"
+            port_list.append(display_text)
+
+        if port_list:
+            self.app.COM_Select['values'] = port_list
+            self.app.COM_Select.current(0)
+            self.log(f"可用COM口：{', '.join(port_list)}")
+        else:
+            self.app.COM_Select['values'] = ["无可用端口"]
+            self.log("未发现可用COM口", "WARNING")
+
+    def toggle_port(self):
+        """切换端口连接状态（原有方法修改）"""
+        current_mode = self.app.Port_Select.get()
+
+        if current_mode == "HID":
+            # HID模式连接/断开逻辑
+            if self.hid_connected:
+                if self.hid_handle and self.hid_handle.is_opened:
+                    self.hid_handle.close()
+                    self.hid_handle = None
+                    self.log("HID设备已断开连接", "INFO")
+                    self.update_connection_state(False)
+            else:
+                # 尝试连接HID设备
+                if self.hid_device:
+                    try:
+                        self.hid_handle = self.hid_device.open()
+                        self.log("HID设备连接成功", "INFO")
+                        self.update_connection_state(True)
+                    except Exception as e:
+                        self.log(f"HID设备连接失败: {str(e)}", "ERROR")
+                else:
+                    self.log("未找到可用HID设备，请检查设备连接", "ERROR")
+        else:
+            # 原有VCOM模式处理逻辑保持不变
+            if self.ser and self.ser.is_open:
+                self.ser.close()
+                self.ser = None
+                self.log("串口已关闭", "INFO")
+                self.update_connection_state(False)
+            else:
+                self._open_port()
+                pass
+
+    def _open_port(self):
+        # 1. 获取下拉列表选中的完整文本（如“USB 串行设备 (COM6)”）
+        selected_text = self.app.COM_Select.get()
+
+        # 2. 检查是否为“无可用端口”
+        if "无可用端口" in selected_text:
+            messagebox.showerror("错误", "未选择有效COM口")
+            return
+
+        # 3. 从完整文本中提取纯端口名（核心修复：提取“(”和“)”之间的内容）
+        try:
+            # 找到“(”和“)”的位置（格式严格为「描述 (端口名)」）
+            start_idx = selected_text.find("(")
+            end_idx = selected_text.find(")")
+
+            # 验证格式是否正确
+            if start_idx == -1 or end_idx == -1 or end_idx <= start_idx:
+                raise ValueError("端口格式错误，无法提取有效端口名")
+
+            # 提取并清理端口名（如从“(COM6)”中提取“COM6”）
+            com_port = selected_text[start_idx + 1: end_idx].strip()
+
+            # 额外验证端口名格式（Windows：COMx，Linux：/dev/ttyUSBx）
+            if not (com_port.startswith("COM") or com_port.startswith("/dev/")):
+                raise ValueError(f"无效端口名：{com_port}（应为COMx或/dev/ttyUSBx格式）")
+
+        except ValueError as e:
+            messagebox.showerror("错误", f"提取端口名失败：{str(e)}")
+            self.log(f"端口名提取错误：{str(e)}", "ERROR")
+            return
+
+        # 4. 后续逻辑不变（获取波特率、打开端口）
+        baud_rate = self.app.BaudRate_Select.get()
+        try:
+            self.ser = serial.Serial(
+                port=com_port,  # 这里用的是提取后的纯端口名（如“COM6”）
+                baudrate=int(baud_rate),
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
+                bytesize=serial.EIGHTBITS,
+                timeout=2
+            )
+            if self.ser.is_open:
+                self.log(f"COM口 {com_port} 打开（波特率：{baud_rate}）")
+                self.update_connection_state(True)
+        except Exception as e:
+            self.log(f"COM口打开失败：{str(e)}", "ERROR")
+            messagebox.showerror("错误", f"COM口打开失败：{str(e)}")
+            self.ser = None
+            self.update_connection_state(False)
+
+    def _close_port(self):
+        if self.ser and self.ser.is_open:
+            com_port = self.ser.port
+            try:
+                self.ser.close()
+                self.log(f"COM口 {com_port} 关闭")
+            except Exception as e:
+                self.log(f"COM口关闭失败：{str(e)}", "ERROR")
+            finally:
+                self.ser = None
+                self.update_connection_state(False)
+
 
     def _hid_data_receive_callback(self, data):
         """HID数据接收回调（可能在独立线程执行）"""
@@ -335,7 +505,7 @@ class IAPControl:
                                          "DEBUG")
                                 self.last_response = None  # 清空错误响应
 
-                    time.sleep(0.005)
+                    time.sleep(0.001)
                     retry_count += 1
 
                 # 4. 超时判断
@@ -421,68 +591,6 @@ class IAPControl:
                 self.mcu_app_total_size = size
 
                 self.log(f"MCU返回应用信息 - 起始地址:0x{start_addr:08X}, 大小:0x{size:08X}", "INFO")
-
-    # COM口处理
-    def on_port_select_change(self, event):
-        selected_mode = self.app.Port_Select.get()
-        self.log(f"模式切换为：{selected_mode}")
-        if self.ser and self.ser.is_open:
-            self.ser.close()
-        if self.hid_handle:
-            self.hid_handle.close()
-            self.hid_handle = None
-        self.hid_device = None
-        self.set_mode_ui(selected_mode)
-
-    def refresh_com_ports(self):
-        ports = serial.tools.list_ports.comports()
-        port_list = [port.device for port in ports]
-        if port_list:
-            self.app.COM_Select['values'] = port_list
-            self.app.COM_Select.current(0)
-            self.log(f"可用COM口：{', '.join(port_list)}")
-        else:
-            self.app.COM_Select['values'] = ["无可用端口"]
-            self.log("未发现可用COM口", "WARNING")
-
-    def toggle_port(self):
-        if self.ser and self.ser.is_open:
-            self._close_port()
-        else:
-            self._open_port()
-
-    def _open_port(self):
-        com_port = self.app.COM_Select.get()
-        baud_rate = self.app.BaudRate_Select.get()
-        if "无可用端口" in com_port:
-            messagebox.showerror("错误", "未选择有效COM口")
-            return
-        try:
-            self.ser = serial.Serial(
-                port=com_port, baudrate=int(baud_rate),
-                parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
-                bytesize=serial.EIGHTBITS, timeout=2
-            )
-            if self.ser.is_open:
-                self.log(f"COM口 {com_port} 打开（波特率：{baud_rate}）")
-                self.update_connection_state(True)
-        except Exception as e:
-            self.log(f"COM口打开失败：{str(e)}", "ERROR")
-            messagebox.showerror("错误", f"COM口打开失败：{str(e)}")
-            self.ser = None
-            self.update_connection_state(False)
-
-    def _close_port(self):
-        if self.ser and self.ser.is_open:
-            com_port = self.ser.port
-            try:
-                self.ser.close()
-                self.log(f"COM口 {com_port} 关闭")
-            except Exception as e:
-                self.log(f"COM口关闭失败：{str(e)}", "ERROR")
-            finally:
-                self.ser = None
-                self.update_connection_state(False)
 
     # 固件解析相关函数
     def _parse_intel_hex(self, hex_path, print_bin=True):
@@ -1156,10 +1264,19 @@ class IAPControl:
             self.log("固件下载流程完成！", "INFO")
             messagebox.showinfo("完成", f"{current_mode}模式固件下载成功！")
 
+            # 下载完成之后检查连接状态
+            if current_mode == "HID":
+                # 下载完成，开始HID监听
+                self.start_hid_monitor()
+
         except Exception as e:
             self.log(f"下载异常：{str(e)}", "ERROR")
             self.app.DownloadTProgressbar.config(value=0)
             messagebox.showerror("错误", f"下载失败：{str(e)}")
+            # 下载失败之后检查连接状态
+            if current_mode == "HID":
+                # 下载失败，开始HID监听
+                self.start_hid_monitor()
 
     # 日志和状态更新
     def log(self, message, level="INFO"):
@@ -1170,8 +1287,10 @@ class IAPControl:
         # 根据日志级别选择标签
         if level == "ERROR":
             self.app.Message.insert(END, log_entry, "error")
-        else:
+        elif level == "INFO":
             self.app.Message.insert(END, log_entry, "normal")
+        else:
+            self.app.Message.insert(END, log_entry, "info")
 
         self.app.Message.see(END)
         self.app.Message.config(state=DISABLED)
@@ -1180,7 +1299,7 @@ class IAPControl:
         self.app.Message.config(state=NORMAL)
         self.app.Message.delete(1.0, END)
         self.app.Message.config(state=DISABLED)
-        self.log("日志已清空")
+        self.log("日志已清空","INFO")
 
     def update_connection_state(self, connected):
         if connected:

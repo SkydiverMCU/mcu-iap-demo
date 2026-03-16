@@ -46,7 +46,8 @@ extern "C" {
 /* Exported variables *************************************************************************************************/
 
 /* Exported functions *************************************************************************************************/
-void TinyUSB_Device_HID_Port_Sample(void);
+void TinyUSB_Device_Configure(void);
+void USB_SendGroup(uint8_t *pBuff, uint16_t length);
 
 #ifdef __cplusplus
 }

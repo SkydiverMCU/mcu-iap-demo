@@ -55,7 +55,7 @@
 // #define SYSCLK_HSI_XXMHz               36000000
 // #define SYSCLK_HSI_XXMHz               24000000
                                           
- #define SYSCLK_HSE_XXMHz               96000000 /* default:96MHz, can be set as 48000000 or others */
+#define SYSCLK_HSE_XXMHz               96000000 /* default:96MHz, can be set as 48000000 or others */
 // #define SYSCLK_HSE_XXMHz               48000000
 // #define SYSCLK_HSE_XXMHz               36000000
 // #define SYSCLK_HSE_XXMHz               24000000

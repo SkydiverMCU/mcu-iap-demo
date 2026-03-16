@@ -31,18 +31,19 @@
 #define _PLATFORM_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Files include */
 #include "hal_conf.h"
-
-/* Exported types *****************************************************************************************************/
-typedef enum
-{
+#include "boot.h"
+  /* Exported types *****************************************************************************************************/
+  typedef enum
+  {
     LED1,
     LED2,
-} LEDn_TypeDef;
+  } LEDn_TypeDef;
 
 /* Exported constants *************************************************************************************************/
 
@@ -57,11 +58,11 @@ typedef enum
 #define EXTERN extern
 #endif
 
-EXTERN volatile uint32_t PLATFORM_DelayTick;
+  EXTERN volatile uint32_t PLATFORM_DelayTick;
 
-/* Exported functions *************************************************************************************************/
-void PLATFORM_DelayMS(uint32_t Millisecond);
-void PLATFORM_Init(void);
+  /* Exported functions *************************************************************************************************/
+  void PLATFORM_DelayMS(uint32_t Millisecond);
+  void PLATFORM_Init(void);
 
 #ifdef __cplusplus
 }
@@ -70,4 +71,3 @@ void PLATFORM_Init(void);
 #endif /* _PLATFORM_H_ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

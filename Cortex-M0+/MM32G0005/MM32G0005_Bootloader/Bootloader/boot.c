@@ -34,7 +34,7 @@
 #include "platform.h"
 #include "boot.h"
 
-#define BURN_VER "0.0.1"
+#define BOOT_VERSION "V:0.0.1"
 
 /* Private typedef ****************************************************************************************************/
 
@@ -42,38 +42,31 @@
 
 /* Private variables **************************************************************************************************/
 
-#define Send_Size 64
-
-const u8 USB_Return_Err[64] =
+const uint8_t Report_Return_Err[REPORT_PACKET_SIZE] =
     {
         0xD5, 0x04, 0x00, 0x00, 0x59};
-const u8 Valid_buf[4] =
+const uint8_t Valid_buf[4] =
     {
         0x55, 0xAA, 0xAA, 0x55};
 
 FileData_Block appdata_block[BLOCK_NUM];
 
-u8 code_buff[512];
-u8 currentSegment = 0;
-u16 code_CurrentLength;
-u32 code_TotalLength;
+uint8_t code_buff[512];
+uint8_t currentSegment = 0;
+uint16_t code_CurrentLength;
+uint32_t code_TotalLength;
 uint16_t USART_RX_STA = 0;
 
-u8 sendbuff[64];
+uint8_t sendbuff[REPORT_PACKET_SIZE];
 
-uint8_t USART_RxBuff[UART_REC_LEN];
+uint8_t USART_RxBuff[REPORT_PACKET_SIZE];
 
 #define code_buff_size sizeof(code_buff)
 /* Private functions **************************************************************************************************/
 
-void UART_SendGroup(u8 *buffer, u16 bufsize)
-{
-    USART_SendGroup(buffer, bufsize);
-}
-
 /*************Check calculation********************************/
 
-static u16 CheckSum(uint8_t *pdat, uint8_t count)
+static uint16_t CheckSum(uint8_t *pdat, uint8_t count)
 {
     register int sum = 0;
 
@@ -87,9 +80,9 @@ static u16 CheckSum(uint8_t *pdat, uint8_t count)
     return (sum);
 }
 
-/**********У��Checksum*******************/
+/**********Checksum*******************/
 
-static uint8_t Check_data(u8 *txrxCmd)
+static uint8_t Check_data(uint8_t *txrxCmd)
 {
     // uint8_t Flag_check = 0;
     uint16_t tmp_Checksum = 0;
@@ -108,11 +101,11 @@ static uint8_t Check_data(u8 *txrxCmd)
     return (0);
 }
 
-static void FLASH_Write(const u8 *buff, u32 addr, u32 writeNumber) // MM32G0005 Flash 32 位写入
+static void FLASH_Write(const uint8_t *buff, uint32_t addr, uint32_t writeNumber) // MM32G0005 Flash 32 位写入
 {
-    u32 temp;
-    u32 WriteAddress;
-    u32 Word;
+    uint32_t temp;
+    uint32_t WriteAddress;
+    uint32_t Word;
     uint8_t remainder = 0;
     uint32_t integer = 0;
 
@@ -130,7 +123,6 @@ static void FLASH_Write(const u8 *buff, u32 addr, u32 writeNumber) // MM32G0005 
         Word = Word | (buff[temp + 1] << 8);
         Word = Word | (buff[temp + 2] << 16);
         Word = Word | (buff[temp + 3] << 24);
-
 
         FLASH_ProgramWord(WriteAddress, Word);
         WriteAddress = WriteAddress + 4;
@@ -160,11 +152,11 @@ static void FLASH_Write(const u8 *buff, u32 addr, u32 writeNumber) // MM32G0005 
     FLASH_Lock();
 }
 
-void FLASH_Read(u8 *buff, u32 addr, u32 readNumber)
+void FLASH_Read(uint8_t *buff, uint32_t addr, uint32_t readNumber)
 {
-    u32 temp;
-    u32 Address;
-    u32 Word;
+    uint32_t temp;
+    uint32_t Address;
+    uint32_t Word;
     uint8_t remainder = 0;
     uint32_t integer = 0;
 
@@ -206,16 +198,12 @@ void FLASH_Read(u8 *buff, u32 addr, u32 readNumber)
     }
 }
 
-void appVerify(u8 *buff)
+void appVerify(uint8_t *buff)
 {
-    u8 j;
-    u16 i, idx;
-    u16 page_num;
-    u16 page_mud;
-    u32 addr;
-    u32 DatWord = 0;
-    u32 check_sum = 0;
-
+    uint8_t j;
+    uint32_t CRC32_check = 0;
+    uint16_t sum = 0;
+    
     for (j = 0; j < 4; j++)
     {
         if (appdata_block[j].BlockLength == 0)
@@ -223,77 +211,32 @@ void appVerify(u8 *buff)
             break;
         }
 
-        check_sum = 0;
-        page_num = appdata_block[j].BlockLength / code_buff_size;
-        page_mud = appdata_block[j].BlockLength % code_buff_size;
+        CRC32_check = crc32_mpeg2_calculate((uint8_t *)appdata_block[j].BlockStartAddr, appdata_block[j].BlockLength);
 
-        // addr = APPFILE_SAVE_ADDR+(appdata_block[j].BlockStartAddr - appdata_block[0].BlockStartAddr);
-        addr = appdata_block[j].BlockStartAddr;
-
-        for (i = 0; i < page_num; i++)
+        // printf("CRC32 = 0x%x",CRC32_check);
+        if (CRC32_check != appdata_block[j].BlockCheckSum)
         {
-            FLASH_Read(code_buff, addr, code_buff_size);
-            addr += code_buff_size;
-
-            for (idx = 0; idx < code_buff_size; idx++)
-            {
-                if (idx & 0x01)
-                {
-                    DatWord = ((code_buff[idx] << 8) + DatWord);
-                    check_sum += DatWord;
-                }
-                else
-                {
-                    DatWord = code_buff[idx];
-                }
-            }
-        }
-
-        if (page_mud)
-        {
-            FLASH_Read(code_buff, addr, page_mud);
-
-            for (idx = 0; idx < page_mud; idx++)
-            {
-                if (idx & 0x01)
-                {
-                    DatWord = ((code_buff[idx] << 8) + DatWord);
-                    check_sum += DatWord;
-                }
-                else
-                {
-                    DatWord = code_buff[idx];
-                }
-            }
-        }
-
-        // printf("checksum = 0x%x",check_sum);
-        if (check_sum != appdata_block[j].BlockCheckSum)
-        {
-            memcpy(buff, USB_Return_Err, 0x40);
-            UART_SendGroup(buff, Send_Size);
+            memcpy(buff, Report_Return_Err, 0x40);
+            USART_SendGroup(buff, REPORT_PACKET_SIZE);
             return;
         }
     }
 
     memset(buff, 0, 0x40);
-    buff[0] = 0xC0 | VERIFY_APP;
-    buff[1] = 5;
-    buff[2] = 1;
-    buff[3] = ((buff[0] + buff[1] + buff[2]) >> 8) & 0xFF;
-    buff[4] = (buff[0] + buff[1] + buff[2]) & 0xFF;
-    UART_SendGroup(buff, Send_Size);
+    buff[0] = VERIFY_APP | RESPONSE_MASK;
+    buff[1] = 4;
+    sum = CheckSum(buff, buff[1] - 2);
+    buff[buff[1] - 2] = (sum >> 8) & 0xFF;
+    buff[buff[1] - 1] = sum & 0xFF;
+    USART_SendGroup(buff, REPORT_PACKET_SIZE);
 }
 
-void segmentInfo(u8 *buff)
+void segmentInfo(uint8_t *buff)
 {
-    u8 i;
-    u32 segmentLen;
-
-    code_CurrentLength = 0;
-    code_TotalLength = 0;
-    currentSegment = 0;
-
+    uint8_t i;
+    uint32_t segmentLen;
+    uint16_t sum = 0;
+    
     for (i = 0; i < BLOCK_NUM; i++)
     {
         appdata_block[i].BlockLength = 0;
@@ -315,14 +258,15 @@ void segmentInfo(u8 *buff)
         appdata_block[i].BlockCheckSum = (buff[i * 12 + 10] << 24) | (buff[i * 12 + 11] << 16) | (buff[i * 12 + 12] << 8) | buff[i * 12 + 13];
     }
 
-    buff[0] = SEG_STARTADDR | 0xC0;
+    buff[0] = SEG_STARTADDR | RESPONSE_MASK;
     buff[1] = 4;
-    buff[2] = ((buff[0] + buff[1]) >> 8) & 0xFF;
-    buff[3] = (buff[0] + buff[1]) & 0xFF;
-    UART_SendGroup(buff, Send_Size);
+    sum = CheckSum(buff, buff[1] - 2);
+    buff[buff[1] - 2] = (sum >> 8) & 0xFF;
+    buff[buff[1] - 1] = sum & 0xFF;
+    USART_SendGroup(buff, REPORT_PACKET_SIZE);
 }
 
-static void Data_Recive(u8 *buff, u32 StartAddr, u32 SegmentLength)
+static void Data_Recive(uint8_t *buff, uint32_t StartAddr, uint32_t SegmentLength)
 {
     if (code_CurrentLength + 60 <= code_buff_size)
     {
@@ -352,41 +296,43 @@ static void Data_Recive(u8 *buff, u32 StartAddr, u32 SegmentLength)
     }
 }
 
-void appCodeDownload(u8 *buff)
+void appCodeDownload(uint8_t *buff)
 {
-    // static u8 count = 0;
-    // printf("currentSegment:%d    ncount:%d\r\n",currentSegment+1,count++);
+    uint16_t sum = 0;
+    
     Data_Recive(buff, appdata_block[currentSegment].BlockStartAddr, appdata_block[currentSegment].BlockLength);
 
     memset(buff, 0, 0x40);
-    buff[0] = WRITE_APP | 0xC0;
+    buff[0] = WRITE_APP | RESPONSE_MASK;
     buff[1] = 4;
-    buff[2] = ((buff[0] + buff[1]) >> 8) & 0xFF;
-    buff[3] = (buff[0] + buff[1]) & 0xFF;
-    UART_SendGroup(buff, Send_Size);
+    sum = CheckSum(buff, buff[1] - 2);
+    buff[buff[1] - 2] = (sum >> 8) & 0xFF;
+    buff[buff[1] - 1] = sum & 0xFF;
+    USART_SendGroup(buff, REPORT_PACKET_SIZE);
 }
 
-void resetMCU(u8 *buff)
+void resetMCU(uint8_t *buff)
 {
-    u16 sum;
-
-    buff[0] = buff[0] | 0xc0;
+    uint16_t sum = 0;
+    
+    buff[0] = SYSTEM_RESET | RESPONSE_MASK;
+    buff[1] = 4;
     sum = CheckSum(buff, buff[1] - 2);
-    buff[2] = (sum >> 8) & 0xFF;
-    buff[3] = sum & 0xFF;
-    UART_SendGroup(buff, Send_Size);
+    buff[buff[1] - 2] = (sum >> 8) & 0xFF;
+    buff[buff[1] - 1] = sum & 0xFF;
+    USART_SendGroup(buff, REPORT_PACKET_SIZE);
 
     PLATFORM_DelayMS(5);
     __disable_irq();
-    NVIC_SystemReset(); // ϵͳ��λ
+    NVIC_SystemReset(); // 软复位
 }
 
-void eraseAppSpace(u8 *buff)
+void eraseAppSpace(uint8_t *buff)
 {
     uint32_t Address;
     uint16_t index;
-    u16 sum;
-    u16 page_erase = (buff[2] << 8) | buff[3];
+    uint16_t sum = 0;    
+    uint16_t page_erase = (buff[2] << 8) | buff[3];
 
     Address = ApplicationAddress;
     FLASH_Unlock();
@@ -399,34 +345,34 @@ void eraseAppSpace(u8 *buff)
     }
 
     FLASH_Lock();
-    buff[0] = buff[0] | 0xC0;
+    buff[0] = ERASE_APP | RESPONSE_MASK;
+    buff[1] = 4;
     sum = CheckSum(buff, buff[1] - 2);
-    buff[buff[1]-2] = (sum >> 8) & 0xFF;
-    buff[buff[1]-1] = sum & 0xff;
-    UART_SendGroup(buff, Send_Size);
+    buff[buff[1] - 2] = (sum >> 8) & 0xFF;
+    buff[buff[1] - 1] = sum & 0xFF;
+    USART_SendGroup(buff, REPORT_PACKET_SIZE);
 }
 
-void getVersion(u8 *buff)
+void getVersion(uint8_t *buff)
 {
-    u16 sum = 0;
+    uint16_t sum = 0;
 
     memset(buff, 0, 0x40);
-    buff[0] = GET_VERSION | 0xc0;
-    buff[1] = 9;
-    strncpy((char *)(buff + 2), BURN_VER, 5);
+    buff[0] = GET_VERSION | RESPONSE_MASK;
+    buff[1] = 16;
+    buff[2] = 'B'; // Bootloader
+    strncpy((char *)(buff + 3), BOOT_VERSION, 7);
     sum = CheckSum(buff, buff[1] - 2);
-    buff[7] = (sum >> 8) & 0xFF;
-    buff[8] = sum & 0xFF;
+    buff[buff[1] - 2] = (sum >> 8) & 0xFF;
+    buff[buff[1] - 1] = sum & 0xFF;
 
-    UART_SendGroup(buff, Send_Size);
+    USART_SendGroup(buff, REPORT_PACKET_SIZE);
 }
 
-void clearAppFlag(u8 *buff)
+void clearAppFlag(uint8_t *buff)
 {
-    code_CurrentLength = 0;
-    code_TotalLength = 0;
-    currentSegment = 0;
-
+    uint16_t sum = 0;
+    
     FLASH_Unlock();
     FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR);
 
@@ -435,40 +381,93 @@ void clearAppFlag(u8 *buff)
     FLASH_Lock();
 
     memset(buff, 0, 0x40);
-    buff[0] = CLEAR_FLAG | 0xC0;
+    buff[0] = CLEAR_FLAG | RESPONSE_MASK;
     buff[1] = 4;
-    buff[2] = ((buff[0] + buff[1]) >> 8) & 0xFF;
-    buff[3] = (buff[0] + buff[1]) & 0xFF;
-    UART_SendGroup(buff, Send_Size);
+    sum = CheckSum(buff, buff[1] - 2);
+    buff[buff[1] - 2] = (sum >> 8) & 0xFF;
+    buff[buff[1] - 1] = sum & 0xFF;
+    USART_SendGroup(buff, REPORT_PACKET_SIZE);
 }
 
-void writeAppFlag(u8 *buff)
+void writeAppFlag(uint8_t *buff)
 {
-    u8 buf[4];
+    uint16_t sum = 0;
+    
+    uint8_t Write_buff[4] = {0};
+    uint32_t Calculation_crc_result, Information_crc_result, Download_lenth, Download_CRC;
 
-    FLASH_Write(Valid_buf, BootJumpFlagAddress, sizeof(Valid_buf));
-    FLASH_Read(buf, BootJumpFlagAddress, 4);
+    Download_lenth = buff[5]; // 下发的APP长度
+    Download_lenth |= (buff[4] << 8);
+    Download_lenth |= (buff[3] << 16);
+    Download_lenth |= (buff[2] << 24);
 
-    if (memcmp(buf, Valid_buf, 4) != 0)
+    Download_CRC = buff[9]; // 下发的CRC32值
+    Download_CRC |= (buff[8] << 8);
+    Download_CRC |= (buff[7] << 16);
+    Download_CRC |= (buff[6] << 24);
+
+    Calculation_crc_result = crc32_mpeg2_calculate((uint8_t *)ApplicationAddress, Download_lenth); // Application 校验
+    if (Download_CRC == Calculation_crc_result)
     {
-        memcpy(buff, USB_Return_Err, 0x40);
-        UART_SendGroup(buff, Send_Size);
-        return;
-    }
 
-    memset(buff, 0, 0x40);
-    buff[0] = WRITE_FLAG | 0xC0;
-    buff[1] = 4;
-    buff[2] = ((buff[0] + buff[1]) >> 8) & 0xFF;
-    buff[3] = (buff[0] + buff[1]) & 0xFF;
-    UART_SendGroup(buff, Send_Size);
+        Write_buff[0] = buff[5];
+        Write_buff[1] = buff[4];
+        Write_buff[2] = buff[3];
+        Write_buff[3] = buff[2];
+
+        FLASH_Write(Write_buff, BootJumpFlagAddress + 4, 4);
+
+        Write_buff[0] = buff[9];
+        Write_buff[1] = buff[8];
+        Write_buff[2] = buff[7];
+        Write_buff[3] = buff[6];
+
+        FLASH_Write(Write_buff, BootJumpFlagAddress + 8, 4);
+
+        FLASH_Write(Valid_buf, BootJumpFlagAddress, sizeof(Valid_buf));
+        FLASH_Read(Write_buff, BootJumpFlagAddress, 4);
+
+        if (memcmp(Write_buff, Valid_buf, 4) != 0)
+        {
+            memcpy(buff, Report_Return_Err, 0x40);
+            USART_SendGroup(buff, REPORT_PACKET_SIZE);
+        }
+        else
+        {
+            Information_crc_result = crc32_mpeg2_calculate((uint8_t *)BootJumpFlagAddress, 1024 - 4); // 1K Information CRC 校验
+            Write_buff[0] = Information_crc_result & 0xFF;
+            Write_buff[1] = (Information_crc_result >> 8) & 0xFF;
+            Write_buff[2] = (Information_crc_result >> 16) & 0xFF;
+            Write_buff[3] = (Information_crc_result >> 24) & 0xFF;
+
+            FLASH_Write(Write_buff, ApplicationAddress - 4, 4);
+
+            Write_buff[0] = buff[9];
+            Write_buff[1] = buff[8];
+            Write_buff[2] = buff[7];
+            Write_buff[3] = buff[6];
+
+            memset(buff, 0, 0x40);
+            buff[0] = WRITE_FLAG | RESPONSE_MASK;
+            buff[1] = 4;
+            sum = CheckSum(buff, buff[1] - 2);
+            buff[buff[1] - 2] = (sum >> 8) & 0xFF;
+            buff[buff[1] - 1] = sum & 0xFF;
+            USART_SendGroup(buff, REPORT_PACKET_SIZE);
+        }
+    }
+    else
+    {
+        memcpy(buff, Report_Return_Err, 0x40);
+        USART_SendGroup(buff, REPORT_PACKET_SIZE);
+    }
 }
 
-void mcuInfo(u8 *buff)
+void mcuInfo(uint8_t *buff)
 {
-    u16 sum;
+    uint16_t sum = 0;
 
-    buff[0] = MCU_INFO | 0xC0;
+    buff[0] = MCU_INFO | RESPONSE_MASK;
     buff[1] = 12;
     buff[2] = (ApplicationAddress >> 24) & 0xFF;
     buff[3] = (ApplicationAddress >> 16) & 0xFF;
@@ -481,23 +480,23 @@ void mcuInfo(u8 *buff)
     buff[9] = (APP_SIZE * 1024) & 0xFF;
 
     sum = CheckSum(buff, buff[1] - 2);
-    buff[10] = (sum >> 8) & 0xFF;
-    buff[11] = sum & 0xFF;
+    buff[buff[1] - 2] = (sum >> 8) & 0xFF;
+    buff[buff[1] - 1] = sum & 0xFF;
 
-    UART_SendGroup(buff, Send_Size);
+    USART_SendGroup(buff, REPORT_PACKET_SIZE);
 }
 
-void boot_protocol(u8 *buff, u16 len)
+void boot_protocol(uint8_t *buff, uint16_t len)
 {
-    u8 cmd;
+    uint8_t cmd;
 
     memcpy(sendbuff, buff, len);
     buff = sendbuff;
 
     if (Check_data(buff))
     {
-        memcpy(buff, USB_Return_Err, 0x40);
-        UART_SendGroup(buff, Send_Size);
+        memcpy(buff, Report_Return_Err, 0x40);
+        USART_SendGroup(buff, REPORT_PACKET_SIZE);
         return;
     }
 

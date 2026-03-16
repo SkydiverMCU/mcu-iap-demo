@@ -117,55 +117,6 @@ void SysTick_Handler(void)
   }
 }
 
-/***********************************************************************************************************************
- * @brief  This function handles USART1 Handler
- * @note   none
- * @param  none
- * @retval none
- *********************************************************************************************************************/
-void USART1_IRQHandler(void)
-{
-  uint8_t RxData = 0;
-
-  if ((RESET != USART_GetITStatus(USART1, USART_IT_PE)) ||
-      (RESET != USART_GetITStatus(USART1, USART_IT_ERR)))
-  {
-    USART_ReceiveData(USART1);
-  }
-
-  if (RESET != USART_GetITStatus(USART1, USART_IT_RXNE))
-  {
-    RxData = USART_ReceiveData(USART1);
-
-    if (0 == USART_RxStruct.CompleteFlag)
-    {
-      USART_RxStruct.Buffer[USART_RxStruct.CurrentCount++] = RxData;
-
-      if (USART_RxStruct.CurrentCount == USART_RxStruct.Length)
-      {
-        USART_RxStruct.CompleteFlag = 1;
-
-        USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
-      }
-    }
-  }
-
-  if (RESET != USART_GetITStatus(USART1, USART_IT_TXE))
-  {
-    if (0 == USART_TxStruct.CompleteFlag)
-    {
-      USART_SendData(USART1, USART_TxStruct.Buffer[USART_TxStruct.CurrentCount++]);
-
-      if (USART_TxStruct.CurrentCount == USART_TxStruct.Length)
-      {
-        USART_TxStruct.CompleteFlag = 1;
-
-        USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
-      }
-    }
-  }
-}
-
 /**
  * @}
  */

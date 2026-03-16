@@ -79,7 +79,7 @@ uint32_t SystemCoreClock         = SYSCLK_HSI_XXMHz; /*!< HSI Selected as System
   */
 static void SetSysClockToDefine(void)
 {
-    __IO uint32_t StartUpCounter = 0, ClkSrcStatus = 1;
+    __IO uint32_t StartUpCounter = 0, ClkSrcStatus = 0;
     uint32_t temp = 0;
 
 #ifdef SYSCLK_HSE_XXMHz

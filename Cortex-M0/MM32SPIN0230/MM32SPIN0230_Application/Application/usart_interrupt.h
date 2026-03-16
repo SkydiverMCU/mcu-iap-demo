@@ -37,15 +37,8 @@ extern "C"
 
 /* Files include */
 #include "hal_conf.h"
-
-  /* Exported types *****************************************************************************************************/
-  typedef struct
-  {
-    uint8_t Buffer[255];
-    uint8_t Length;
-    uint8_t CurrentCount;
-    uint8_t CompleteFlag;
-  } USART_RxTx_TypeDef;
+#include "app_protocol.h"
+/* Exported types *****************************************************************************************************/
 
 /* Exported constants *************************************************************************************************/
 
@@ -60,11 +53,12 @@ extern "C"
 #define EXTERN extern
 #endif
 
-  EXTERN volatile USART_RxTx_TypeDef USART_RxStruct;
-  EXTERN volatile USART_RxTx_TypeDef USART_TxStruct;
+  extern uint16_t USART_RX_STA;
+  extern uint8_t USART_RxBuff[REPORT_PACKET_SIZE];
 
   /* Exported functions *************************************************************************************************/
-  void USART_Interrupt_Sample(void);
+  void USART_Configure(uint32_t Baudrate);
+  void USART_SendGroup(uint8_t *pBuff, uint16_t length);
 
 #ifdef __cplusplus
 }

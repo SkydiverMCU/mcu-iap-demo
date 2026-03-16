@@ -118,52 +118,7 @@ void SysTick_Handler(void)
     }
 }
 
-/***********************************************************************************************************************
-  * @brief  This function handles UART1 Handler
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
-void UART1_IRQHandler(void)
-{
-    uint8_t RxData = 0;
 
-    if (SET == UART_GetITStatus(UART1, UART_IT_RX))
-    {
-        RxData = UART_ReceiveData(UART1);
-
-        UART_ClearITPendingBit(UART1, UART_IT_RX);
-
-        if (0 == UART_RxStruct.CompleteFlag)
-        {
-            UART_RxStruct.Buffer[UART_RxStruct.CurrentCount++] = RxData;
-
-            if (UART_RxStruct.CurrentCount == UART_RxStruct.Length)
-            {
-                UART_RxStruct.CompleteFlag = 1;
-
-                UART_ITConfig(UART1, UART_IT_RX, DISABLE);
-            }
-        }
-    }
-
-    if (SET == UART_GetITStatus(UART1, UART_IT_TX))
-    {
-        UART_ClearITPendingBit(UART1, UART_IT_TX);
-
-        if (0 == UART_TxStruct.CompleteFlag)
-        {
-            UART_SendData(UART1, UART_TxStruct.Buffer[UART_TxStruct.CurrentCount++]);
-
-            if (UART_TxStruct.CurrentCount == UART_TxStruct.Length)
-            {
-                UART_TxStruct.CompleteFlag = 1;
-
-                UART_ITConfig(UART1, UART_IT_TX, DISABLE);
-            }
-        }
-    }
-}
 
 /**
   * @}

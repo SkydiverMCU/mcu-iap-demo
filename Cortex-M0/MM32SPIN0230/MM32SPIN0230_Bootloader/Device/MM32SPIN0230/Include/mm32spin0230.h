@@ -67,7 +67,7 @@ extern "C" {
                                             |(__MM32_LIB_RELESE_DAY   <<  0U))
 
 
-#define HSI_STARTUP_TIMEOUT             (0x0500U)                               /*!< Time out for HSI start up. */
+#define HSI_STARTUP_TIMEOUT             (0x8000U)                               /*!< Time out for HSI start up. */
 
 #ifndef LSI_VALUE
 #define LSI_VALUE                       (40000U)                                ///< Value of the Low Internal oscillator in Hz.

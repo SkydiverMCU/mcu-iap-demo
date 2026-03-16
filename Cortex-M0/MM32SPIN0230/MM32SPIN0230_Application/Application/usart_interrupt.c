@@ -112,103 +112,71 @@ void USART_Configure(uint32_t Baudrate)
 }
 
 /***********************************************************************************************************************
- * @brief
+ * @brief  This function handles USART1 Handler
  * @note   none
  * @param  none
  * @retval none
  *********************************************************************************************************************/
-void USART_RxData_Interrupt(uint8_t Length)
+void USART1_IRQHandler(void)
 {
-  uint8_t i = 0;
+  volatile uint8_t RxData;
 
-  for (i = 0; i < Length; i++)
+  if ((RESET != USART_GetITStatus(USART1, USART_IT_PE)) ||
+      (RESET != USART_GetITStatus(USART1, USART_IT_ERR)))
   {
-    USART_RxStruct.Buffer[i] = 0;
+    USART_ReceiveData(USART1);
   }
 
-  USART_RxStruct.Length = Length;
-  USART_RxStruct.CurrentCount = 0;
-  USART_RxStruct.CompleteFlag = 0;
-
-  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-}
-
-/***********************************************************************************************************************
- * @brief
- * @note   none
- * @param  none
- * @retval none
- *********************************************************************************************************************/
-void USART_TxData_Interrupt(uint8_t *Buffer, uint8_t Length)
-{
-  uint8_t i = 0;
-
-  for (i = 0; i < Length; i++)
+  if (RESET != USART_GetITStatus(USART1, USART_IT_RXNE))
   {
-    USART_TxStruct.Buffer[i] = Buffer[i];
-  }
-
-  USART_TxStruct.Length = Length;
-  USART_TxStruct.CurrentCount = 0;
-  USART_TxStruct.CompleteFlag = 0;
-
-  USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
-}
-
-/***********************************************************************************************************************
- * @brief
- * @note   none
- * @param  none
- * @retval none
- *********************************************************************************************************************/
-void PLATFORM_DeInitConsole(void)
-{
-  GPIO_InitTypeDef GPIO_InitStruct;
-
-  RCC_APB1PeriphResetCmd(RCC_APB1Periph_USART1, ENABLE);
-  RCC_APB1PeriphResetCmd(RCC_APB1Periph_USART1, DISABLE);
-
-  GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_1);
-
-  GPIO_StructInit(&GPIO_InitStruct);
-  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_8;
-  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_FLOATING;
-  GPIO_Init(GPIOA, &GPIO_InitStruct);
-}
-
-/***********************************************************************************************************************
- * @brief
- * @note   none
- * @param  none
- * @retval none
- *********************************************************************************************************************/
-void USART_Interrupt_Sample(void)
-{
-  printf("\r\nTest %s", __FUNCTION__);
-
-  printf("\r\nSend 10 bytes to USART every time");
-
-  PLATFORM_DeInitConsole();
-
-  USART_RxStruct.CompleteFlag = 0;
-  USART_TxStruct.CompleteFlag = 1;
-
-  USART_Configure(115200);
-
-  USART_RxData_Interrupt(10);
-
-  while (1)
-  {
-    if (0 != USART_RxStruct.CompleteFlag)
+    RxData = USART_ReceiveData(USART1);
+    if (0 == READ_BIT(USART1->CR1, USART_CR1_IDLEIEN))
     {
-      USART_TxData_Interrupt((uint8_t *)USART_RxStruct.Buffer, USART_RxStruct.Length);
-
-      while (0 == USART_TxStruct.CompleteFlag)
-      {
-      }
-
-      USART_RxData_Interrupt(10);
+      /* Enable IDLE Interrupt */
+      SET_BIT(USART1->CR1, USART_CR1_IDLEIEN);
     }
+
+    if ((USART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
+    {
+      if (USART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
+      {
+        USART_RxBuff[USART_RX_STA++] = RxData; // 记录接收到的值
+      }
+      else
+      {
+        USART_RX_STA |= 0x8000; // 强制标记接收完成
+      }
+    }
+  }
+
+  if ((USART1->SR & USART_SR_IDLE_Msk) == USART_SR_IDLE_Msk) // if (((USART1->SR & USART_SR_IDLE_Msk) == USART_SR_IDLE_Msk) && ((USART1->CR1 & USART_CR1_IDLEIEN) == USART_CR1_IDLEIEN))
+  {
+    USART_ReceiveData(USART1);
+    /* Disable IDLE Interrupt */
+    CLEAR_BIT(USART1->CR1, USART_CR1_IDLEIEN);
+
+    USART_RX_STA |= 0x8000;
+
+    USART_ClearITPendingBit(USART1, USART_IT_IDLE);
+  }
+}
+
+/***********************************************************************************************************************
+ * @brief
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
+void USART_SendGroup(uint8_t *pBuff, uint16_t length)
+{
+  while (length--)
+  {
+    USART_SendData(USART1, (uint8_t)*pBuff);
+
+    while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
+    {
+    }
+    pBuff++;
   }
 }
 

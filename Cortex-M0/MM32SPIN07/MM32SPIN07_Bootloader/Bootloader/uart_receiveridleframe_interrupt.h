@@ -31,7 +31,8 @@
 #define _UART_RECEIVERIDLEFRAME_INTERRUPT_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Files include */
@@ -52,9 +53,9 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Exported functions *************************************************************************************************/
-void UART_Configure(uint32_t Baudrate);
-void UART_SendGroup(u8 *buf, u16 len);
+  /* Exported functions *************************************************************************************************/
+  void UART_Configure(uint32_t Baudrate);
+  void UART_SendGroup(u8 *buf, u16 len);
 
 #ifdef __cplusplus
 }
@@ -63,4 +64,3 @@ void UART_SendGroup(u8 *buf, u16 len);
 #endif /* _UART_RECEIVERIDLEFRAME_INTERRUPT_H_ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

@@ -37,16 +37,15 @@
 #define HSE_VALUE                       (8000000U)          /*!< Value of the External High oscillator in Hz. */
 #endif
 
-#ifndef HSE_STARTUP_TIMEOUT
+#define HSI_STARTUP_TIMEOUT             (0x8000U)           /*!< Time out for HSI start up. */
 #define HSE_STARTUP_TIMEOUT             (0x8000U)           /*!< Time out for HSE start up. */
-#endif
 
 /* Value of the Internal oscillator in Hz. */
 #define HSI_48MHz                       (48000000U)          /*!< Value of the Internal oscillator in Hz. */
 #define HSI_48MHz_DIV6                  ((HSI_48MHz)/6)      /*!< Value of the Internal oscillator in Hz. */
 
 #ifndef LSI_VALUE
-#define LSI_VALUE                       (40000U)            /*!< Value of the Low Internal oscillator in Hz. */
+#define LSI_VALUE                       (40000U)             /*!< Value of the Low Internal oscillator in Hz. */
 #endif
 
 #ifndef HSI_SYSCLKSRC_HIGH_VALUE
@@ -64,18 +63,18 @@
 #endif
 #define __Vendor_SysTickConfig          (0)                                     /*!< Set to 1 if different SysTick Config is used */
 
-/* MM32 Library version is V0.9 --------------------------------------------*/
+/* MM32 Library version is V0.12 --------------------------------------------*/
 
 #define __MM32_LIB_VERSION_MAIN             (0x00U) /*!< [15:8] main version */
-#define __MM32_LIB_VERSION_SUB              (0x09U) /*!< [7:0]  sub version */
+#define __MM32_LIB_VERSION_SUB              (0x12U) /*!< [7:0]  sub version */
 #define __MM32_LIB_VERSION                  ((__MM32_LIB_VERSION_MAIN << 8U) \
                                             |(__MM32_LIB_VERSION_SUB  << 0U))
 
-/* MM32 Library release date is 2025-7-4 -----------------------------------*/
+/* MM32 Library release date is 2025-12-31 -----------------------------------*/
 #define __MM32_LIB_RELESE_YEARH             (0x20U) /*!< [31:24] release year high */
 #define __MM32_LIB_RELESE_YEARL             (0x25U) /*!< [23:16] release year low */
-#define __MM32_LIB_RELESE_MONTH             (0x07U) /*!< [15:8]  release month */
-#define __MM32_LIB_RELESE_DAY               (0x04U) /*!< [7:0]   release day */
+#define __MM32_LIB_RELESE_MONTH             (0x12U) /*!< [15:8]  release month */
+#define __MM32_LIB_RELESE_DAY               (0x31U) /*!< [7:0]   release day */
 #define __MM32_LIB_RELESE_DATE              ((__MM32_LIB_RELESE_YEARH << 24U) \
                                             |(__MM32_LIB_RELESE_YEARL << 16U) \
                                             |(__MM32_LIB_RELESE_MONTH <<  8U) \

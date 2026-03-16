@@ -30,24 +30,25 @@
 #define _MAIN_C_
 
 /* Files include */
-#include "platform.h"
-#include "usart_receiveridleframe_interrupt.h"
-#include "main.h"
 #include <stdio.h>
+#include "platform.h"
+#include "usart_interrupt.h"
+#include "main.h"
+#include "app_protocol.h"
 /**
-  * @addtogroup MM32G0005_LibSamples
-  * @{
-  */
+ * @addtogroup MM32G0005_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup USART
-  * @{
-  */
+ * @addtogroup USART
+ * @{
+ */
 
 /**
-  * @addtogroup USART_ReceiverIdleFrame_Interrupt
-  * @{
-  */
+ * @addtogroup USART_ReceiverIdleFrame_Interrupt
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -58,41 +59,47 @@
 /* Private variables **************************************************************************************************/
 
 /* Private functions **************************************************************************************************/
-#define APP_ADDRESS_OFFSET  1400
+
+/* Exported constants *************************************************************************************************/
+
+/* Exported macro *****************************************************************************************************/
 
 /***********************************************************************************************************************
-  * @brief  This function is main entrance
-  * @note   main
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function is main entrance
+ * @note   main
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 int main(void)
 {
-    SCB->VTOR = FLASH_START_ADDR | APP_ADDRESS_OFFSET; //M0+可以对中断向量进行偏移，这样app的中断可以直接跳到自己的中断服务函数
-    __enable_irq();//跳转之后要确保打开总中断   
 
-    PLATFORM_Init();
-    
-    printf("\r\n MM32G0005 enter application \r\n");
+  SCB->VTOR = FLASH_START_ADDR | APP_ADDRESS_OFFSET; // M0+可以对中断向量进行偏移，这样app的中断可以直接跳到自己的中断服务函数
+  __enable_irq();                                    // 跳转之后要确保打开总中断
 
-    USART_ReceiverIdleFrame_Interrupt_Sample();
+  PLATFORM_Init();
 
-    while (1)
-    {
-    }
+  printf("MM32G0005 enter application \r\n");
+
+  USART_Configure(115200);
+
+  while (1)
+  {
+    PLATFORM_LED_Toggle(LED1);
+
+    Receive_Protocol_Process(); // 添加串口，支持直接Application接收串口升级协议，跳转回Bootloader
+  }
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

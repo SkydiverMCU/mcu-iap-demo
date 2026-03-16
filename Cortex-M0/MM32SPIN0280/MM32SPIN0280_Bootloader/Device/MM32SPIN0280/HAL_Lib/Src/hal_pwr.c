@@ -401,24 +401,6 @@ void PWR_ClearFlag(u32 flag)
 {
     PWR->CR |= flag << 2;
 }
-//////////////////////////////////////////////////////////////////////////////////
-///// @brief  Enters STANDBY mode.
-///// @param  None.
-///// @retval None.
-//////////////////////////////////////////////////////////////////////////////////
-//void exPWR_EnterLowPowerMode(emPWR_LP_Mode_Typedef lp_mode, emPWR_Wait_Mode_Typedef wait_mode)
-//{
-//    if (lp_mode != LP_SLEEP_MODE) {
-//        PWR->CR |= lp_mode | PWR_CR_CWUF;
-//        SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
-//        if (wait_mode == LP_WFE) {
-//            __WFE();        //  stop & standby
-//            return;
-//        }
-//    }
-//    __WFI();        // sleep &  stop & standby
-
-//}
 
 /// @}
 

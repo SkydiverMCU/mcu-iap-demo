@@ -33,9 +33,9 @@
 #include <stdio.h>
 #include "platform.h"
 #include "uart_receiveridleframe_interrupt.h"
-
+#include "app_protocol.h"
 /**
- * @addtogroup MM32F0140_LibSamples
+ * @addtogroup MM32SPIN07_LibSamples
  * @{
  */
 
@@ -111,26 +111,57 @@ void UART_Configure(uint32_t Baudrate)
 }
 
 /***********************************************************************************************************************
- * @brief
+ * @brief  This function handles UART2 Handler
  * @note   none
  * @param  none
  * @retval none
  *********************************************************************************************************************/
-void UART_ReceiverIdleFrame_Interrupt_Sample(void)
+void UART2_IRQHandler(void)
 {
-  printf("\r\nTest %s", __FUNCTION__);
 
-  UART_RxLength = 0;
-
-  UART_Configure(115200);
-
-  while (1)
+  if (RESET != UART_GetITStatus(UART2, UART_IT_RXIEN))
   {
-    PLATFORM_LED_Toggle(LED1);
-    PLATFORM_DelayMS(100);
+    // UART_RxBuffer[UART_RxLength++] = UART_ReceiveData(UART2);
+    if ((UART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
+    {
+      if (UART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
+      {
+        UART_RxBuff[UART_RX_STA++] = UART_ReceiveData(UART2); // UART_ReceiveData(UART1); // 记录接收到的值
+      }
+      else
+      {
+        UART_RX_STA |= 0x8000; // 强制标记接收完成
+      }
+    }
+    UART_ClearITPendingBit(UART2, UART_IT_RXIEN);
+  }
+
+  if (RESET != (UART2->ISR & UART_ISR_RXIDLE))
+  {
+    UART_RX_STA |= 0x8000;
+
+    UART2->ICR = UART_ICR_RXIDLE;
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+/// @brief  UART send byte.
+/// @note   None.
+/// @param  buf:buffer address.
+/// @param  len:data length.
+/// @retval None.
+////////////////////////////////////////////////////////////////////////////////
+void UART_SendGroup(u8 *buf, u16 len)
+{
+  while (len--)
+  {
+    UART_SendData(UART2, *buf++);
+
+    while (!UART_GetFlagStatus(UART2, UART_FLAG_TXEPT))
+    {
+    }
+  }
+}
 /**
  * @}
  */

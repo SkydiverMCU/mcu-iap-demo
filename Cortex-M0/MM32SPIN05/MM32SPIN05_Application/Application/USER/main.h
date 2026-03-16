@@ -15,7 +15,6 @@
 /// <H2><CENTER>&COPY; COPYRIGHT MINDMOTION </CENTER></H2>
 ////////////////////////////////////////////////////////////////////////////////
 
-
 // Define to prevent recursive inclusion
 #ifndef __MAIN_H
 #define __MAIN_H
@@ -26,11 +25,8 @@
 
 #include "mm32_device.h"
 
-
-
 #include "hal_conf.h"
 #include <stdio.h>
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @defgroup MM32_Example_Layer
@@ -46,9 +42,6 @@
 /// @defgroup MM32_Exported_Constants
 /// @{
 
-
-
-
 /// @}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,8 +53,6 @@
 /// @anchor XXXX
 ////////////////////////////////////////////////////////////////////////////////
 
-
-
 /// @}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,24 +61,10 @@
 #ifdef _MAIN_C_
 #define GLOBAL
 
-
-
-
-
-
-
 #else
 #define GLOBAL extern
 
-
-
-
-
-
-
 #endif
-
-
 
 GLOBAL s8 printBuf[100];
 
@@ -95,28 +72,21 @@ GLOBAL s8 printBuf[100];
 
 /// @}
 
-
 ////////////////////////////////////////////////////////////////////////////////
 /// @defgroup MM32_Exported_Functions
 /// @{
 
-
-
-
 void UartInit_Loop(void);
-void UartSendGroup(u8* buf, u16 len);
-void Uart1RxTest(UART_TypeDef* UARTx);
-u8 inbyte(UART_TypeDef* UARTx);
+void UartSendGroup(u8 *buf, u16 len);
+void Uart1RxTest(UART_TypeDef *UARTx);
+u8 inbyte(UART_TypeDef *UARTx);
 void UartSendByte(u8 dat);
 
-
-/// @}
-
-
 /// @}
 
 /// @}
 
+/// @}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif

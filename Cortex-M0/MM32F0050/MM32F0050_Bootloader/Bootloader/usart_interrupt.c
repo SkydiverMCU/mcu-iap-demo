@@ -67,48 +67,48 @@
  *********************************************************************************************************************/
 void USART_Configure(uint32_t Baudrate)
 {
-    GPIO_InitTypeDef  GPIO_InitStruct;
-    NVIC_InitTypeDef  NVIC_InitStruct;
-    USART_InitTypeDef USART_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  NVIC_InitTypeDef NVIC_InitStruct;
+  USART_InitTypeDef USART_InitStruct;
 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
-    USART_StructInit(&USART_InitStruct);
-    USART_InitStruct.USART_BaudRate   = Baudrate;
-    USART_InitStruct.USART_WordLength = USART_WordLength_8b;
-    USART_InitStruct.USART_StopBits   = USART_StopBits_1;
-    USART_InitStruct.USART_Parity     = USART_Parity_No;
-    USART_InitStruct.USART_Mode       = USART_Mode_Rx | USART_Mode_Tx;
-    USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_Init(USART2, &USART_InitStruct);
+  USART_StructInit(&USART_InitStruct);
+  USART_InitStruct.USART_BaudRate = Baudrate;
+  USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+  USART_InitStruct.USART_StopBits = USART_StopBits_1;
+  USART_InitStruct.USART_Parity = USART_Parity_No;
+  USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+  USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_Init(USART2, &USART_InitStruct);
 
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
 
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_3);
-    GPIO_PinAFConfig(GPIOB, GPIO_PinSource8, GPIO_AF_4);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_3);
+  GPIO_PinAFConfig(GPIOB, GPIO_PinSource8, GPIO_AF_4);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_8;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_8;
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_8;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_IPU;
-    GPIO_Init(GPIOB, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_8;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
+  GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    NVIC_InitStruct.NVIC_IRQChannel = USART2_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPriority = 0;
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
+  NVIC_InitStruct.NVIC_IRQChannel = USART2_IRQn;
+  NVIC_InitStruct.NVIC_IRQChannelPriority = 0;
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStruct);
 
-    USART_ITConfig(USART2, USART_IT_PE, ENABLE);
-    USART_ITConfig(USART2, USART_IT_ERR, ENABLE);
-    USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+  USART_ITConfig(USART2, USART_IT_PE, ENABLE);
+  USART_ITConfig(USART2, USART_IT_ERR, ENABLE);
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
-    USART_Cmd(USART2, ENABLE);
+  USART_Cmd(USART2, ENABLE);
 }
 
 /***********************************************************************************************************************
@@ -138,7 +138,7 @@ void USART2_IRQHandler(void)
 
     if ((USART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
     {
-      if (USART_RX_STA < UART_REC_LEN) // 还可以接收数据
+      if (USART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
       {
         USART_RxBuff[USART_RX_STA++] = RxData; // 记录接收到的值
       }

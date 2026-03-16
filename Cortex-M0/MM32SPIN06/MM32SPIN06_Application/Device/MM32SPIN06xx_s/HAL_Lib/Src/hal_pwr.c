@@ -114,8 +114,48 @@ void PWR_WakeUpPinCmd(FunctionalState state)
 ////////////////////////////////////////////////////////////////////////////////
 void PWR_EnterSTOPMode(emPWR_Reg_Stop_mode_Typedef regulator, emPWR_STOP_ModeEn_Typedef stop_entry)
 {
+    uint32_t systickreg = 0;
+    uint32_t nvicReg = 0;
+    uint32_t wrIcerReg = 0;
+    uint32_t exti16Reg = 0;
+    
+    systickreg = SysTick->CTRL & 0x01;
+    
     MODIFY_REG(PWR->CR, PWR_CR_PDDS | PWR_CR_LDPS, regulator);
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+    
+    /* By default, clear the enablement of all interrupts except EXTI0 - EXTI15. The interrupt lines with enablement above EXTI16 will maintain their original enabled states */
+    nvicReg = NVIC->ISER[0];
+    exti16Reg = EXTI->IMR;
+    wrIcerReg = nvicReg;
+    wrIcerReg &= ~((1 << EXTI0_1_IRQn)|(1 << EXTI2_3_IRQn)|(1 << EXTI4_15_IRQn));
+    
+    if(exti16Reg & (1UL << 16))
+    {
+        wrIcerReg &= ~(1UL << PVD_IRQn);
+    }
+    NVIC->ICER[0] = wrIcerReg;
+    
+    /* Enable HSI */
+    RCC->CR |= 0x1;
+    while((RCC->CR & 0x2) == 0);
+	
+    /* To ensure that the instruction is deterministic after awakening, turn off the prefetch function before stop. */
+    RCC->CFGR  &= ~(RCC_CFGR_HPRE | RCC_CFGR_SW);
+    while((RCC->CFGR & RCC_CFGR_SWS) != 0);
+	
+    /* Before turning off prefetch, you need to clear the latency configuration */
+    FLASH->ACR &= ~FLASH_ACR_LATENCY;
+    FLASH->ACR &= ~FLASH_ACR_PRFTBE;
+    while ((FLASH->ACR & 0x00000010) != 0)
+    {
+    }
+    
+    SysTick->CTRL &= 0xFFFFFFFE;
+
+    /* RCC_HSIDLY register */
+    *(__IO uint32_t *)(RCC_BASE + 0x44) = 0xFF;	
+    
     if(stop_entry == PWR_STOPEntry_WFI) {
         __WFI();
     }
@@ -124,6 +164,9 @@ void PWR_EnterSTOPMode(emPWR_Reg_Stop_mode_Typedef regulator, emPWR_STOP_ModeEn_
         __WFE();
         __WFE();
     }
+    NVIC->ISER[0] = nvicReg;
+    SysTick->CTRL |= systickreg ;
+    
     CLEAR_BIT(SCB->SCR, ((u32)SCB_SCR_SLEEPDEEP_Msk));
 }
 
@@ -134,8 +177,45 @@ void PWR_EnterSTOPMode(emPWR_Reg_Stop_mode_Typedef regulator, emPWR_STOP_ModeEn_
 ////////////////////////////////////////////////////////////////////////////////
 void PWR_EnterSTANDBYMode(void)
 {
+    uint32_t nvicReg = 0;
+    uint32_t wrIcerReg = 0;
+    uint32_t exti16Reg = 0;
+    
     PWR->CR |= PWR_CR_CWUF | PWR_CR_PDDS;
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+    
+    /* By default, clear the enablement of all interrupts except EXTI0 - EXTI15. The interrupt lines with enablement above EXTI16 will maintain their original enabled states */
+    nvicReg = NVIC->ISER[0];
+    exti16Reg = EXTI->IMR;
+    wrIcerReg = nvicReg;
+    wrIcerReg &= ~((1 << EXTI0_1_IRQn)|(1 << EXTI2_3_IRQn)|(1 << EXTI4_15_IRQn));
+    
+    if(exti16Reg & (1UL << 16))
+    {
+        wrIcerReg &= ~(1UL << PVD_IRQn);
+    }
+    NVIC->ICER[0] = wrIcerReg;
+    
+    /* Enable HSI */
+    RCC->CR |= 0x1;
+    while((RCC->CR & 0x2) == 0);
+	
+    /* To ensure that the instruction is deterministic after awakening, turn off the prefetch function before stop. */
+    RCC->CFGR  &= ~(RCC_CFGR_HPRE | RCC_CFGR_SW);
+    while((RCC->CFGR & RCC_CFGR_SWS) != 0);
+	
+    /* Before turning off prefetch, you need to clear the latency configuration */
+    FLASH->ACR &= ~FLASH_ACR_LATENCY;
+    FLASH->ACR &= ~FLASH_ACR_PRFTBE;
+    while ((FLASH->ACR & 0x00000010) != 0)
+    {
+    }
+    
+    SysTick->CTRL &= 0xFFFFFFFE;
+
+    /* RCC_HSIDLY register */
+    *(__IO uint32_t *)(RCC_BASE + 0x44) = 0xFF;	
+    
 #if defined(__CC_ARM)
     __force_stores();
 #endif

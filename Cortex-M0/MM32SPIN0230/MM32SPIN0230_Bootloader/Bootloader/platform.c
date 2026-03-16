@@ -34,19 +34,19 @@
 #include "platform.h"
 
 /**
-  * @addtogroup MM32SPIN0230_LibSamples
-  * @{
-  */
+ * @addtogroup MM32SPIN0230_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup USART
-  * @{
-  */
+ * @addtogroup USART
+ * @{
+ */
 
 /**
-  * @addtogroup USART_Interrupt
-  * @{
-  */
+ * @addtogroup USART_Interrupt
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -59,212 +59,211 @@
 /* Private functions **************************************************************************************************/
 
 /***********************************************************************************************************************
-  * @brief  Initialize SysTick for delay function
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  Initialize SysTick for delay function
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_InitDelay(void)
 {
-    RCC_ClocksTypeDef RCC_Clocks;
+  RCC_ClocksTypeDef RCC_Clocks;
 
-    RCC_GetClocksFreq(&RCC_Clocks);
+  RCC_GetClocksFreq(&RCC_Clocks);
 
-    if (SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000))
+  if (SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000))
+  {
+    while (1)
     {
-        while (1)
-        {
-        }
     }
+  }
 
-    NVIC_SetPriority(SysTick_IRQn, 0x0);
+  NVIC_SetPriority(SysTick_IRQn, 0x0);
 }
 
 /***********************************************************************************************************************
-  * @brief  Millisecond delay
-  * @note   none
-  * @param  Millisecond: delay time unit
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  Millisecond delay
+ * @note   none
+ * @param  Millisecond: delay time unit
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_DelayMS(uint32_t Millisecond)
 {
-    PLATFORM_DelayTick = Millisecond;
+  PLATFORM_DelayTick = Millisecond;
 
-    while (0 != PLATFORM_DelayTick)
-    {
-    }
+  while (0 != PLATFORM_DelayTick)
+  {
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  Initialize console for printf
-  * @note   none
-  * @param  Baudrate : USART1 communication baudrate
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  Initialize console for printf
+ * @note   none
+ * @param  Baudrate : USART1 communication baudrate
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_InitConsole(uint32_t Baudrate)
 {
-    GPIO_InitTypeDef  GPIO_InitStruct;
-    USART_InitTypeDef USART_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  USART_InitTypeDef USART_InitStruct;
 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART1, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART1, ENABLE);
 
-    USART_StructInit(&USART_InitStruct);
-    USART_InitStruct.USART_BaudRate   = Baudrate;
-    USART_InitStruct.USART_WordLength = USART_WordLength_8b;
-    USART_InitStruct.USART_StopBits   = USART_StopBits_1;
-    USART_InitStruct.USART_Parity     = USART_Parity_No;
-    USART_InitStruct.USART_Mode       = USART_Mode_Tx;
-    USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_Init(USART1, &USART_InitStruct);
+  USART_StructInit(&USART_InitStruct);
+  USART_InitStruct.USART_BaudRate = Baudrate;
+  USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+  USART_InitStruct.USART_StopBits = USART_StopBits_1;
+  USART_InitStruct.USART_Parity = USART_Parity_No;
+  USART_InitStruct.USART_Mode = USART_Mode_Tx;
+  USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_Init(USART1, &USART_InitStruct);
 
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_6);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_6);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_8;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_8;
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    USART_Cmd(USART1, ENABLE);
+  USART_Cmd(USART1, ENABLE);
 }
 
-#if   defined (__ICCARM__)
+#if defined(__ICCARM__)
 
-#if   (__VER__ >= 9030001)
+#if (__VER__ >= 9030001)
 
 /* Files include */
 #include <stddef.h>
 #include <LowLevelIOInterface.h>
 
 /***********************************************************************************************************************
-  * @brief  redefine __write function
-  * @note   for printf
-  * @param  handle
-  * @param  *buf
-  * @param  bufSize
-  * @retval nChars
-  *********************************************************************************************************************/
+ * @brief  redefine __write function
+ * @note   for printf
+ * @param  handle
+ * @param  *buf
+ * @param  bufSize
+ * @retval nChars
+ *********************************************************************************************************************/
 size_t __write(int handle, const unsigned char *buf, size_t bufSize)
 {
-    size_t nChars = 0;
+  size_t nChars = 0;
 
-    /* Check for the command to flush all handles */
-    if (-1 == handle)
+  /* Check for the command to flush all handles */
+  if (-1 == handle)
+  {
+    return (0);
+  }
+
+  /* Check for stdout and stderr (only necessary if FILE descriptors are enabled.) */
+  if ((_LLIO_STDOUT != handle) && (_LLIO_STDERR != handle))
+  {
+    return (-1);
+  }
+
+  for (/* Empty */; bufSize > 0; --bufSize)
+  {
+    USART_SendData(USART1, *buf);
+
+    while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
     {
-        return (0);
     }
 
-    /* Check for stdout and stderr (only necessary if FILE descriptors are enabled.) */
-    if ((_LLIO_STDOUT != handle) && (_LLIO_STDERR != handle))
-    {
-        return (-1);
-    }
+    ++buf;
+    ++nChars;
+  }
 
-    for (/* Empty */; bufSize > 0; --bufSize)
-    {
-        USART_SendData(USART1, *buf);
-
-        while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
-        {
-        }
-
-        ++buf;
-        ++nChars;
-    }
-
-    return (nChars);
+  return (nChars);
 }
 
 #else
 
 /***********************************************************************************************************************
-  * @brief  redefine fputc function
-  * @note   for printf
-  * @param  ch
-  * @param  f
-  * @retval ch
-  *********************************************************************************************************************/
+ * @brief  redefine fputc function
+ * @note   for printf
+ * @param  ch
+ * @param  f
+ * @retval ch
+ *********************************************************************************************************************/
 int fputc(int ch, FILE *f)
 {
-    USART_SendData(USART1, (uint8_t)ch);
+  USART_SendData(USART1, (uint8_t)ch);
 
-    while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
-    {
-    }
+  while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
+  {
+  }
 
-    return (ch);
+  return (ch);
 }
 
 #endif
 
-#elif defined (__GNUC__)
+#elif defined(__GNUC__)
 
 /***********************************************************************************************************************
-  * @brief  redefine fputc function
-  * @note   for printf
-  * @param  ch
-  * @param  f
-  * @retval ch
-  *********************************************************************************************************************/
+ * @brief  redefine fputc function
+ * @note   for printf
+ * @param  ch
+ * @param  f
+ * @retval ch
+ *********************************************************************************************************************/
 int fputc(int ch, FILE *f)
 {
-    USART_SendData(USART1, (uint8_t)ch);
+  USART_SendData(USART1, (uint8_t)ch);
 
-    while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
-    {
-    }
+  while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
+  {
+  }
 
-    return (ch);
+  return (ch);
 }
 
 #else
 
 /***********************************************************************************************************************
-  * @brief  redefine fputc function
-  * @note   for printf
-  * @param  ch
-  * @param  f
-  * @retval ch
-  *********************************************************************************************************************/
+ * @brief  redefine fputc function
+ * @note   for printf
+ * @param  ch
+ * @param  f
+ * @retval ch
+ *********************************************************************************************************************/
 int fputc(int ch, FILE *f)
 {
-    USART_SendData(USART1, (uint8_t)ch);
+  USART_SendData(USART1, (uint8_t)ch);
 
-    while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
-    {
-    }
+  while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
+  {
+  }
 
-    return (ch);
+  return (ch);
 }
 
 #endif
 
 /***********************************************************************************************************************
-  * @brief  Initialize Platform
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  Initialize Platform
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_Init(void)
 {
-    PLATFORM_InitDelay();
+  PLATFORM_InitDelay();
 
-    //PLATFORM_InitConsole(115200);
+  // PLATFORM_InitConsole(115200);
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

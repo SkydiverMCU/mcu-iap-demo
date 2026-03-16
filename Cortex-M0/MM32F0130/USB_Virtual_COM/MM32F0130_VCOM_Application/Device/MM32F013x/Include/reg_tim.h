@@ -493,6 +493,10 @@ typedef struct {
 #define TIM_CCER_CC4EN                  (0x01U << TIM_CCER_CC4EN_Pos)           ///< Capture/Compare 4 output enable
 #define TIM_CCER_CC4P_Pos               (13)
 #define TIM_CCER_CC4P                   (0x01U << TIM_CCER_CC4P_Pos)            ///< Capture/Compare 4 output Polarity
+#define TIM_CCER_CC4NEN_Pos             (14)
+#define TIM_CCER_CC4NEN                 (0x01U << TIM_CCER_CC4NEN_Pos)           ///< Capture/Compare 4 output enable
+#define TIM_CCER_CC4NP_Pos              (15)
+#define TIM_CCER_CC4NP                  (0x1U << TIM_CCER_CC4NP_Pos)            /*!<Channel 4 input/capture complementary output polarity*/
 #define TIM_CCER_CC5EN_Pos              (16)
 #define TIM_CCER_CC5EN                  (0x01U << TIM_CCER_CC5EN_Pos)           ///< Capture/Compare 5 output enable
 #define TIM_CCER_CC5P_Pos               (17)

@@ -69,7 +69,6 @@ u16 BKP_ReadBackupRegister(BKPDR_Typedef bkp_dr)
 void exBKP_Init(void)
 {
     RCC_APB1PeriphClockCmd(RCC_APB1ENR_PWR, ENABLE);
-    //COMMON_EnableIpClock(emCLOCK_PWR);
     RCC_APB1PeriphClockCmd(RCC_APB1ENR_BKP, ENABLE);
 
     PWR->CR |= PWR_CR_DBP;

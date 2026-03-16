@@ -15,32 +15,24 @@
 /// <H2><CENTER>&COPY; COPYRIGHT MINDMOTION </CENTER></H2>
 ////////////////////////////////////////////////////////////////////////////////
 
-
 // Define to prevent recursive inclusion
 #ifndef __UART_TXRX_INTERRUPT_H
 #define __UART_TXRX_INTERRUPT_H
 // Files includes
 #include "hal_conf.h"
-#include  "stdio.h"
+#include "stdio.h"
 #include "string.h"
+#include "app_protocol.h"
 
-
-#define UART_REC_LEN            200
-#define EN_UART1_RX             1
-extern u8 gUartRxBuf[UART_REC_LEN];
-extern u16 gUartRxSta;
-void UART1_GPIO_Init(void);
 void UART1_NVIC_Init(u32 baudrate);
-void UART1_Send_Byte(u8 dat);
-void UART1_Send_Group(u8* buf, u16 len);
-void UART1_RxTx_Transceiving(void);
-/// @}
 
+void UART_SendGroup(u8 *buf, u16 len);
 
 /// @}
 
 /// @}
 
+/// @}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif

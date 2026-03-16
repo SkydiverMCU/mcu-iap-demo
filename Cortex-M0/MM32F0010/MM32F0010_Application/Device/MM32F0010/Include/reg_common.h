@@ -32,7 +32,7 @@
 
 
 #ifndef HSE_STARTUP_TIMEOUT
-#define HSE_STARTUP_TIMEOUT     (0x0500U)                                       ///< Time out for HSE start up.
+#define HSE_STARTUP_TIMEOUT     (0x08000U)                                       ///< Time out for HSE start up.
 #endif
 #ifdef  CUSTOM_HSE_VAL
 #ifndef HSE_VALUE

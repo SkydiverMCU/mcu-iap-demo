@@ -21,7 +21,6 @@
 // Files includes
 #include "hal_pwr.h"
 #include "hal_rcc.h"
-#include "hal_flash.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @addtogroup MM32_Hardware_Abstract_Layer
@@ -107,39 +106,11 @@ void PWR_WakeUpPinCmd(FunctionalState state)
 ////////////////////////////////////////////////////////////////////////////////
 void PWR_EnterSTOPMode(u32 regulator, u8 stop_entry)
 {
-    uint32_t tmpreg1 = 0;
-    uint32_t tmpreg2 = 0;
-
     PWR->CR |= regulator;
 
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
 
-    tmpreg1 = RCC->CFGR;
-    tmpreg2 = FLASH->ACR;
-
-    /* To ensure that the instruction is deterministic after awakening, turn off the prefetch function before stop. */
-    RCC->CFGR &= ~(RCC_CFGR_HPRE | RCC_CFGR_SW);
-    FLASH->ACR &= ~FLASH_ACR_LATENCY;
-
-    FLASH->ACR &= ~FLASH_ACR_PRFTBE;
-    while((FLASH->ACR & FLASH_ACR_PRFTBS) != 0)
-    {
-    }   
-
-    if (stop_entry == PWR_STOPEntry_WFI)
-    {
-        __WFI();
-    }
-    else
-    {
-        __SEV();
-        __WFE();
-        __WFE();
-    }
-
-    FLASH->ACR = tmpreg2 & FLASH_ACR_PRFTBE;
-    FLASH->ACR = tmpreg2;
-    RCC->CFGR = tmpreg1;
+    (stop_entry == PWR_STOPEntry_WFI) ? __WFI() : __WFE();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +174,6 @@ void exPWR_EnterLowPowerMode(emPWR_LP_Mode_Typedef lp_mode, emPWR_Wait_Mode_Type
     __WFI();        // sleep &  stop & standby
 
 }
-
 
 /// @}
 

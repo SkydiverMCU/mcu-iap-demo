@@ -22,7 +22,10 @@
 #include "main.h"
 #include "led.h"
 #include "delay.h"
-#include "uart_print_loop.h"
+#include "stdio.h"
+#include "string.h"
+#include "uart_txrx_interrupt.h"
+#include "app_protocol.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @addtogroup MM32_Example_Layer
@@ -35,8 +38,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// @addtogroup MAIN_Exported_Constants
 /// @{
-#define APPLICATION_ADDRESS (uint32_t)(0x08001800) // APP START ADDRESS
-#define VECTOR_SIZE 0xC0
+
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief  This function is main entrance.
 /// @param  None.
@@ -46,7 +48,7 @@ int main(void)
 {
 
     // M0 要把APP的向量表转移到SRAM
-    memcpy((void *)0x20000000, (void *)APPLICATION_ADDRESS, VECTOR_SIZE);
+    memcpy((void *)0x20000000, (void *)(FLASH_BASE | APP_ADDRESS_OFFSET), VECTOR_SIZE);
     // Enable the SYSCFG Peripheral Clock
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
     // Remap SRAM at 0x00000000 将SRAM中的向量表映射到0x0000000
@@ -55,15 +57,19 @@ int main(void)
 
     DELAY_Init();
     LED_Init();
-    UART1_Loop_Init(115200);
-    
+    UART1_NVIC_Init(115200);
+
+    // printf("MM32SPIN05 enter application \r\n");
+
+    TIM3_Up_Init(100 - 1, 72 - 1); // 100us 中断 用于UART接收空闲处理
+
     while (1)
     {
         LED1_TOGGLE();
         LED2_TOGGLE();
         LED3_TOGGLE();
         LED4_TOGGLE();
-        UART_RxTest(UART1);
+        Receive_Protocol_Process(); // 添加串口，支持直接Application接收串口升级协议，跳转回Bootloader
     }
 }
 

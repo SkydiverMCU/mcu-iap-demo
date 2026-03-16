@@ -353,21 +353,7 @@ void SPI_BiDirectionalLineConfig(SPI_TypeDef* spi, SPI_Direction_TypeDef directi
 ////////////////////////////////////////////////////////////////////////////////
 FlagStatus SPI_GetFlagStatus(SPI_TypeDef* spi, SPI_FLAG_TypeDef flag)
 {
-//    u8 number;
     return (spi->SR & flag) ? SET : RESET;
-//  if (spi->ECR == 8 || spi->ECR == 0)
-//      return (spi->SR & SPI_FLAG) ? SET : RESET;
-//  else {
-//      if ((spi->ECR > 0) && (spi->ECR <= 8))
-//          number = 1;
-//      else if ((spi->ECR) <= 16)
-//          number = 2;
-//      else if ((spi->ECR) <= 24)
-//          number = 3;
-//      else if (((spi->ECR) <= 31) || (spi->ECR == 0))
-//          number = 4;
-//      return (((spi->SR & 0xf00) >> 8) >= number) ? SET : RESET;
-//  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -19,9 +19,7 @@
 
 // Files includes
 #include "uart_txrx_interrupt.h"
-u8 gUartRxBuf[UART_REC_LEN];
-// Received status marker
-u16 gUartRxSta = 0;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// @addtogroup MM32_Example_Layer
 /// @{
@@ -32,7 +30,7 @@ u16 gUartRxSta = 0;
 /// @param  baudrate: Baud rate
 /// @retval None.
 ////////////////////////////////////////////////////////////////////////////////
-void UART1_NVIC_Init(u32 baudrate)
+void UART1_NVIC_Init(uint32_t baudrate)
 {
     UART_InitTypeDef UART_InitStruct;
     NVIC_InitTypeDef NVIC_InitStruct;
@@ -47,6 +45,7 @@ void UART1_NVIC_Init(u32 baudrate)
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
 
+    UART_DeInit(UART1);
     // Baud rate
     UART_StructInit(&UART_InitStruct);
     UART_InitStruct.BaudRate = baudrate;
@@ -58,6 +57,8 @@ void UART1_NVIC_Init(u32 baudrate)
     // No hardware data flow control.
     UART_InitStruct.HWFlowControl = UART_HWFlowControl_None;
     UART_InitStruct.Mode = UART_Mode_Rx | UART_Mode_Tx;
+
+    UART_Init(UART1, &UART_InitStruct);
 
     RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOA, ENABLE);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_7);
@@ -75,8 +76,7 @@ void UART1_NVIC_Init(u32 baudrate)
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
     GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    UART_Init(UART1, &UART_InitStruct);
-    UART_ITConfig(UART1, /*UART_IT_TXIEN |*/ UART_IT_RXIEN, ENABLE);
+    UART_ITConfig(UART1, UART_IER_RXIDLE | UART_IT_RXIEN, ENABLE);
     UART_Cmd(UART1, ENABLE);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,16 +87,28 @@ void UART1_NVIC_Init(u32 baudrate)
 ////////////////////////////////////////////////////////////////////////////////
 void UART1_IRQHandler(void)
 {
-    u8 recvbyte;
+
     // Send packet
-    if (UART_GetITStatus(UART1, UART_IT_TXIEN) != RESET)
+    if (UART_GetITStatus(UART1, UART_IER_RXIDLE) != RESET)
     {
-        UART_ClearITPendingBit(UART1, UART_IT_TXIEN);
+        UART_RX_STA |= 0x8000;
+        UART_ClearITPendingBit(UART1, UART_IER_RXIDLE);
     }
     // Recv packet
     if (UART_GetITStatus(UART1, UART_ISR_RX) != RESET)
     {
-        recvbyte = UART_ReceiveData(UART1);
+        // recvbyte = UART_ReceiveData(UART1);
+        if ((UART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
+        {
+            if (UART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
+            {
+                UART_RxBuff[UART_RX_STA++] = UART_ReceiveData(UART1); // 记录接收到的值
+            }
+            else
+            {
+                UART_RX_STA |= 0x8000; // 强制标记接收完成
+            }
+        }
         UART_ClearITPendingBit(UART1, UART_ISR_RX);
     }
 }
@@ -107,25 +119,16 @@ void UART1_IRQHandler(void)
 /// @param  dat(A byte data).
 /// @retval None.
 ////////////////////////////////////////////////////////////////////////////////
-void UART1_Send_Byte(u8 dat)
+void UART_SendGroup(uint8_t *pBuff, uint16_t length)
 {
-    UART_SendData(UART1, dat);
-    while (!UART_GetFlagStatus(UART1, UART_FLAG_TXEPT))
+    while (length--)
     {
-    }
-}
+        UART_SendData(UART1, (uint8_t)*pBuff);
 
-////////////////////////////////////////////////////////////////////////////////
-/// @brief  UART send group.
-/// @note   None.
-/// @param  buf:buffer address.
-/// @param  len:data length.
-/// @retval None.
-////////////////////////////////////////////////////////////////////////////////
-void UART1_Send_Group(u8 *buf, u16 len)
-{
-    while (len--)
-        UART1_Send_Byte(*buf++);
+        while (!UART_GetFlagStatus(UART1, UART_FLAG_TXEPT))
+            ;
+        pBuff++;
+    }
 }
 
 /// @}

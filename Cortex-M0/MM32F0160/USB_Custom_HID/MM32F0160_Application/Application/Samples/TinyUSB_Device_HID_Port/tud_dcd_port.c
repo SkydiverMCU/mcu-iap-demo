@@ -394,7 +394,7 @@ void dcd_edpt_clear_stall(uint8_t rhport, uint8_t ep_addr)
 /* USB IRQ. */
 void BOARD_USB_IRQHandler(void)
 {
-    dcd_int_handler(TUD_OPT_RHPORT);
+    dcd_int_handler(BOARD_TUD_RHPORT);
 }
 
 /* EOF. */

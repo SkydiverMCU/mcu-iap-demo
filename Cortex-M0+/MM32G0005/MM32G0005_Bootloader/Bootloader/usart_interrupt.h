@@ -31,7 +31,8 @@
 #define _USART_INTERRUPT_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Files include */
@@ -52,9 +53,9 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Exported functions *************************************************************************************************/
-void USART_SendGroup(uint8_t *pBuff, uint16_t length);
-void USART_Configure(uint32_t Baudrate);
+  /* Exported functions *************************************************************************************************/
+  void USART_SendGroup(uint8_t *pBuff, uint16_t length);
+  void USART_Configure(uint32_t Baudrate);
 
 #ifdef __cplusplus
 }
@@ -63,4 +64,3 @@ void USART_Configure(uint32_t Baudrate);
 #endif /* _USART_INTERRUPT_H_ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

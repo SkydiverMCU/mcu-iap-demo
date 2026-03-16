@@ -26,11 +26,6 @@
 #include "uart.h"
 #include "uart_txrx_idleframe_interrupt.h"
 
-#define APPLICATION_ADDRESS (uint32_t)(0x08001800) // APP START ADDRESS
-
-/**********************************function*******************************/
-#define VECTOR_SIZE 0xC0
-
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief  This function is main entrance.
 /// @param  None.
@@ -39,7 +34,7 @@
 int main(void)
 {
     // M0 要把APP的向量表转移到SRAM
-    memcpy((void *)0x20000000, (void *)APPLICATION_ADDRESS, VECTOR_SIZE);
+    memcpy((void *)0x20000000, (void *)(FLASH_BASE | APP_ADDRESS_OFFSET), VECTOR_SIZE);
     // Enable the SYSCFG Peripheral Clock
     RCC_APB2PeriphClockCmd(RCC_APB2ENR_SYSCFG, ENABLE);
     // Remap SRAM at 0x00000000 将SRAM中的向量表映射到0x0000000
@@ -48,13 +43,13 @@ int main(void)
 
     DELAY_Init();
     CONSOLE_Init(115200);
-    UART1_NVIC_Init(115200);
+    UART2_NVIC_Init(115200);
 
-    printf("Enter Application success...\r\n");
+    printf("MM32SPIN0280 enter application \r\n");
 
     while (1)
     {
-        UART1_RxTx_Transceiving();
+        Receive_Protocol_Process(); // 添加串口，支持直接Application接收串口升级协议，跳转回Bootloader
     }
 
     // return 0;

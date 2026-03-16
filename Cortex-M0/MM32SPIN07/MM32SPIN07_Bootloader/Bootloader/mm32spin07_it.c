@@ -27,7 +27,7 @@
   *********************************************************************************************************************/
 
 /* Define to prevent recursive inclusion */
-#define _MM32F0140_IT_C_
+#define _MM32SPIN07PF_IT_C_
 
 /* Files include */
 #include "platform.h"

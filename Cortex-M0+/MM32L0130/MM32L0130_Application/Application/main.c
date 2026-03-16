@@ -30,10 +30,11 @@
 #define _MAIN_C_
 
 /* Files include */
+#include <stdio.h>
 #include "platform.h"
 #include "uart_interrupt.h"
 #include "main.h"
-
+#include "app_protocol.h"
 /**
  * @addtogroup MM32L0130_LibSamples
  * @{
@@ -58,7 +59,7 @@
 /* Private variables **************************************************************************************************/
 
 /* Private functions **************************************************************************************************/
-#define APP_ADDRESS_OFFSET 0x1400
+
 /***********************************************************************************************************************
  * @brief  This function is main entrance
  * @note   main
@@ -73,10 +74,15 @@ int main(void)
 
   PLATFORM_Init();
 
-  UART_Interrupt_Sample();
+  printf("MM32L0130 enter application \r\n");
+
+  UART_Configure(115200);
 
   while (1)
   {
+    PLATFORM_LED_Toggle(LED1);
+
+    Receive_Protocol_Process(); // 添加串口，支持直接Application接收串口升级协议，跳转回Bootloader
   }
 }
 

@@ -407,9 +407,9 @@ bool hidd_xfer_cb(uint8_t rhport, uint8_t ep_addr, xfer_result_t result, uint32_
   else if (ep_addr == p_hid->ep_out)
   {
     //tud_hid_set_report_cb(instance, 0, HID_REPORT_TYPE_INVALID, p_hid->epout_buf, (uint16_t) xferred_bytes);
-    USART_RX_STA  = 0x8000;
-    USART_RX_STA |= sizeof(p_hid->epout_buf);
-    memcpy(UART_RxBuff,p_hid->epout_buf,sizeof(p_hid->epout_buf));      
+    USB_RX_STA  = 0x8000;
+    USB_RX_STA |= sizeof(p_hid->epout_buf);
+    memcpy(USB_RxBuff,p_hid->epout_buf,sizeof(p_hid->epout_buf));      
     TU_ASSERT(usbd_edpt_xfer(rhport, p_hid->ep_out, p_hid->epout_buf, sizeof(p_hid->epout_buf)));
   }
 

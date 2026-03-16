@@ -33,13 +33,11 @@
 /// @addtogroup DELAY_Exported_Functions
 /// @{
 
-
-
 #define USE_SYSTICK_DELAY 1
-//1 = use systick as the delay,
-//0 = use NOP loop as the delay
+// 1 = use systick as the delay,
+// 0 = use NOP loop as the delay
 
-//if use systick for delay, need to call function DELAY_Init(u8 pclk2) firstly
+// if use systick for delay, need to call function DELAY_Init(u8 pclk2) firstly
 
 #if USE_SYSTICK_DELAY
 extern u32 SystemCoreClock;
@@ -53,8 +51,10 @@ static __IO u32 TimingDelay;
 ////////////////////////////////////////////////////////////////////////////////
 void DELAY_Init(void)
 {
-    if (SysTick_Config(SystemCoreClock / 1000)) {
-        while (1);
+    if (SysTick_Config(SystemCoreClock / 1000))
+    {
+        while (1)
+            ;
     }
     NVIC_SetPriority(SysTick_IRQn, 0x0);
 }
@@ -66,7 +66,8 @@ void DELAY_Init(void)
 ////////////////////////////////////////////////////////////////////////////////
 static void TimingDelayDecrement(void)
 {
-    if (TimingDelay != 0x00) {
+    if (TimingDelay != 0x00)
+    {
         TimingDelay--;
     }
 }
@@ -92,7 +93,8 @@ void DELAY_Ms(__IO u32 nTime)
 {
     TimingDelay = nTime;
 
-    while(TimingDelay != 0);
+    while (TimingDelay != 0)
+        ;
 }
 #else
 static __IO u32 DelayNOPNumber;
@@ -104,7 +106,7 @@ static __IO u32 DelayNOPNumber;
 ////////////////////////////////////////////////////////////////////////////////
 void DELAY_Init(void)
 {
-    //Custom
+    // Custom
     DelayNOPNumber = 100;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,9 +118,11 @@ void DELAY_Init(void)
 void DELAY_Us(__IO u32 nTime)
 {
     u32 i = 0;
-    while(nTime--) {
+    while (nTime--)
+    {
         i = DelayNOPNumber;
-        while(i--);
+        while (i--)
+            ;
     }
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,13 +134,14 @@ void DELAY_Us(__IO u32 nTime)
 void DELAY_Ms(__IO u32 nTime)
 {
     u32 i = 0;
-    while(nTime--) {
+    while (nTime--)
+    {
         i = DelayNOPNumber * 1000;
-        while(i--);
+        while (i--)
+            ;
     }
 }
 #endif
-
 
 /// @}
 

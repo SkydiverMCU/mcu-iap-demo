@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// @file    main.c
 /// @author  AE TEAM
-/// @brief   Output received data.
+/// @brief   THIS FILE PROVIDES ALL THE SYSTEM FUNCTIONS.
 ////////////////////////////////////////////////////////////////////////////////
 /// @attention
 ///
@@ -14,63 +14,48 @@
 ///
 /// <H2><CENTER>&COPY; COPYRIGHT MINDMOTION </CENTER></H2>
 ////////////////////////////////////////////////////////////////////////////////
+
 // Define to prevent recursive inclusion
 #define _MAIN_C_
 
 // Files includes
 
-
 #include "main.h"
-#include "led.h"
 #include "delay.h"
-#include "uart_print_loop.h"
+#include "led.h"
+#include "uart_txrx_idleframe_interrupt.h"
+#include "app_protocol.h"
 
-////////////////////////////////////////////////////////////////////////////////
-/// @addtogroup MM32_Example_Layer
-/// @{
-
-////////////////////////////////////////////////////////////////////////////////
-/// @addtogroup MAIN
-/// @{
-
-////////////////////////////////////////////////////////////////////////////////
-/// @addtogroup MAIN_Exported_Constants
-/// @{
-#define APPLICATION_ADDRESS (uint32_t)(0x08001800) // APP START ADDRESS
-#define VECTOR_SIZE 0xC0
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief  This function is main entrance.
 /// @param  None.
-/// @retval None.
+/// @retval  0.
 ////////////////////////////////////////////////////////////////////////////////
 int main(void)
 {
+
     // M0 要把APP的向量表转移到SRAM
-    memcpy((void *)0x20000000, (void *)APPLICATION_ADDRESS, VECTOR_SIZE);
+    memcpy((void *)0x20000000, (void *)(FLASH_BASE | APP_ADDRESS_OFFSET), VECTOR_SIZE);
     // Enable the SYSCFG Peripheral Clock
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-    // Remap SRAM at 0x00000000 将SRAM中的向量表映射到0x0000000
+    // 将向量表映射到SRAM 0x20000000
     SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_SRAM);
     __enable_irq();
-	
-	
+
     DELAY_Init();
-    LED_Init();
-    UART1_Loop_Init(115200);
-    while(1) {
-        LED1_TOGGLE();
-        LED2_TOGGLE();
-        LED3_TOGGLE();
-        LED4_TOGGLE();
-        UART_RxTest(UART1);
+
+    // printf("MM32SPIN06 enter application \r\n");
+
+    UART1_NVIC_Init(115200);
+
+    while (1)
+    {
+        Receive_Protocol_Process(); // 添加串口，支持直接Application接收串口升级协议，跳转回Bootloader
     }
 }
 
 /// @}
 
-
 /// @}
 
 /// @}
-
-

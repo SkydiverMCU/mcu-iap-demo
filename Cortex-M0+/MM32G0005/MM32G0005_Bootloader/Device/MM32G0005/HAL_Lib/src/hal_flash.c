@@ -235,18 +235,21 @@ FLASH_Status FLASH_EnableWriteProtection(uint32_t page)
   * @param  ob_pvd: Reset event when entering Standby mode.
   *    @arg OB_PVD_EN   enable PVD
   *    @arg OB_PVD_DIS     disable PVD
+  * @param  ob_pvd_level: Select the default pvd value upon power-on.
+  *    @arg OB_PVD_1V8     pvd_level 1.8V
+  *    @arg OB_PVD_2V1     pvd_level 2.1V
+  *    @arg OB_PVD_2V4     pvd_level 2.4V
+  *    @arg OB_PVD_2V7     pvd_level 2.7V
   * @retval FLASH Status: The returned value can be: FLASH_ERROR_PG,
   *         FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT.
   */
-FLASH_Status FLASH_UserOptionByteConfig(uint32_t ob_iwdg, uint32_t ob_stop, uint32_t ob_pvd)
+FLASH_Status FLASH_UserOptionByteConfig(uint32_t ob_iwdg, uint32_t ob_stop, uint32_t ob_pvd, uint32_t ob_pvd_level)
 {
     FLASH_OPTB_Enable();
-
+    
     FLASH->CR |= (0x01U << FLASH_CR_OPTPG_Pos);
 
-    *((uint16_t *)(OB_BASE + 16)) |= ob_iwdg;
-    *((uint16_t *)(OB_BASE + 16)) |= ob_stop;
-    *((uint16_t *)(OB_BASE + 16)) |= ob_pvd;
+    *((uint32_t *)(OB_BASE + 4)) = ob_iwdg | ob_stop | ob_pvd | ob_pvd_level | 0xC8;
 
     return (FLASH_WaitForLastOperation(FLASH_Program_Timeout));
 }
@@ -368,21 +371,21 @@ FLASH_Status FLASH_EraseDataAreaPage(uint32_t page_address)
 }
 
 /**
-  * @brief  Programs a half word at a specified DataArea address.
+  * @brief  Programs a word at a specified DataArea address.
   * @note   This function can be used for all MM32 devices.
   * @param  address: specifies the DataArea address to be programmed.
   * @param  data: specifies the data to be programmed.
   * @retval FLASH Status: The returned value can be: FLASH_ERROR_PG,
   *         FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT.
   */
-FLASH_Status FLASH_ProgramDataAreaHalfWord(uint32_t address, uint16_t data)
+FLASH_Status FLASH_ProgramDataAreaWord(uint32_t address, uint32_t data)
 {
     FLASH_Status ret;
 
     FLASH_OPTB_Enable();
     FLASH->CR |= (0x01U << FLASH_CR_OPTPG_Pos);
 
-    *(__IO uint16_t *)address = data;
+    *(__IO uint32_t *)address = data;
 
     ret = FLASH_WaitForLastOperation(FLASH_Erase_Timeout);
 

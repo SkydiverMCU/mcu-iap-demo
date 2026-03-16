@@ -48,7 +48,7 @@ extern "C" {
 /// @brief BKP Base Address Definition
 ////////////////////////////////////////////////////////////////////////////////
 
-#define BKP_BASE                        (APB1PERIPH_BASE + 0x280C)              ///< Base Address: 0x4000280C
+#define BKP_BASE                        (APB1PERIPH_BASE + 0x2800)              ///< Base Address: 0x40002800
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief BKP Register Structure Definition
@@ -57,27 +57,9 @@ extern "C" {
 #define BKP_NUMBER  20
 
 typedef struct {
-    __IO u32 RESERVED0;                                                         ///< Reserved,                              offset: 0x00
-    __IO u32 DR1;                                                               ///< BKP data register 1,                   offset: 0x04    BKP_DR1
-    __IO u32 DR2;                                                               ///< BKP data register 2,                   offset: 0x08    BKP_DR2
-    __IO u32 DR3;                                                               ///< BKP data register 3,                   offset: 0x0C    BKP_DR3
-    __IO u32 DR4;                                                               ///< BKP data register 4,                   offset: 0x10    BKP_DR4
-    __IO u32 DR5;                                                               ///< BKP data register 5,                   offset: 0x14    BKP_DR5
-    __IO u32 DR6;                                                               ///< BKP data register 6,                   offset: 0x18    BKP_DR6
-    __IO u32 DR7;                                                               ///< BKP data register 7,                   offset: 0x1C    BKP_DR7
-    __IO u32 DR8;                                                               ///< BKP data register 8,                   offset: 0x20    BKP_DR8
-    __IO u32 DR9;                                                               ///< BKP data register 9,                   offset: 0x24    BKP_DR9
-    __IO u32 DR10;                                                              ///< BKP data register 10                   offset: 0x28    BKP_DR10
-    __IO u32 DR11;                                                              ///< BKP data register 11,                  offset: 0x2C    BKP_DR11
-    __IO u32 DR12;                                                              ///< BKP data register 12,                  offset: 0x30    BKP_DR12
-    __IO u32 DR13;                                                              ///< BKP data register 13,                  offset: 0x34    BKP_DR13
-    __IO u32 DR14;                                                              ///< BKP data register 14,                  offset: 0x38    BKP_DR14
-    __IO u32 DR15;                                                              ///< BKP data register 15,                  offset: 0x3C    BKP_DR15
-    __IO u32 DR16;                                                              ///< BKP data register 16,                  offset: 0x40    BKP_DR16
-    __IO u32 DR17;                                                              ///< BKP data register 17,                  offset: 0x44    BKP_DR17
-    __IO u32 DR18;                                                              ///< BKP data register 18,                  offset: 0x48    BKP_DR18
-    __IO u32 DR19;                                                              ///< BKP data register 19,                  offset: 0x4C    BKP_DR19
-    __IO u32 DR20;                                                              ///< BKP data register 20,                  offset: 0x50    BKP_DR20
+    __IO uint32_t RESERVED;                   
+    __IO uint32_t CR;                             /*!<                                               offset: 0x04       */
+    __IO uint32_t CSR;                            /*!<                                               offset: 0x08       */
 } BKP_TypeDef;
 
 ////////////////////////////////////////////////////////////////////////////////

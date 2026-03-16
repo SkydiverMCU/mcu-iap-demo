@@ -54,7 +54,6 @@ typedef struct
     uint32_t COMP_Output;                   /*!< Selects the output redirection of the comparator. */
     uint32_t COMP_OutputPol;                /*!< Selects the output polarity of the comparator. */
     uint32_t COMP_Hysteresis;               /*!< Selects the hysteresis voltage of the comparator. */
-    uint32_t COMP_Mode;                     /*!< Selects the operating mode of the comparator and allows */
     uint32_t COMP_OutAnaSel;                /*!< Selects the output source of the comparator */
     uint32_t COMP_OFLT;                     /*!< Comparator Output Filter Period */
 } COMP_InitTypeDef;
@@ -102,6 +101,7 @@ typedef struct
   * @brief COMP_Output
   */
 #define COMP_Output_None               (0x00U << COMP_COMP1CSR_OUT_SEL_Pos)/*!< No output */
+#define COMP_Output_TIM3IC2            (0x01U << COMP_COMP1CSR_OUT_SEL_Pos)/*!< Timer3 input capture 2 */
 #define COMP_Output_TIM1BKIN           (0x02U << COMP_COMP1CSR_OUT_SEL_Pos)/*!< Timer1 brake input */
 #define COMP_Output_TIM1OCREFCLR       (0x06U << COMP_COMP1CSR_OUT_SEL_Pos)/*!< Timer1 ocrefclear input */
 #define COMP_Output_TIM3IC1            (0x0AU << COMP_COMP1CSR_OUT_SEL_Pos)/*!< Timer3 input capture 1 */
@@ -120,14 +120,6 @@ typedef struct
 #define COMP_Hysteresis_Low             (0x01U << COMP_COMP1CSR_HYST_Pos)/*!< COMP_Hysteresis_Low */
 #define COMP_Hysteresis_Medium          (0x02U << COMP_COMP1CSR_HYST_Pos)/*!< COMP_Hysteresis_Medium */
 #define COMP_Hysteresis_High            (0x03U << COMP_COMP1CSR_HYST_Pos)/*!< COMP_Hysteresis_High */
-
-/**
-  * @brief COMP_Mode
-  */
-#define COMP_Mode_HighPower             (0x00U << COMP_COMP1CSR_MODE_Pos)  /*!< Comparator high power mode */
-#define COMP_Mode_MediumPower           (0x01U << COMP_COMP1CSR_MODE_Pos)  /*!< Comparator medium power mode */
-#define COMP_Mode_LowPower              (0x02U << COMP_COMP1CSR_MODE_Pos)  /*!< Comparator low power mode */
-#define COMP_Mode_VeryLowPower          (0x03U << COMP_COMP1CSR_MODE_Pos)  /*!< Comparator very low power mode */
 
 /**
   * @brief COMP_OutAnaSel
@@ -156,26 +148,6 @@ typedef struct
   */
 #define COMP_CRV_SRC_VREFINT             (0x00U << COMP_CRV_CRV_SRC_Pos)/*!<  Select VREFINT as CRV source  */
 #define COMP_CRV_SRC_VDDA                (0x01U << COMP_CRV_CRV_SRC_Pos)/*!<  Select VDDA as CRV source */
-
-/**
-  * @brief COMP_CRV_Sel
-  */
-#define COMP_CRV_Sel_1_20             (0x00U << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 1/20 or VDDA 1/20  */
-#define COMP_CRV_Sel_2_20             (0x01U << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 2/20 or VDDA 2/20  */
-#define COMP_CRV_Sel_3_20             (0x02U << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 3/20 or VDDA 3/20  */
-#define COMP_CRV_Sel_4_20             (0x03U << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 4/20 or VDDA 4/20  */
-#define COMP_CRV_Sel_5_20             (0x04U << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 5/20 or VDDA 5/20  */
-#define COMP_CRV_Sel_6_20             (0x05U << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 6/20 or VDDA 6/20  */
-#define COMP_CRV_Sel_7_20             (0x06U << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 7/20 or VDDA 7/20  */
-#define COMP_CRV_Sel_8_20             (0x07U << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 8/20 or VDDA 8/20  */
-#define COMP_CRV_Sel_9_20             (0x08U << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 9/20 or VDDA 9/20  */
-#define COMP_CRV_Sel_10_20            (0x09U << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 10/20 or VDDA 10/20  */
-#define COMP_CRV_Sel_11_20            (0x0AU << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 11/20 or VDDA 11/20  */
-#define COMP_CRV_Sel_12_20            (0x0BU << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 12/20 or VDDA 12/20  */
-#define COMP_CRV_Sel_13_20            (0x0CU << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 13/20 or VDDA 13/20  */
-#define COMP_CRV_Sel_14_20            (0x0DU << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 14/20 or VDDA 14/20  */
-#define COMP_CRV_Sel_15_20            (0x0EU << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 15/20 or VDDA 15/20  */
-#define COMP_CRV_Sel_16_20            (0x0FU << COMP_CRV_CRV_SEL_Pos)/*!<  Select VREFINT 16/20 or VDDA 16/20  */
 
 /**
   * @brief COMP_PollChannelSel

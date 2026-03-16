@@ -131,7 +131,7 @@ typedef struct
 #define ADC_IT_EOC             (0x01U << ADC_ADCR_ADIE_Pos) 
 
 #define ADC_FLAG_AWD           (0x01U << ADC_ADSTA_AWDIF_Pos)
-#define ADC_FLAG_EOC            (0x01U << ADC_ADSTA_ADIF_Pos)
+#define ADC_FLAG_EOC           (0x01U << ADC_ADSTA_ADIF_Pos)
 
 /**
   * @brief ADC_Channels

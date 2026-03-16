@@ -31,9 +31,11 @@
 
 /* Files include */
 #include "platform.h"
-#include "uart_interrupt.h"
+#include "uart_receiveridleframe_interrupt.h"
 #include "main.h"
 #include "string.h"
+#include "stdio.h"
+#include "app_protocol.h"
 /**
  * @addtogroup MM32F0010_LibSamples
  * @{
@@ -58,8 +60,7 @@
 /* Private variables **************************************************************************************************/
 
 /* Private functions **************************************************************************************************/
-#define APPLICATION_ADDRESS (uint32_t)(0x08001400) // APP START ADDRESS
-#define VECTOR_SIZE 0xC0
+
 /***********************************************************************************************************************
  * @brief  This function is main entrance
  * @note   main
@@ -69,7 +70,7 @@
 int main(void)
 {
   // M0 要把APP的向量表转移到SRAM
-  memcpy((void *)0x20000000, (void *)APPLICATION_ADDRESS, VECTOR_SIZE);
+  memcpy((void *)0x20000000, (void *)(FLASH_BASE | APP_ADDRESS_OFFSET), VECTOR_SIZE);
   // Enable the SYSCFG Peripheral Clock
   RCC_APB1PeriphClockCmd(RCC_APB1ENR_SYSCFG, ENABLE);
   // Remap SRAM at 0x00000000 将SRAM中的向量表映射到0x0000000
@@ -78,10 +79,13 @@ int main(void)
 
   PLATFORM_Init();
 
-  UART_Interrupt_Sample();
+  printf("MM32F0010 enter application \r\n");
+
+  UART_Configure(115200);
 
   while (1)
   {
+    Receive_Protocol_Process(); // 添加串口，支持直接Application接收串口升级协议，跳转回Bootloader
   }
 }
 

@@ -35,19 +35,19 @@
 #include "uart_receiveridleframe_interrupt.h"
 
 /**
-  * @addtogroup MM32G0020_LibSamples
-  * @{
-  */
+ * @addtogroup MM32G0020_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup UART
-  * @{
-  */
+ * @addtogroup UART
+ * @{
+ */
 
 /**
-  * @addtogroup UART_ReceiverIdleFrame_Interrupt
-  * @{
-  */
+ * @addtogroup UART_ReceiverIdleFrame_Interrupt
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -60,53 +60,53 @@
 /* Private functions **************************************************************************************************/
 
 /***********************************************************************************************************************
-  * @brief
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void UART_Configure(uint32_t Baudrate)
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
-    NVIC_InitTypeDef NVIC_InitStruct;
-    UART_InitTypeDef UART_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  NVIC_InitTypeDef NVIC_InitStruct;
+  UART_InitTypeDef UART_InitStruct;
 
-    RCC_APB1PeriphClockCmd(RCC_APB1PERIPH_UART1, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB1ENR_UART1, ENABLE);
 
-    UART_StructInit(&UART_InitStruct);
-    UART_InitStruct.BaudRate      = Baudrate;
-    UART_InitStruct.WordLength    = UART_WordLength_8b;
-    UART_InitStruct.StopBits      = UART_StopBits_1;
-    UART_InitStruct.Parity        = UART_Parity_No;
-    UART_InitStruct.HWFlowControl = UART_HWFlowControl_None;
-    UART_InitStruct.Mode          = UART_Mode_Rx | UART_Mode_Tx;
-    UART_Init(UART1, &UART_InitStruct);
+  UART_StructInit(&UART_InitStruct);
+  UART_InitStruct.BaudRate = Baudrate;
+  UART_InitStruct.WordLength = UART_WordLength_8b;
+  UART_InitStruct.StopBits = UART_StopBits_1;
+  UART_InitStruct.Parity = UART_Parity_No;
+  UART_InitStruct.HWFlowControl = UART_HWFlowControl_None;
+  UART_InitStruct.Mode = UART_Mode_Rx | UART_Mode_Tx;
+  UART_Init(UART1, &UART_InitStruct);
 
-    UART_ITConfig(UART1, UART_IT_RX, ENABLE);
-    UART_ITConfig(UART1, UART_IT_RXIDLE, ENABLE);
+  UART_ITConfig(UART1, UART_IER_RX_IEN, ENABLE);
+  UART_ITConfig(UART1, UART_IER_RXIDLE_IEN, ENABLE);
 
-    RCC_AHBPeriphClockCmd(RCC_AHBPERIPH_GPIOA, ENABLE);
+  RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOA, ENABLE);
 
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_1);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_1);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_12;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_12;
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin  = GPIO_Pin_3;
-    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    NVIC_InitStruct.NVIC_IRQChannel = UART1_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPriority = 1;
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
+  NVIC_InitStruct.NVIC_IRQChannel = UART1_IRQn;
+  NVIC_InitStruct.NVIC_IRQChannelPriority = 1;
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStruct);
 
-    UART_Cmd(UART1, ENABLE);
+  UART_Cmd(UART1, ENABLE);
 }
 
 /***********************************************************************************************************************
@@ -121,15 +121,15 @@ void UART1_IRQHandler(void)
   if (RESET != UART_GetITStatus(UART1, UART_ISR_RX_INTF))
   {
     // UART_RxBuffer[UART_RxLength++] = UART_ReceiveData(UART1);
-    if ((USART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
+    if ((UART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
     {
-      if (USART_RX_STA < UART_REC_LEN) // 还可以接收数据
+      if (UART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
       {
-        UART_RxBuff[USART_RX_STA++] = UART_ReceiveData(UART1); // UART_ReceiveData(UART2); // 记录接收到的值
+        UART_RxBuff[UART_RX_STA++] = UART_ReceiveData(UART1); // UART_ReceiveData(UART2); // 记录接收到的值
       }
       else
       {
-        USART_RX_STA |= 0x8000; // 强制标记接收完成
+        UART_RX_STA |= 0x8000; // 强制标记接收完成
       }
     }
     UART_ClearITPendingBit(UART1, UART_ICR_RX_ICLR);
@@ -137,7 +137,7 @@ void UART1_IRQHandler(void)
 
   if (RESET != (UART1->ISR & UART_ISR_RXIDLE_INTF))
   {
-    USART_RX_STA |= 0x8000;
+    UART_RX_STA |= 0x8000;
 
     UART1->ICR = UART_ICR_RXIDLE_ICLR;
   }
@@ -156,22 +156,21 @@ void UART_SendGroup(u8 *buf, u16 len)
   {
     UART_SendData(UART1, *buf++);
 
-	while (RESET == UART_GetFlagStatus(UART1, UART_FLAG_TXEPT))
-	{
-	}
+    while (RESET == UART_GetFlagStatus(UART1, UART_FLAG_TXEPT))
+    {
+    }
   }
 }
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

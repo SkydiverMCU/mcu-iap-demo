@@ -27,8 +27,8 @@
   *********************************************************************************************************************/
 
 /* Define to prevent recursive inclusion */
-#ifndef _MM32F0140_IT_H_
-#define _MM32F0140_IT_H_
+#ifndef _MM32SPIN07PF_IT_H_
+#define _MM32SPIN07PF_IT_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -56,6 +56,6 @@ extern "C"
 }
 #endif
 
-#endif /* _MM32F0140_IT_H_ */
+#endif /* _MM32SPIN07PF_IT_H_ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/

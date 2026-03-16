@@ -305,7 +305,7 @@ enum _flexcan_flags
 {
     Enum_Flexcan_SynchFlag            = FLEXCAN_ESR1_SYNCH_Msk,   /*!< CAN Synchronization Status. */
     Enum_Flexcan_TxWarningIntFlag     = FLEXCAN_ESR1_TWRNINT_Msk, /*!< Tx Warning Interrupt Flag. */
-    Enum_Flexcan_RxWarningIntFlag     = FLEXCAN_ESR1_RXWRN_Msk, /*!< Rx Warning Interrupt Flag. */
+    Enum_Flexcan_RxWarningIntFlag     = FLEXCAN_ESR1_RWRNINT_Msk, /*!< Rx Warning Interrupt Flag. */
     Enum_Flexcan_IdleFlag             = FLEXCAN_ESR1_IDLE_Msk,    /*!< CAN IDLE Status Flag. */
     Enum_Flexcan_FaultConfinementFlag = FLEXCAN_ESR1_FLTCONF_Msk, /*!< Fault Confinement State Flag. */
     Enum_Flexcan_TransmittingFlag     = FLEXCAN_ESR1_TX_Msk,      /*!< FlexCAN In Transmission Status. */

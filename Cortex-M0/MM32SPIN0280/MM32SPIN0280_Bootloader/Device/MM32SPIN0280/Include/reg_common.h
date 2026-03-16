@@ -55,7 +55,7 @@ extern "C" {
 #endif
 
 #ifndef HSE_STARTUP_TIMEOUT
-#define HSE_STARTUP_TIMEOUT             (0x0500U)                               ///< Time out for HSE start up.
+#define HSE_STARTUP_TIMEOUT             (0x8000U)                               ///< Time out for HSE start up.
 #endif
 
 #ifndef HSI_PLLSRC_VALUE

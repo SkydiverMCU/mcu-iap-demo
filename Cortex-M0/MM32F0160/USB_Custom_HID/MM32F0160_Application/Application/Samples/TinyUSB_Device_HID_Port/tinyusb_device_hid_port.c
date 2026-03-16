@@ -35,76 +35,66 @@
 #include "tinyusb_device_hid_port.h"
 
 /**
-  * @addtogroup MM32F0160_LibSamples
-  * @{
-  */
+ * @addtogroup MM32F0160_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup TinyUSB_Device
-  * @{
-  */
+ * @addtogroup TinyUSB_Device
+ * @{
+ */
 
 /**
-  * @addtogroup TinyUSB_Device_HID_Port
-  * @{
-  */
+ * @addtogroup TinyUSB_Device_HID_Port
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
 /* Private define *****************************************************************************************************/
-uint8_t hid_upload_buff[64]={0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09};
+uint8_t hid_upload_buff[64] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
 /* Private macro ******************************************************************************************************/
 
 /* Private variables **************************************************************************************************/
 static void hid_task(void);
 /* Private functions **************************************************************************************************/
-void USB_DeviceClockInit(void)         //HSE 96M
+void USB_DeviceClockInit(void) // HSE 96M
 {
-    /* Select USBCLK source */
-    RCC->CFGR &= ~(1 << 19);           //USB CLK SEL PLL1
+  /* Select USBCLK source */
+  RCC->CFGR &= ~(1 << 19); // USB CLK SEL PLL1
 
-    RCC->CFGR &= ~(0x03 << 22);
-    RCC->CFGR |= 0x01 << 22;
+  RCC->CFGR &= ~(0x03 << 22);
+  RCC->CFGR |= 0x01 << 22;
 
-    RCC_AHBPeriphClockCmd(RCC_AHBENR_USB, ENABLE);
+  RCC_AHBPeriphClockCmd(RCC_AHBENR_USB, ENABLE);
 }
 
 /***********************************************************************************************************************
-  * @brief
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void TinyUSB_Device_Configure(void)
 {
-    USB_DeviceClockInit();             // board_init();
+  USB_DeviceClockInit(); // board_init();
 
-    // init device stack on configured roothub port
-    tud_init(BOARD_TUD_RHPORT);   
+  // init device stack on configured roothub port
+  tud_init(BOARD_TUD_RHPORT);
 }
 
 /***********************************************************************************************************************
-  * @brief
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
-void TinyUSB_Device_HID_Port_Sample(void)
+ * @brief
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
+void USB_SendGroup(uint8_t *pBuff, uint16_t length)
 {
-    printf("\r\nTest %s", __FUNCTION__);
-
-    TinyUSB_Device_Configure();
-
-    while (1)
-    {
-        tud_task();                    // TinyUSB device task
-        hid_task();
-        PLATFORM_LED_Toggle(LED1);
-        PLATFORM_LED_Toggle(LED2);
-        PLATFORM_LED_Toggle(LED3);
-        PLATFORM_LED_Toggle(LED4);
-    }
+  tud_hid_report(0, pBuff, length);
+  // tud_hid_set_report_cb(instance, 0, HID_REPORT_TYPE_INVALID, pBuff, (uint16_t) length);
 }
+
 // Every 10ms, we will sent 1 report for each HID profile (keyboard, mouse etc ..)
 // tud_hid_report_complete_cb() is used to send the next report after previous one is complete
 void hid_task(void)
@@ -112,15 +102,16 @@ void hid_task(void)
   uint32_t const btn = 1u;
 
   // Remote wakeup
-  if ( tud_suspended() && btn )
+  if (tud_suspended() && btn)
   {
     // Wake up host if we are in suspend mode
     // and REMOTE_WAKEUP feature is enabled by host
     tud_remote_wakeup();
-  }else
+  }
+  else
   {
     // Send the 1st of report chain, the rest will be sent by tud_hid_report_complete_cb()
-    tud_hid_n_report(0, 0x00, &hid_upload_buff, sizeof(hid_upload_buff)); //send_hid_report(REPORT_ID_MOUSE, btn);
+    tud_hid_n_report(0, 0x00, &hid_upload_buff, sizeof(hid_upload_buff)); // send_hid_report(REPORT_ID_MOUSE, btn);
   }
 }
 //--------------------------------------------------------------------+
@@ -132,50 +123,49 @@ void hid_task(void)
 // Return zero will cause the stack to STALL request
 uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t *buffer, uint16_t reqlen)
 {
-    // TODO not Implemented
-    (void)itf;
-    (void)report_id;
-    (void)report_type;
-    (void)buffer;
-    (void)reqlen;
+  // TODO not Implemented
+  (void)itf;
+  (void)report_id;
+  (void)report_type;
+  (void)buffer;
+  (void)reqlen;
 
-    return (0);
+  return (0);
 }
 
 // Invoked when received SET_REPORT control request or
 // received data on OUT endpoint ( Report ID = 0, Type = 0 )
 void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer, uint16_t bufsize)
 {
-    // This example doesn't use multiple report and report ID
-    (void)itf;
-    (void)report_id;
-    (void)report_type;
+  // This example doesn't use multiple report and report ID
+  (void)itf;
+  (void)report_id;
+  (void)report_type;
 
-    // echo back anything we received from host
-    tud_hid_report(0, buffer, bufsize);
+  // echo back anything we received from host
+  tud_hid_report(0, buffer, bufsize);
 }
 
 // Invoked when sent REPORT successfully to host
 // Application can use this to send the next report
 // Note: For composite reports, report[0] is report ID
-void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint16_t len) //void tud_hid_report_complete_cb(uint8_t itf, uint8_t const* report, uint8_t len)
+void tud_hid_report_complete_cb(uint8_t instance, uint8_t const *report, uint16_t len) // void tud_hid_report_complete_cb(uint8_t itf, uint8_t const* report, uint8_t len)
 {
-  (void) instance;
-  (void) report;
-  (void) len;
+  (void)instance;
+  (void)report;
+  (void)len;
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

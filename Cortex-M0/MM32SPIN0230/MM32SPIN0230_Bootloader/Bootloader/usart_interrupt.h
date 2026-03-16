@@ -55,7 +55,7 @@ extern "C"
 
   /* Exported functions *************************************************************************************************/
   void USART_Configure(uint32_t Baudrate);
-  void UART_SendGroup(uint8_t *pBuff, uint16_t length);
+  void USART_SendGroup(uint8_t *pBuff, uint16_t length);
 
 #ifdef __cplusplus
 }

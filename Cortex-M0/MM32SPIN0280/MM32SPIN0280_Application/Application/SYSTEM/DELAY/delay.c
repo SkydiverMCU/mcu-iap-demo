@@ -34,8 +34,8 @@
 /// @{
 
 #define USE_SYSTICK_DELAY 1
-//1 = use systick as the delay,
-//0 = use NOP loop as the delay
+// 1 = use systick as the delay,
+// 0 = use NOP loop as the delay
 #if USE_SYSTICK_DELAY
 extern u32 SystemCoreClock;
 static vu32 sTimingDelay;
@@ -109,7 +109,7 @@ static vu32 sDelayNopNumber;
 ////////////////////////////////////////////////////////////////////////////////
 void DELAY_Init(void)
 {
-    //Custom
+    // Custom
     sDelayNopNumber = 100;
 }
 
@@ -160,4 +160,3 @@ void DELAY_Ms(vu32 count)
 /// @}
 
 /// @}
-

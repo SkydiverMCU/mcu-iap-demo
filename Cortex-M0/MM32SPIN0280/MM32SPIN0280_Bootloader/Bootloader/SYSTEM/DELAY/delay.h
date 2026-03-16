@@ -54,10 +54,10 @@
 /// @defgroup MM32_Exported_Variables
 /// @{
 #ifdef _DELAY_C_
-  #define GLOBAL
+#define GLOBAL
 
 #else
-  #define GLOBAL extern
+#define GLOBAL extern
 
 #endif
 
@@ -71,7 +71,7 @@
 
 void DELAY_Init(void);
 void DELAY_Ms(__IO u32 count);
-//void DELAY_Us(__IO u32 count);
+// void DELAY_Us(__IO u32 count);
 
 /// @}
 
@@ -82,4 +82,3 @@ void DELAY_Ms(__IO u32 count);
 ////////////////////////////////////////////////////////////////////////////////
 #endif
 ////////////////////////////////////////////////////////////////////////////////
-

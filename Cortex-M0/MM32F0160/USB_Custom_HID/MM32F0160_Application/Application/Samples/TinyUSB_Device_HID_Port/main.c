@@ -33,21 +33,24 @@
 #include "platform.h"
 #include "tinyusb_device_hid_port.h"
 #include "main.h"
+#include "stdio.h"
+#include "string.h"
+#include "app_protocol.h"
 
 /**
-  * @addtogroup MM32F0160_LibSamples
-  * @{
-  */
+ * @addtogroup MM32F0160_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup TinyUSB_Device
-  * @{
-  */
+ * @addtogroup TinyUSB_Device
+ * @{
+ */
 
 /**
-  * @addtogroup TinyUSB_Device_HID_Port
-  * @{
-  */
+ * @addtogroup TinyUSB_Device_HID_Port
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -58,46 +61,47 @@
 /* Private variables **************************************************************************************************/
 
 /* Private functions **************************************************************************************************/
-#define APPLICATION_ADDRESS (uint32_t)(0x08004800) // APP START ADDRESS
-#define VECTOR_SIZE 0xC0
+
 /***********************************************************************************************************************
-  * @brief  This function is main entrance
-  * @note   main
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function is main entrance
+ * @note   main
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
+/*Please using an External 8MHz Crystal Oscillator*/
 int main(void)
 {
-    // M0 要把APP的向量表转移到SRAM
-    memcpy((void *)0x20000000, (void *)APPLICATION_ADDRESS, VECTOR_SIZE);
-    // Enable the SYSCFG Peripheral Clock
-    RCC_APB2PeriphClockCmd(RCC_APB2ENR_SYSCFG, ENABLE);
-    // Remap SRAM at 0x00000000 将SRAM中的向量表映射到0x0000000
-    SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_SRAM);
-    __enable_irq();
-	
-    PLATFORM_Init();
-	
-	printf("Enter Application success...\r\n");
+  // M0 要把APP的向量表转移到SRAM
+  memcpy((void *)0x20000000, (void *)(FLASH_BASE | APP_ADDRESS_OFFSET), VECTOR_SIZE);
+  // Enable the SYSCFG Peripheral Clock
+  RCC_APB2PeriphClockCmd(RCC_APB2ENR_SYSCFG, ENABLE);
+  // Remap SRAM at 0x00000000 将SRAM中的向量表映射到0x0000000
+  SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_SRAM);
+  __enable_irq();
 
-    TinyUSB_Device_HID_Port_Sample();
+  PLATFORM_Init();
 
-    while (1)
-    {
-    }
+  printf("MM32F0160 enter application \r\n");
+
+  TinyUSB_Device_Configure();
+
+  while (1)
+  {
+    tud_task();                 // TinyUSB device task
+    Receive_Protocol_Process(); // 添加HID，支持直接Application接收串口升级协议，跳转回Bootloader
+  }
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

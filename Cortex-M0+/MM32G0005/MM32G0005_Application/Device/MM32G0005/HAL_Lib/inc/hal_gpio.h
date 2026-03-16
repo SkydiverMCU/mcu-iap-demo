@@ -87,9 +87,54 @@ typedef struct
     GPIOSpeed_TypeDef      GPIO_Speed; /*!< GPIO_Speed */
     GPIOMode_TypeDef       GPIO_Mode;  /*!< GPIO_Mode */
 } GPIO_InitTypeDef;
+
+/**
+  * @brief  Constant current source current range selection.
+  */
+typedef enum
+{
+    GPIO_LEDDriveCurrent_2mA5            = 0x00, /*!< current is 2.5 mA */
+    GPIO_LEDDriveCurrent_5mA0            = 0x04, /*!< current is 5.0 mA */
+    GPIO_LEDDriveCurrent_7mA5            = 0x08, /*!< current is 7.5 mA */
+    GPIO_LEDDriveCurrent_10mA0           = 0x0C  /*!< current is 10.0 mA */
+} GPIO_LEDDriveCurrentTypeDef;
+
+/**
+  * @brief  when ODR = 0, select IO output.
+  */
+typedef enum
+{
+    GPIO_LEDDriveODR0_0V                 = 1, /*!< IO 0V */
+    GPIO_LEDDriveODR0_Floating           = 0, /*!< IO floating */
+} GPIO_LEDDriveODR0TypeDef;
+
+/**
+  * @brief  Configuration LED Drive Mode enumeration.
+  */
+typedef enum
+{
+    GPIO_LEDDriveMode_SourceGPIO     = 0x50, /*!< LED Drive Mode SourceGPIO */
+    GPIO_LEDDriveMode_SourceCurrent  = 0x51, /*!< LED Drive Mode SourceCurrent */
+    GPIO_LEDDriveMode_SinkGPIO       = 0xA0, /*!< LED Drive Mode SinkGPIO */
+    GPIO_LEDDriveMode_SinkCurrent    = 0xA1, /*!< LED Drive Mode SinkCurrent */
+} GPIO_LEDDriveModeTypeDef;
+
+
+/**
+  * @brief  GPIO LED Drive init structure definition
+  */
+typedef struct
+{
+    uint32_t                      GPIO_LEDDrivePin;        /*!< GPIO LED Drive Pin */
+    GPIO_LEDDriveCurrentTypeDef   GPIO_LEDDriveCurrent;    /*!< Constant current source current range selection. */
+    GPIO_LEDDriveODR0TypeDef      GPIO_LEDDriveODR0;       /*!< when ODR = 0, select IO output. */
+    GPIO_LEDDriveModeTypeDef      GPIO_LEDDriveMode;       /*!< Configuration LED Drive Mode. */
+} GPIO_LEDDriveInitTypeDef;
+
 /**
   * @}
   */
+
 
 /** @defgroup GPIO_Exported_Constants
   * @{
@@ -145,6 +190,24 @@ typedef struct
 #define GPIO_OD_PullDown                0x01
 #define GPIO_OD_PullUp                  0x03
 
+/** 
+  * @brief  The GPIO LED Drive Pin
+  */
+#define GPIO_LEDDvireHCIO_0                  (0x00000001U) 
+#define GPIO_LEDDvireHCIO_1                  (0x00000002U) 
+#define GPIO_LEDDvireHCIO_2                  (0x00000004U) 
+#define GPIO_LEDDvireHCIO_3                  (0x00000008U) 
+#define GPIO_LEDDvireHCIO_4                  (0x00000010U) 
+#define GPIO_LEDDvireLEDIO_0                 (0x00000001U) 
+#define GPIO_LEDDvireLEDIO_1                 (0x00000010U) 
+#define GPIO_LEDDvireLEDIO_2                 (0x00000100U) 
+#define GPIO_LEDDvireLEDIO_3                 (0x00001000U) 
+#define GPIO_LEDDvireLEDIO_4                 (0x00010000U) 
+#define GPIO_LEDDvireLEDIO_5                 (0x00100000U) 
+#define GPIO_LEDDvireLEDIO_6                 (0x01000000U) 
+#define GPIO_LEDDvireLEDIO_7                 (0x10000000U) 
+
+
 /**
   * @}
   */
@@ -167,6 +230,8 @@ void GPIO_Write(GPIO_TypeDef *gpio, uint16_t value);
 void GPIO_PinLockConfig(GPIO_TypeDef *gpio, uint16_t pin, uint16_t lock);
 void GPIO_PinAFConfig(GPIO_TypeDef *gpio, uint8_t pin, uint8_t alternate_function);
 void GPIO_PinODConfig(GPIO_TypeDef *gpio, uint16_t pin, uint32_t od_mode);
+void GPIO_LEDDriveInit(GPIO_LEDDriveInitTypeDef *init_struct);
+void GPIO_LEDDriveStructInit(GPIO_LEDDriveInitTypeDef *init_struct);
 
 #endif
 

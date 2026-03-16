@@ -287,10 +287,6 @@ void PLATFORM_Init(void)
   PLATFORM_InitDelay();
 
   PLATFORM_InitConsole(115200);
-
-  // PLATFORM_InitLED();
-
-  // PLATFORM_PrintInfo();
 }
 
 /**

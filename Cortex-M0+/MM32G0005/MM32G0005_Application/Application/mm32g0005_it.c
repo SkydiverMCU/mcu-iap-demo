@@ -31,7 +31,7 @@
 
 /* Files include */
 #include "platform.h"
-#include "usart_receiveridleframe_interrupt.h"
+#include "usart_interrupt.h"
 #include "mm32g0005_it.h"
 
 /**
@@ -80,6 +80,7 @@ void HardFault_Handler(void)
     /* Go to infinite loop when Hard Fault exception occurs */
     while (1)
     {
+        NVIC_SystemReset();
     }
 }
 
@@ -117,47 +118,6 @@ void SysTick_Handler(void)
     }
 }
 
-/***********************************************************************************************************************
-  * @brief  This function handles UART2 Handler
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
-void USART2_IRQHandler(void)
-{
-    uint8_t i = 0;
-
-    if ((RESET != USART_GetITStatus(USART2, USART_IT_PE)) ||
-        (RESET != USART_GetITStatus(USART2, USART_IT_ERR)))
-    {
-        USART_ReceiveData(USART2);
-    }
-    
-    if (SET == USART_GetITStatus(USART2, USART_IT_IDLE))
-    {
-        USART_ClearITPendingBit(USART2, USART_IT_IDLE);
-
-        for (i = 0; i < USART_RxLength; i++)
-        {
-            USART_SendData(USART2, USART_RxBuffer[i]);
-
-            while (RESET == USART_GetFlagStatus(USART2, USART_FLAG_TC))
-            {
-            }
-        }
-
-        USART_RxLength = 0;
-    }
-
-    if (RESET != USART_GetITStatus(USART2, USART_IT_RXNE))
-    {
-        USART_RxBuffer[USART_RxLength++] = USART_ReceiveData(USART2);
-
-        USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-    }
-
-
-}
 
 
 /**

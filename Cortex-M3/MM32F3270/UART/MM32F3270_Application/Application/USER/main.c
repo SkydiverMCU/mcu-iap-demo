@@ -24,9 +24,7 @@
 #include "delay.h"
 #include "led.h"
 #include "uart_txrx_interrupt.h"
-
-#define APP_ADDRESS_OFFSET 0x1800
-
+#include "app_protocol.h"
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief  This function is main entrance.
 /// @param  None.
@@ -35,12 +33,26 @@
 int main(void)
 {
     SCB->VTOR = FLASH_BASE | APP_ADDRESS_OFFSET; // M3可以对中断向量进行偏移，这样app的中断可以直接跳到自己的中断服务函数
-    __enable_irq();                                    // 跳转之后要确保打开总中断
+    __enable_irq();                              // 跳转之后要确保打开总中断
 
     DELAY_Init();
     UART1_NVIC_Init(115200);
+
+    // printf("MM32F3270 enter application \r\n");
+
     while (1)
     {
+        LED1_OFF();
+        LED2_OFF();
+        LED3_OFF();
+        LED4_OFF();
+
+        LED1_ON();
+        LED2_ON();
+        LED3_ON();
+        LED4_ON();
+
+        Receive_Protocol_Process(); // 添加串口，支持直接Application接收串口升级协议，跳转回Bootloader
     }
 }
 

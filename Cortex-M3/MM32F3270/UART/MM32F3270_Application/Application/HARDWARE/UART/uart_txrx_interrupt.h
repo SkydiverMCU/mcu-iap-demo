@@ -22,15 +22,10 @@
 #include "hal_conf.h"
 #include "stdio.h"
 #include "string.h"
+#include "app_protocol.h"
 
-#define UART_REC_LEN 200
-#define EN_UART1_RX 1
-extern u8 gUartRxBuf[UART_REC_LEN];
-extern u16 gUartRxSta;
-
-void UART1_NVIC_Init(u32 baudrate);
-void UART1_Send_Byte(u8 dat);
-void UART1_Send_Group(u8 *buf, u16 len);
+void UART_SendGroup(uint8_t *pBuff, uint16_t length);
+void UART1_NVIC_Init(uint32_t baudrate);
 
 /// @}
 

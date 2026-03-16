@@ -114,6 +114,14 @@ void ADC_DMACmd(ADC_TypeDef* adc, FunctionalState state)
 /// @brief  Enables or disables the specified ADC interrupts.
 /// @param  adc: select the ADC peripheral.
 /// @param  adc_interrupt: specifies the ADC interrupt sources to be enabled or disabled.
+///         This parameter can be one of the following values:
+/// @arg    ADC_IT_ENDOFCONVSEQUENCE
+/// @arg    ADC_IT_ANALOGWATCHDOG
+/// @arg    ADC_IT_ENDOFCONVSINGLE
+/// @arg    ADC_IT_ENDOFCONVSAMPLE
+/// @arg    ADC_IT_INJENDOFCONVSEQUENCE
+/// @arg    ADC_IT_INJENDOFCONVSINGLE
+/// @arg    ADC_IT_INJENDOFCONVSAMPLE
 /// @param  state: New state of the specified ADC interrupts.
 /// @retval None.
 ////////////////////////////////////////////////////////////////////////////////
@@ -393,6 +401,14 @@ void exADC_TempSensorVrefintCmd(u32 chs, FunctionalState state)
 /// @brief  Checks whether the specified ADC flag is set or not.
 /// @param  adc: select the ADC peripheral.
 /// @param  adc_flag: specifies the flag to check.
+///         This parameter can be one of the following values:
+/// @arg    ADC_FLAG_ENDOFCONVSEQUENCE
+/// @arg    ADC_FLAG_ANALOGWATCHDOG
+/// @arg    ADC_FLAG_ENDOFCONVSINGLE
+/// @arg    ADC_FLAG_ENDOFCONVSAMPLE
+/// @arg    ADC_FLAG_INJENDOFCONVSEQUENCE
+/// @arg    ADC_FLAG_INJENDOFCONVSINGLE
+/// @arg    ADC_FLAG_INJENDOFCONVSAMPLE
 /// @retval The New state of adc_flag (SET or RESET).
 ////////////////////////////////////////////////////////////////////////////////
 FlagStatus ADC_GetFlagStatus(ADC_TypeDef* adc, ADCFLAG_TypeDef adc_flag)
@@ -425,6 +441,14 @@ FlagStatus ADC_GetFlagStatus(ADC_TypeDef* adc, ADCFLAG_TypeDef adc_flag)
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief  Clears the adc's pending flags.
 /// @param  adc: select the ADC peripheral.
+///         This parameter can be one of the following values:
+/// @arg    ADC_FLAG_ENDOFCONVSEQUENCE
+/// @arg    ADC_FLAG_ANALOGWATCHDOG
+/// @arg    ADC_FLAG_ENDOFCONVSINGLE
+/// @arg    ADC_FLAG_ENDOFCONVSAMPLE
+/// @arg    ADC_FLAG_INJENDOFCONVSEQUENCE
+/// @arg    ADC_FLAG_INJENDOFCONVSINGLE
+/// @arg    ADC_FLAG_INJENDOFCONVSAMPLE
 /// @param  adc_flag: specifies the flag to clear.
 /// @retval None.
 ////////////////////////////////////////////////////////////////////////////////
@@ -457,6 +481,14 @@ void ADC_ClearFlag(ADC_TypeDef* adc, ADCFLAG_TypeDef adc_flag)
 /// @brief  Checks whether the specified adc's interrupt has occurred or not.
 /// @param  adc: select the ADC peripheral.
 /// @param  adc_interrupt: specifies the ADC interrupt source to check.
+///         This parameter can be one of the following values:
+/// @arg    ADC_IT_ENDOFCONVSEQUENCE
+/// @arg    ADC_IT_ANALOGWATCHDOG
+/// @arg    ADC_IT_ENDOFCONVSINGLE
+/// @arg    ADC_IT_ENDOFCONVSAMPLE
+/// @arg    ADC_IT_INJENDOFCONVSEQUENCE
+/// @arg    ADC_IT_INJENDOFCONVSINGLE
+/// @arg    ADC_IT_INJENDOFCONVSAMPLE
 /// @retval The new state of adc_interrupt (SET or RESET).
 ////////////////////////////////////////////////////////////////////////////////
 ITStatus ADC_GetITStatus(ADC_TypeDef* adc, ADCFLAG_TypeDef adc_interrupt)
@@ -490,6 +522,14 @@ ITStatus ADC_GetITStatus(ADC_TypeDef* adc, ADCFLAG_TypeDef adc_interrupt)
 /// @brief  Clears the adc's interrupt pending bits.
 /// @param  adc: select the ADC peripheral.
 /// @param  adc_interrupt: specifies the ADC interrupt pending bit to clear.
+///         This parameter can be one of the following values:
+/// @arg    ADC_IT_ENDOFCONVSEQUENCE
+/// @arg    ADC_IT_ANALOGWATCHDOG
+/// @arg    ADC_IT_ENDOFCONVSINGLE
+/// @arg    ADC_IT_ENDOFCONVSAMPLE
+/// @arg    ADC_IT_INJENDOFCONVSEQUENCE
+/// @arg    ADC_IT_INJENDOFCONVSINGLE
+/// @arg    ADC_IT_INJENDOFCONVSAMPLE
 /// @retval None.
 ////////////////////////////////////////////////////////////////////////////////
 void ADC_ClearITPendingBit(ADC_TypeDef* adc, ADCFLAG_TypeDef adc_interrupt)
@@ -723,6 +763,17 @@ void ADC_Calibration(ADC_TypeDef* adc)
         ;
     }
     adc->SREXT |= ADC_SREXT_EOCALIF;
+}
+
+/**
+  * @brief  Jump over the ADC calibration when ADC initialization.
+  * @param  adc: select the ADC peripheral.
+  * @retval None.
+  */
+void ADC_CalibrationEscape(ADC_TypeDef *adc)
+{
+    adc->ANYCR &= ~(0x01U << ADC_ANY_CR_ADCAL_Pos);
+    adc->ADDATA  = 0x2430;
 }
 
 /// @}

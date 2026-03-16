@@ -96,10 +96,9 @@ void I2C_Init(I2C_TypeDef* i2c, I2C_InitTypeDef* init_struct)
                      I2C_CR_MASTER);
 
     i2c->IC_CON =  I2C_CR_EMPINT       |   \
-                   ((init_struct->I2C_Mode)  ? (0x01U << I2C_CR_SLAVEDIS_Pos) : (0x00U << I2C_CR_SLAVEDIS_Pos)) | \
                    I2C_CR_REPEN        |   \
                    ((init_struct->I2C_Speed == I2C_CR_FAST) ? I2C_CR_FAST : I2C_CR_STD) | \
-                   init_struct->I2C_Mode;
+                   ((init_struct->I2C_Mode)  ? I2C_CR_MASTER : 0x00);
     i2c->IC_INTR_MASK &= INTR_MASK;
 
     i2c->IC_RX_TL = 0x00;
@@ -515,9 +514,7 @@ void I2C_SendSlaveAddress(I2C_TypeDef* i2c, u8 addr)
 ////////////////////////////////////////////////////////////////////////////////
 void I2C_SlaveConfigure(I2C_TypeDef* i2c, FunctionalState state)
 {
-    (state) ?                                     \
-    (i2c->CR &= ~(I2C_CR_MASTER | I2C_CR_SLAVEDIS)) : \
-    (i2c->CR |= (I2C_CR_MASTER | I2C_CR_SLAVEDIS));
+    (state) ? CLEAR_BIT(i2c->IC_CON, I2C_CR_SLAVEDIS) : SET_BIT(i2c->IC_CON, I2C_CR_SLAVEDIS);
 }
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief  Configures the specified I2C DMA requests.

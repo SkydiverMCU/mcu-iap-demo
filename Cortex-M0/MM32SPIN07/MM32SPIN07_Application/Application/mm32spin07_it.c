@@ -35,19 +35,19 @@
 #include "mm32spin07_it.h"
 
 /**
-  * @addtogroup MM32SPIN07_LibSamples
-  * @{
-  */
+ * @addtogroup MM32SPIN07_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup UART
-  * @{
-  */
+ * @addtogroup UART
+ * @{
+ */
 
 /**
-  * @addtogroup UART_ReceiverIdleFrame_Interrupt
-  * @{
-  */
+ * @addtogroup UART_ReceiverIdleFrame_Interrupt
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -60,108 +60,73 @@
 /* Private functions **************************************************************************************************/
 
 /***********************************************************************************************************************
-  * @brief  This function handles NMI exception
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles NMI exception
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void NMI_Handler(void)
 {
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles Hard Fault exception
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles Hard Fault exception
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void HardFault_Handler(void)
 {
-    /* Go to infinite loop when Hard Fault exception occurs */
-    while (1)
-    {
-    }
+  /* Go to infinite loop when Hard Fault exception occurs */
+  while (1)
+  {
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles SVCall exception
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles SVCall exception
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void SVC_Handler(void)
 {
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles PendSVC exception
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles PendSVC exception
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void PendSV_Handler(void)
 {
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles SysTick Handler
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles SysTick Handler
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void SysTick_Handler(void)
 {
-    if (0 != PLATFORM_DelayTick)
-    {
-        PLATFORM_DelayTick--;
-    }
-}
-
-/***********************************************************************************************************************
-  * @brief  This function handles UART2 Handler
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
-void UART2_IRQHandler(void)
-{
-    uint8_t i = 0;
-
-    if (RESET != UART_GetITStatus(UART2, UART_IT_RXIEN))
-    {
-        UART_RxBuffer[UART_RxLength++] = UART_ReceiveData(UART2);
-
-        UART_ClearITPendingBit(UART2, UART_IT_RXIEN);
-    }
-
-    if (RESET != (UART2->ISR & UART_ISR_RXIDLE))
-    {
-        UART2->ICR = UART_ICR_RXIDLE;
-
-        for (i = 0; i < UART_RxLength; i++)
-        {
-            UART_SendData(UART2, UART_RxBuffer[i]);
-
-            while (RESET == UART_GetFlagStatus(UART2, UART_FLAG_TXEPT))
-            {
-            }
-        }
-
-        UART_RxLength = 0;
-    }
+  if (0 != PLATFORM_DelayTick)
+  {
+    PLATFORM_DelayTick--;
+  }
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

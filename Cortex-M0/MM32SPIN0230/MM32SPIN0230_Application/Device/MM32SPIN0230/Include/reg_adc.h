@@ -122,9 +122,6 @@ typedef struct
 
 #define ADC_ADCFG_VTSEN_Pos             (2)
 #define ADC_ADCFG_VTSEN_Msk             (0x03U << ADC_ADCFG_VTSEN_Pos)     /*!< Disable ADC temperature sensor and voltage sensor */
-#define ADC_ADCFG_VTSEN_VEN             (0x01U << ADC_ADCFG_VTSEN_Pos)     /*!< Enable ADC voltage sensor */
-#define ADC_ADCFG_VTSEN_TEN             (0x02U << ADC_ADCFG_VTSEN_Pos)     /*!< Enable ADC temperature sensor */
-#define ADC_ADCFG_VTSEN_DIS             (0x03U << ADC_ADCFG_VTSEN_Pos)     /*!< Disable */
 
 #define ADC_ADCFG_RSLTCTL_Pos           (7)
 #define ADC_ADCFG_RSLTCTL_Msk           (0x07U << ADC_ADCFG_RSLTCTL_Pos)   /*!< ADC resolution select */

@@ -80,7 +80,7 @@
             <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
-            <RunUserProg1>1</RunUserProg1>
+            <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
             <UserProg1Name>fromelf.exe --bin -o "@L.bin" "#L"</UserProg1Name>
             <UserProg2Name></UserProg2Name>
@@ -403,6 +403,11 @@
               <FileName>usart_interrupt.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\usart_interrupt.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app_protocol.c</FilePath>
             </File>
           </Files>
         </Group>

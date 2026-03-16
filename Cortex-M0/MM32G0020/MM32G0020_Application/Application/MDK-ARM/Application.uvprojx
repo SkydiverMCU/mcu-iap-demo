@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>UART_ReceiverIdleFrame_Interrupt</TargetName>
+      <TargetName>Application</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>5060750::V5.06 update 6 (build 750)::.\ARMCC</pCCUsed>
@@ -403,6 +403,11 @@
               <FileName>platform.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\platform.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app_protocol.c</FilePath>
             </File>
           </Files>
         </Group>

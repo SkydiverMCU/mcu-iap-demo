@@ -15,27 +15,24 @@
 /// <H2><CENTER>&COPY; COPYRIGHT MINDMOTION </CENTER></H2>
 ////////////////////////////////////////////////////////////////////////////////
 
-
 // Define to prevent recursive inclusion
 #ifndef __UART_TXRX_INTERRUPT_H
 #define __UART_TXRX_INTERRUPT_H
 // Files includes
 #include "hal_conf.h"
-#include  "stdio.h"
+#include "stdio.h"
 #include "string.h"
 #include "boot.h"
 
 void UART1_NVIC_Init(u32 baudrate);
 
-void UART_SendGroup(u8* buf, u16 len);
-
-/// @}
-
+void UART_SendGroup(u8 *buf, u16 len);
 
 /// @}
 
 /// @}
 
+/// @}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif

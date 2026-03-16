@@ -33,18 +33,18 @@
 #define __MM32F0120_H
 
 
-/* MM32 Library version is V0.12 --------------------------------------------*/
+/* MM32 Library version is V1.0 --------------------------------------------*/
 
-#define __MM32_LIB_VERSION_MAIN             (0x00U) /*!< [15:8] main version */
-#define __MM32_LIB_VERSION_SUB              (0x12U) /*!< [7:0]  sub version */
+#define __MM32_LIB_VERSION_MAIN             (0x01U) /*!< [15:8] main version */
+#define __MM32_LIB_VERSION_SUB              (0x00U) /*!< [7:0]  sub version */
 #define __MM32_LIB_VERSION                  ((__MM32_LIB_VERSION_MAIN << 8U) \
                                             |(__MM32_LIB_VERSION_SUB  << 0U))
 
-/* MM32 Library release date is 2025-01-10 -----------------------------------*/
+/* MM32 Library release date is 2025-12-29 -----------------------------------*/
 #define __MM32_LIB_RELESE_YEARH             (0x20U) /*!< [31:24] release year high */
 #define __MM32_LIB_RELESE_YEARL             (0x25U) /*!< [23:16] release year low */
-#define __MM32_LIB_RELESE_MONTH             (0x01U) /*!< [15:8]  release month */
-#define __MM32_LIB_RELESE_DAY               (0x10U) /*!< [7:0]   release day */
+#define __MM32_LIB_RELESE_MONTH             (0x12U) /*!< [15:8]  release month */
+#define __MM32_LIB_RELESE_DAY               (0x29U) /*!< [7:0]   release day */
 #define __MM32_LIB_RELESE_DATE              ((__MM32_LIB_RELESE_YEARH << 24U) \
                                             |(__MM32_LIB_RELESE_YEARL << 16U) \
                                             |(__MM32_LIB_RELESE_MONTH <<  8U) \

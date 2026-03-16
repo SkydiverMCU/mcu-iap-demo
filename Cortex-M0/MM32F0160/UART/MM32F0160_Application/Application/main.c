@@ -34,6 +34,8 @@
 #include "uart_receiveridleframe_interrupt.h"
 #include "main.h"
 #include "string.h"
+#include "stdio.h"
+#include "app_protocol.h"
 
 /**
  * @addtogroup MM32F0160_LibSamples
@@ -70,7 +72,7 @@
 int main(void)
 {
   // M0 要把APP的向量表转移到SRAM
-  memcpy((void *)0x20000000, (void *)APPLICATION_ADDRESS, VECTOR_SIZE);
+  memcpy((void *)0x20000000, (void *)(FLASH_BASE | APP_ADDRESS_OFFSET), VECTOR_SIZE);
   // Enable the SYSCFG Peripheral Clock
   RCC_APB2PeriphClockCmd(RCC_APB2ENR_SYSCFG, ENABLE);
   // Remap SRAM at 0x00000000 将SRAM中的向量表映射到0x0000000
@@ -79,10 +81,13 @@ int main(void)
 
   PLATFORM_Init();
 
-  UART_ReceiverIdleFrame_Interrupt_Sample();
+  printf("MM32F0160 enter application \r\n");
+
+  UART_Configure(115200);
 
   while (1)
   {
+    Receive_Protocol_Process(); // 添加串口，支持直接Application接收串口升级协议，跳转回Bootloader
   }
 }
 

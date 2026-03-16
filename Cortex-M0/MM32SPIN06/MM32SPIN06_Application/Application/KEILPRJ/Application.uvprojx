@@ -7,23 +7,23 @@
 
   <Targets>
     <Target>
-      <TargetName>MM32Series</TargetName>
+      <TargetName>Application</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>5060750::V5.06 update 6 (build 750)::.\ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>MM32SPIN06PF</Device>
+          <Device>MM32SPIN06PS</Device>
           <Vendor>MindMotion</Vendor>
           <PackID>MindMotion.MM32SPIN0x_DFP.1.0.8</PackID>
           <PackURL>http://www.mindmotion.com.cn/Download/MDK_KEIL/</PackURL>
           <Cpu>IRAM(0x20000000,0x4000) IROM(0x08000000,0x10000) CPUTYPE("Cortex-M0") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0MM32SPIN06_64K -FS08000000 -FL010000 -FP0($$Device:MM32SPIN06PF$Flash\MM32SPIN06_64K.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0MM32SPIN06_64K -FS08000000 -FL010000 -FP0($$Device:MM32SPIN06PS$Flash\MM32SPIN06_64K.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:MM32SPIN06PF$Device\MM32SPIN06xx_s\Include\mm32_device.h</RegisterFile>
+          <RegisterFile>$$Device:MM32SPIN06PS$Device\MM32SPIN06xx_s\Include\mm32_device.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -33,7 +33,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:MM32SPIN06PF$SVD\MM32SPIN06x_s.svd</SFDFile>
+          <SFDFile>$$Device:MM32SPIN06PS$SVD\MM32SPIN06x_s.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -48,14 +48,14 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>.\OBJ\</OutputDirectory>
+          <OutputDirectory>.\Objects\</OutputDirectory>
           <OutputName>Application</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath>.\OBJ\</ListingPath>
+          <ListingPath>.\Listings\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>
@@ -325,8 +325,8 @@
             <Rwpi>0</Rwpi>
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
-            <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uSurpInc>1</uSurpInc>
+            <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Device\CMSIS\KEIL_Core;..\..\Device\MM32SPIN06xx_s\Include;..\..\Device\MM32SPIN06xx_s\HAL_Lib\Inc;..\USER;..\SYSTEM\SYS;..\SYSTEM\DELAY;..\HARDWARE\UART;..\HARDWARE\LED</IncludePath>
+              <IncludePath>..\..\Device\CMSIS\KEIL_Core;..\..\Device\MM32SPIN06xx_s\Include;..\..\Device\MM32SPIN06xx_s\HAL_Lib\Inc;..\USER;..\SYSTEM\DELAY;..\HARDWARE\UART;..\HARDWARE\LED</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -405,9 +405,9 @@
               <FilePath>..\HARDWARE\LED\led.c</FilePath>
             </File>
             <File>
-              <FileName>uart_print_loop.c</FileName>
+              <FileName>uart_txrx_idleframe_interrupt.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\HARDWARE\UART\uart_print_loop.c</FilePath>
+              <FilePath>..\HARDWARE\UART\uart_txrx_idleframe_interrupt.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -419,11 +419,6 @@
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\DELAY\delay.c</FilePath>
             </File>
-            <File>
-              <FileName>sys.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\SYSTEM\SYS\sys.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -433,6 +428,11 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\app_protocol.c</FilePath>
             </File>
           </Files>
         </Group>

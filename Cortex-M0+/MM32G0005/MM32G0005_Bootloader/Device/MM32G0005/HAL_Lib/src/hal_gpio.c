@@ -311,6 +311,73 @@ void GPIO_PinODConfig(GPIO_TypeDef *gpio, uint16_t pin, uint32_t od_mode)
 }
 
 /**
+  * @brief  Initializes the LED Drive according to the specified
+  *         parameters in the init_struct.
+  * @param  init_struct: pointer to a GPIO_LEDDriveInitTypeDef structure that
+  *         contains the configuration information for the LED Drive.
+  * @retval None.
+  */
+void GPIO_LEDDriveInit(GPIO_LEDDriveInitTypeDef *init_struct)
+{
+    uint8_t  i = 0;
+    
+    if ((init_struct->GPIO_LEDDriveMode & 0xF0) == 0xA0)
+    {
+        if((init_struct->GPIO_LEDDriveMode & 0x0F) == 0x01)
+        {
+            SYSCFG->HCIOCR |= init_struct->GPIO_LEDDrivePin;
+        }
+        else
+        {
+            SYSCFG->HCIOCR &= ~(init_struct->GPIO_LEDDrivePin);
+        }
+    } 
+    else if ((init_struct->GPIO_LEDDriveMode & 0xF0) == 0x50)  
+    {
+        if((init_struct->GPIO_LEDDriveMode & 0x0F) == 0x01)
+        {
+            SYSCFG->LEDIOCR |= init_struct->GPIO_LEDDrivePin;
+        }
+        else
+        {
+            SYSCFG->LEDIOCR &= ~(init_struct->GPIO_LEDDrivePin);
+        }
+        
+        if( init_struct->GPIO_LEDDriveODR0 ==  GPIO_LEDDriveODR0_0V)
+        {
+            SYSCFG->LEDIOCR |= (init_struct->GPIO_LEDDrivePin << 1);
+        }
+        else
+        {
+            SYSCFG->LEDIOCR &= ~(init_struct->GPIO_LEDDrivePin << 1);
+        }
+        
+        for(i=0; i<8; i++)
+        {
+            if((init_struct->GPIO_LEDDrivePin >> 4*i) & 0x01)
+            {
+                SYSCFG->LEDIOCR &= ~(0x0C << 4*i);
+                SYSCFG->LEDIOCR |= (init_struct->GPIO_LEDDriveCurrent << 4*i);
+            }
+        }
+    }        
+}
+
+/**
+  * @brief  Fills each init_struct member with its default value.
+  * @param init_struct : pointer to a GPIO_LEDDriveInitTypeDef structure
+  *   which will be initialized.
+  * @retval : None
+  */
+void GPIO_LEDDriveStructInit(GPIO_LEDDriveInitTypeDef *init_struct)
+{
+    init_struct->GPIO_LEDDrivePin     = GPIO_LEDDvireHCIO_0;    
+    init_struct->GPIO_LEDDriveCurrent = GPIO_LEDDriveCurrent_2mA5;
+    init_struct->GPIO_LEDDriveODR0    = GPIO_LEDDriveODR0_0V;   
+    init_struct->GPIO_LEDDriveMode    = GPIO_LEDDriveMode_SourceGPIO;      
+}
+
+/**
   * @}
   */
 

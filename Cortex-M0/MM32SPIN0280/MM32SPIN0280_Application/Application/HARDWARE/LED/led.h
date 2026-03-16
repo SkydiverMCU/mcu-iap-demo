@@ -39,29 +39,29 @@
 /// @defgroup MM32_Exported_Constants
 /// @{
 
-#define LED1_Port  GPIOA
-#define LED1_Pin   GPIO_Pin_15
-#define LED2_Port  GPIOB
-#define LED2_Pin   GPIO_Pin_3
-#define LED3_Port  GPIOB
-#define LED3_Pin   GPIO_Pin_4
-#define LED4_Port  GPIOB
-#define LED4_Pin   GPIO_Pin_5
+#define LED1_Port GPIOA
+#define LED1_Pin GPIO_Pin_15
+#define LED2_Port GPIOB
+#define LED2_Pin GPIO_Pin_3
+#define LED3_Port GPIOB
+#define LED3_Pin GPIO_Pin_4
+#define LED4_Port GPIOB
+#define LED4_Pin GPIO_Pin_5
 
-#define LED1_ON()     GPIO_ResetBits(LED1_Port, LED1_Pin)
-#define LED1_OFF()    GPIO_SetBits(LED1_Port, LED1_Pin)
+#define LED1_ON() GPIO_ResetBits(LED1_Port, LED1_Pin)
+#define LED1_OFF() GPIO_SetBits(LED1_Port, LED1_Pin)
 #define LED1_TOGGLE() (GPIO_ReadOutputDataBit(LED1_Port, LED1_Pin)) ? (GPIO_ResetBits(LED1_Port, LED1_Pin)) : (GPIO_SetBits(LED1_Port, LED1_Pin))
 
-#define LED2_ON()     GPIO_ResetBits(LED2_Port, LED2_Pin)
-#define LED2_OFF()    GPIO_SetBits(LED2_Port, LED2_Pin)
+#define LED2_ON() GPIO_ResetBits(LED2_Port, LED2_Pin)
+#define LED2_OFF() GPIO_SetBits(LED2_Port, LED2_Pin)
 #define LED2_TOGGLE() (GPIO_ReadOutputDataBit(LED2_Port, LED2_Pin)) ? (GPIO_ResetBits(LED2_Port, LED2_Pin)) : (GPIO_SetBits(LED2_Port, LED2_Pin))
 
-#define LED3_ON()     GPIO_ResetBits(LED3_Port, LED3_Pin)
-#define LED3_OFF()    GPIO_SetBits(LED3_Port, LED3_Pin)
+#define LED3_ON() GPIO_ResetBits(LED3_Port, LED3_Pin)
+#define LED3_OFF() GPIO_SetBits(LED3_Port, LED3_Pin)
 #define LED3_TOGGLE() (GPIO_ReadOutputDataBit(LED3_Port, LED3_Pin)) ? (GPIO_ResetBits(LED3_Port, LED3_Pin)) : (GPIO_SetBits(LED3_Port, LED3_Pin))
 
-#define LED4_ON()     GPIO_ResetBits(LED4_Port, LED4_Pin)
-#define LED4_OFF()    GPIO_SetBits(LED4_Port, LED4_Pin)
+#define LED4_ON() GPIO_ResetBits(LED4_Port, LED4_Pin)
+#define LED4_OFF() GPIO_SetBits(LED4_Port, LED4_Pin)
 #define LED4_TOGGLE() (GPIO_ReadOutputDataBit(LED4_Port, LED4_Pin)) ? (GPIO_ResetBits(LED4_Port, LED4_Pin)) : (GPIO_SetBits(LED4_Port, LED4_Pin))
 
 /// @}
@@ -88,10 +88,10 @@ typedef enum
 /// @defgroup MM32_Exported_Variables
 /// @{
 #ifdef _LED_C_
-  #define GLOBAL
+#define GLOBAL
 
 #else
-  #define GLOBAL extern
+#define GLOBAL extern
 
 #endif
 
@@ -114,4 +114,3 @@ void LED_Init(void);
 ////////////////////////////////////////////////////////////////////////////////
 #endif
 ////////////////////////////////////////////////////////////////////////////////
-

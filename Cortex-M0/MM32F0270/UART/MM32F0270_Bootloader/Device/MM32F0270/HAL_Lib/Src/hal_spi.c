@@ -44,17 +44,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 void SPI_DeInit(SPI_TypeDef* spi)
 {
-    switch (*(vu32*)&spi) {
-        case (u32)SPI2:  // SPI2_BASE:
-            RCC_APB1PeriphResetCmd(RCC_APB1ENR_SPI2, ENABLE);
-            RCC_APB1PeriphResetCmd(RCC_APB1ENR_SPI2, DISABLE);
-            break;
-        case (u32)SPI1:  // SPI1_BASE:
-            RCC_APB2PeriphResetCmd(RCC_APB2ENR_SPI1, ENABLE);
-            RCC_APB2PeriphResetCmd(RCC_APB2ENR_SPI1, DISABLE);
-            break;
-        default:
-            break;
+    if (spi == SPI1)
+    {
+        RCC_APB2PeriphResetCmd(RCC_APB2ENR_SPI1, ENABLE);
+        RCC_APB2PeriphResetCmd(RCC_APB2ENR_SPI1, DISABLE);
+    }
+    else if (spi == SPI2)
+    { 
+        RCC_APB1PeriphResetCmd(RCC_APB1ENR_SPI2, ENABLE);
+        RCC_APB1PeriphResetCmd(RCC_APB1ENR_SPI2, DISABLE);
     }
 }
 

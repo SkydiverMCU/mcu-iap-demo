@@ -191,8 +191,6 @@ void USART2_IRQHandler(void)
     READ_REG(USART2->DR);
   }
 
-
-
   if (READ_BIT(USART2->SR, USART_SR_RXNE))
   {
     RxData = ((uint8_t)(USART2->DR & (uint16_t)0x01FF)); // USART_ReceiveData(USART2);
@@ -205,7 +203,7 @@ void USART2_IRQHandler(void)
 
     if ((USART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
     {
-      if (USART_RX_STA < UART_REC_LEN) // 还可以接收数据
+      if (USART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
       {
         USART_RxBuff[USART_RX_STA++] = RxData; // 记录接收到的值
       }
@@ -215,7 +213,7 @@ void USART2_IRQHandler(void)
       }
     }
   }
-  
+
   if (READ_BIT(USART2->SR, USART_SR_IDLE))
   {
     /* Disable IDLE Interrupt */
@@ -223,7 +221,7 @@ void USART2_IRQHandler(void)
     READ_REG(USART2->DR);
 
     USART_RX_STA |= 0x8000;
-  }  
+  }
 }
 
 /***********************************************************************************************************************
@@ -232,7 +230,7 @@ void USART2_IRQHandler(void)
  * @param  none
  * @retval none
  *********************************************************************************************************************/
-void UART_SendGroup(uint8_t *pBuff, uint16_t length)
+void USART_SendGroup(uint8_t *pBuff, uint16_t length)
 {
   while (length--)
   {

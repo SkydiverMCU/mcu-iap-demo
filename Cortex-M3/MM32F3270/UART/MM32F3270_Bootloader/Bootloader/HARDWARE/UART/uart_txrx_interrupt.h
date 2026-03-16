@@ -25,7 +25,6 @@
 #include "string.h"
 #include "boot.h"
 
-
 /* Exported functions *************************************************************************************************/
 void UART_SendGroup(uint8_t *pBuff, uint16_t length);
 void UART1_NVIC_Init(uint32_t Baudrate);

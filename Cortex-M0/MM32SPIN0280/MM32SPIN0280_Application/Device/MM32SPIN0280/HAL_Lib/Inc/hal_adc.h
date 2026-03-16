@@ -351,6 +351,7 @@ void ADC_SetInjectedOffset(ADC_TypeDef* adc, ADC_INJ_SEQ_Channel_TypeDef off_add
 u16 ADC_GetChannelConvertedValue(ADC_TypeDef* adc, ADCCHANNEL_TypeDef channel);
 void ADC_Calibration(ADC_TypeDef* adc);
 void ADC_AnychanChannelConfig(ADC_TypeDef* adc, ADCCHANNEL_TypeDef channel, uint8_t anychan, uint32_t sample_time);
+void ADC_CalibrationEscape(ADC_TypeDef *adc);
 /// @}
 
 /// @}

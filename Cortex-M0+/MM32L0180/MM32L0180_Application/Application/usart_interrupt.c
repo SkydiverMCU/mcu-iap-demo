@@ -35,19 +35,19 @@
 #include "usart_interrupt.h"
 
 /**
-  * @addtogroup MM32L0180_LibSamples
-  * @{
-  */
+ * @addtogroup MM32L0180_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup USART
-  * @{
-  */
+ * @addtogroup USART
+ * @{
+ */
 
 /**
-  * @addtogroup USART_Interrupt
-  * @{
-  */
+ * @addtogroup USART_Interrupt
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -60,144 +60,133 @@
 /* Private functions **************************************************************************************************/
 
 /***********************************************************************************************************************
-  * @brief
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void USART_Configure(uint32_t Baudrate)
 {
-    GPIO_InitTypeDef  GPIO_InitStruct;
-    NVIC_InitTypeDef  NVIC_InitStruct;
-    USART_InitTypeDef USART_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  NVIC_InitTypeDef NVIC_InitStruct;
+  USART_InitTypeDef USART_InitStruct;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
-    USART_StructInit(&USART_InitStruct);
-    USART_InitStruct.USART_BaudRate   = Baudrate;
-    USART_InitStruct.USART_WordLength = USART_WordLength_8b;
-    USART_InitStruct.USART_StopBits   = USART_StopBits_1;
-    USART_InitStruct.USART_Parity     = USART_Parity_No;
-    USART_InitStruct.USART_Mode       = USART_Mode_Rx | USART_Mode_Tx;
-    USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_Init(USART1, &USART_InitStruct);
+  USART_StructInit(&USART_InitStruct);
+  USART_InitStruct.USART_BaudRate = Baudrate;
+  USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+  USART_InitStruct.USART_StopBits = USART_StopBits_1;
+  USART_InitStruct.USART_Parity = USART_Parity_No;
+  USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+  USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_Init(USART2, &USART_InitStruct);
 
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 
-    GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_2);
-    GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_2);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_1);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_10;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOC, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2;
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_11;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_FLOATING;
-    GPIO_Init(GPIOC, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    NVIC_InitStruct.NVIC_IRQChannel = USART1_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPriority = 0;
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
+  NVIC_InitStruct.NVIC_IRQChannel = USART2_IRQn;
+  NVIC_InitStruct.NVIC_IRQChannelPriority = 0;
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStruct);
 
-    USART_ITConfig(USART1, USART_IT_PE, ENABLE);
-    USART_ITConfig(USART1, USART_IT_ERR, ENABLE);
+  USART_ITConfig(USART2, USART_IT_PE, ENABLE);
+  USART_ITConfig(USART2, USART_IT_ERR, ENABLE);
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
-    USART_Cmd(USART1, ENABLE);
+  USART_Cmd(USART2, ENABLE);
 }
 
 /***********************************************************************************************************************
-  * @brief
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
-void USART_RxData_Interrupt(uint8_t Length)
+ * @brief
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
+void USART_SendGroup(uint8_t *pBuff, uint16_t length)
 {
-    uint8_t i = 0;
+  while (length--)
+  {
+    USART_SendData(USART2, (uint8_t)*pBuff);
 
-    for (i = 0; i < Length; i++)
+    while (RESET == USART_GetFlagStatus(USART2, USART_FLAG_TC))
     {
-        USART_RxStruct.Buffer[i] = 0;
     }
-
-    USART_RxStruct.Length = Length;
-    USART_RxStruct.CurrentCount = 0;
-    USART_RxStruct.CompleteFlag = 0;
-
-    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+    pBuff++;
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
-void USART_TxData_Interrupt(uint8_t *Buffer, uint8_t Length)
+ * @brief  This function handles USART1 Handler
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
+void USART2_IRQHandler(void)
 {
-    uint8_t i = 0;
+  uint8_t RxData = 0;
 
-    for (i = 0; i < Length; i++)
+  if ((RESET != USART_GetITStatus(USART2, USART_IT_PE)) ||
+      (RESET != USART_GetITStatus(USART2, USART_IT_ERR)))
+  {
+    USART_ReceiveData(USART2);
+  }
+
+  if (RESET != USART_GetITStatus(USART2, USART_IT_IDLE))
+  {
+    USART_ReceiveData(USART2);
+    /* Disable IDLE Interrupt */
+    CLEAR_BIT(USART2->CR1, USART_CR1_IDLEIEN);
+
+    USART_RX_STA |= 0x8000;
+  }
+
+  if (RESET != USART_GetITStatus(USART2, USART_IT_RXNE))
+  {
+    RxData = USART_ReceiveData(USART2);
+
+    if (0 == READ_BIT(USART2->CR1, USART_CR1_IDLEIEN))
     {
-        USART_TxStruct.Buffer[i] = Buffer[i];
+      /* Enable IDLE Interrupt */
+      SET_BIT(USART2->CR1, USART_CR1_IDLEIEN);
     }
 
-    USART_TxStruct.Length = Length;
-    USART_TxStruct.CurrentCount = 0;
-    USART_TxStruct.CompleteFlag = 0;
-
-    USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
-}
-
-/***********************************************************************************************************************
-  * @brief
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
-void USART_Interrupt_Sample(void)
-{
-    printf("\r\nTest %s", __FUNCTION__);
-
-    USART_RxStruct.CompleteFlag = 0;
-    USART_TxStruct.CompleteFlag = 1;
-
-    USART_Configure(115200);
-
-    USART_RxData_Interrupt(10);
-
-    printf("\r\nSend 10 bytes to USART every time.");
-
-    while (1)
+    if ((USART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
     {
-        if (0 != USART_RxStruct.CompleteFlag)
-        {
-            USART_TxData_Interrupt((uint8_t *)USART_RxStruct.Buffer, USART_RxStruct.Length);
-
-            while (0 == USART_TxStruct.CompleteFlag)
-            {
-            }
-
-            USART_RxData_Interrupt(10);
-        }
+      if (USART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
+      {
+        USART_RxBuff[USART_RX_STA++] = RxData; // 记录接收到的值
+      }
+      else
+      {
+        USART_RX_STA |= 0x8000; // 强制标记接收完成
+      }
     }
+  }
 }
+/**
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
-
-/**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

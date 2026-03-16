@@ -81,20 +81,28 @@ typedef enum
 /**
   * @brief  Option_Bytes_IWatchdog
   */
-#define OB_IWDG_SW                       0x0001                           /*!< Software IWDG selected */
-#define OB_IWDG_HW                       0x0000                           /*!< Hardware IWDG selected */
+#define OB_IWDG_HW                       0x00                           /*!< Hardware IWDG selected */
+#define OB_IWDG_SW                       0x01                           /*!< Software IWDG selected */
 
 /**
   * @brief  Option_Bytes_nRST_STOP
   */
-#define OB_STOP_NORST                    0x0002                           /*!< No reset generated when entering in STOP */
-#define OB_STOP_RST                      0x0000                           /*!< Reset generated when entering in STOP */
+#define OB_STOP_RST                      0x00                           /*!< Reset generated when entering in STOP */
+#define OB_STOP_NORST                    0x02                           /*!< No reset generated when entering in STOP */
 
 /**
   * @brief  Option_Bytes_PVD_EN
   */
-#define OB_PVD_EN                        0x0004                           /*!< enable PVD*/
-#define OB_PVD_DIS                       0x0000                           /*!< disable PVD */
+#define OB_PVD_EN                        0x00                           /*!< enable PVD*/
+#define OB_PVD_DIS                       0x04                           /*!< disable PVD */
+
+/**
+  * @brief  Option_Bytes_PVD_PLS
+  */
+#define OB_PVD_1V8                       0x00                           /*!< PVD_1V8*/
+#define OB_PVD_2V1                       0x10                           /*!< PVD_2V1*/
+#define OB_PVD_2V4                       0x20                           /*!< PVD_2V4*/
+#define OB_PVD_2V7                       0x30                           /*!< PVD_2V7*/
 
 /**
   * @brief  FLASH_Flags
@@ -128,7 +136,7 @@ FLASH_Status FLASH_EraseOptionBytes(void);
 FLASH_Status FLASH_ProgramWord(uint32_t address, uint32_t data);
 FLASH_Status FLASH_ProgramOptionWord(uint32_t address, uint32_t data);
 FLASH_Status FLASH_EnableWriteProtection(uint32_t page);
-FLASH_Status FLASH_UserOptionByteConfig(uint32_t ob_iwdg, uint32_t ob_stop, uint32_t ob_pvd);
+FLASH_Status FLASH_UserOptionByteConfig(uint32_t ob_iwdg, uint32_t ob_stop, uint32_t ob_pvd, uint32_t ob_pvd_level);
 FLASH_Status FLASH_GetStatus(void);
 FLASH_Status FLASH_WaitForLastOperation(uint32_t time_out);
 void FLASH_ClearFlag(uint16_t flag);
@@ -137,7 +145,7 @@ uint32_t FLASH_GetWriteProtectionOptionByte(void);
 
 FlagStatus FLASH_GetFlagStatus(uint16_t flag);
 FLASH_Status FLASH_EraseDataAreaPage(uint32_t page_address);
-FLASH_Status FLASH_ProgramDataAreaHalfWord(uint32_t address, uint16_t data);
+FLASH_Status FLASH_ProgramDataAreaWord(uint32_t address, uint32_t data);
 void FLASH_OPTB_Disable(void);
 
 #endif

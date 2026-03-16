@@ -31,20 +31,14 @@
 #define _UART_INTERRUPT_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Files include */
 #include "hal_conf.h"
-
-/* Exported types *****************************************************************************************************/
-typedef struct
-{
-    uint8_t Buffer[255];
-    uint8_t Length;
-    uint8_t CurrentCount;
-    uint8_t CompleteFlag;
-} UART_RxTx_TypeDef;
+#include "app_protocol.h"
+  /* Exported types *****************************************************************************************************/
 
 /* Exported constants *************************************************************************************************/
 
@@ -59,11 +53,9 @@ typedef struct
 #define EXTERN extern
 #endif
 
-EXTERN volatile UART_RxTx_TypeDef UART_RxStruct;
-EXTERN volatile UART_RxTx_TypeDef UART_TxStruct;
-
-/* Exported functions *************************************************************************************************/
-void UART_Interrupt_Sample(void);
+  /* Exported functions *************************************************************************************************/
+  void UART_SendGroup(uint8_t *pBuff, uint16_t length);
+  void UART_Configure(uint32_t Baudrate);
 
 #ifdef __cplusplus
 }
@@ -72,4 +64,3 @@ void UART_Interrupt_Sample(void);
 #endif /* _UART_INTERRUPT_H_ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

@@ -31,12 +31,13 @@
 #define _UART_RECEIVERIDLEFRAME_INTERRUPT_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Files include */
 #include "hal_conf.h"
-
+#include "app_protocol.h"
 /* Exported types *****************************************************************************************************/
 
 /* Exported constants *************************************************************************************************/
@@ -52,11 +53,9 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN volatile uint8_t UART_RxBuffer[255];
-EXTERN volatile uint8_t UART_RxLength;
-
-/* Exported functions *************************************************************************************************/
-void UART_ReceiverIdleFrame_Interrupt_Sample(void);
+  /* Exported functions *************************************************************************************************/
+  void UART_SendGroup(u8 *buf, u16 len);
+  void UART_Configure(uint32_t Baudrate);
 
 #ifdef __cplusplus
 }
@@ -65,4 +64,3 @@ void UART_ReceiverIdleFrame_Interrupt_Sample(void);
 #endif /* _UART_RECEIVERIDLEFRAME_INTERRUPT_H_ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

@@ -62,12 +62,12 @@ uint32_t SystemCoreClock         = SYSCLK_HSI_XXMHz; /*!< HSI Selected as System
 #define RCC_CFGR_PPRE1_DIV8             (0x06U << RCC_CFGR_PPRE1_Pos)
 #define RCC_CFGR_PPRE1_DIV16            (0x07U << RCC_CFGR_PPRE1_Pos)
 
-#define RCC_CFGR_SW_HSI_DIV12           (0x00U << RCC_CFGR_SW_Pos)
+#define RCC_CFGR_SW_HSI_DIV6            (0x00U << RCC_CFGR_SW_Pos)
 #define RCC_CFGR_SW_HSE                 (0x01U << RCC_CFGR_SW_Pos)
 #define RCC_CFGR_SW_HSI                 (0x02U << RCC_CFGR_SW_Pos)
 #define RCC_CFGR_SW_LSI                 (0x03U << RCC_CFGR_SW_Pos)
 
-#define RCC_CFGR_SWS_HSI_DIV12          (0x00U << RCC_CFGR_SWS_Pos)
+#define RCC_CFGR_SWS_HSI_DIV6           (0x00U << RCC_CFGR_SWS_Pos)
 #define RCC_CFGR_SWS_HSE                (0x01U << RCC_CFGR_SWS_Pos)
 #define RCC_CFGR_SWS_HSI                (0x02U << RCC_CFGR_SWS_Pos)
 #define RCC_CFGR_SWS_LSI                (0x03U << RCC_CFGR_SWS_Pos)
@@ -79,14 +79,13 @@ uint32_t SystemCoreClock         = SYSCLK_HSI_XXMHz; /*!< HSI Selected as System
   */
 static void SetSysClockToDefine(void)
 {
-    __IO uint32_t StartUpCounter = 0, ClkSrcStatus = 1;
+    __IO uint32_t StartUpCounter = 0, ClkSrcStatus = 0;
     uint32_t temp = 0;
 
 #ifdef SYSCLK_HSE_XXMHz
-     /* Enable HSE */
+    /* Enable HSE */
     RCC->CR |= (0x01U << RCC_CR_HSEON_Pos);
-
-     /* Wait till HSE is ready and if Time out is reached exit */
+    /* Wait till HSE is ready and if Time out is reached exit */
     do
     {
         ClkSrcStatus = RCC->CR & RCC_CR_HSERDY_Msk;
@@ -107,28 +106,28 @@ static void SetSysClockToDefine(void)
 
     if (ClkSrcStatus == (uint32_t)0x01)
     {
-         /* Enable Prefetch Buffer */
-        FLASH->ACR |= FLASH_ACR_PRFTBE;
-         /* Flash 0 wait state, bit0~2 */
+        /* Flash 0 wait state, bit0~2 */
         FLASH->ACR &= ~FLASH_ACR_LATENCY_Msk;
+        /* Enable Prefetch Buffer */
+        FLASH->ACR |= FLASH_ACR_PRFTBE;
 
-         /* HCLK = SYSCLK */
+        /* HCLK = SYSCLK */
         temp      = RCC->CFGR;
         temp     &= ~RCC_CFGR_HPRE_Msk;
         temp     |= RCC_CFGR_HPRE_DIV1;
         RCC->CFGR = temp;
 
-         /* PCLK1 = HCLK */
+        /* PCLK1 = HCLK */
         temp      = RCC->CFGR;
         temp     &= ~RCC_CFGR_PPRE1_Msk;
         temp     |= RCC_CFGR_PPRE1_DIV1;
         RCC->CFGR = temp;
 
-         /* Select HSI as system clock source */
+        /* Select HSE as system clock source */
         RCC->CFGR &= ~RCC_CFGR_SW_Msk;
         RCC->CFGR |= RCC_CFGR_SW_HSE;
 
-         /* Wait till HSE is used as system clock source */
+        /* Wait till HSE is used as system clock source */
         while ((RCC->CFGR & RCC_CFGR_SWS_Msk) != RCC_CFGR_SWS_HSE)
         {
             __ASM("nop");              /* __NOP(); */
@@ -150,6 +149,8 @@ static void SetSysClockToDefine(void)
     {
     }
 
+    SystemCoreClock = SYSCLK_HSI_XXMHz;
+    
     FLASH->ACR &= ~FLASH_ACR_LATENCY_Msk;
     FLASH->ACR |= FLASH_ACR_PRFTBE_Msk;
     temp = (SystemCoreClock - 1) / 24000000;
@@ -161,19 +162,19 @@ static void SetSysClockToDefine(void)
 
     FLASH->ACR |= temp;
 
-     /* HCLK = SYSCLK = 48MHz */
+    /* HCLK = SYSCLK = 48MHz */
     temp      = RCC->CFGR;
     temp     &= ~RCC_CFGR_HPRE_Msk;
     temp     |= RCC_CFGR_HPRE_DIV1;
     RCC->CFGR = temp;
 
-     /* PCLK1 = HCLK = 48MHz */
+    /* PCLK1 = HCLK = 48MHz */
     temp      = RCC->CFGR;
     temp     &= ~RCC_CFGR_PPRE1_Msk;
     temp     |= RCC_CFGR_PPRE1_DIV1;
     RCC->CFGR = temp;
 
-     /* Select HSI as system clock source */
+    /* Select HSI as system clock source */
     RCC->CFGR &= ~RCC_CFGR_SW_Msk;
     RCC->CFGR |= RCC_CFGR_SW_HSI;
 

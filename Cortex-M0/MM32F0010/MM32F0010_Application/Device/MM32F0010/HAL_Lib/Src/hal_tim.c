@@ -1450,11 +1450,12 @@ void TIM_ClearITPendingBit(TIM_TypeDef* tim,  u32 it)    //TIMIT_TypeDef
 ///   This parameter can be one of the following values:
 ///     @arg TIM_ICPolarity_Rising
 ///     @arg TIM_ICPolarity_Falling
+///     @arg TIM_ICPolarity_BothEdge
 /// @retval None.
 ////////////////////////////////////////////////////////////////////////////////
 void exTIM_SetIC1Plority(TIM_TypeDef* tim, TIMICP_Typedef pol)
 {
-    (pol) ? SET_BIT(tim->CCER, TIM_CCER_CC1P) : CLEAR_BIT(tim->CCER, TIM_CCER_CC1P);
+    MODIFY_REG(tim->CCER, TIM_CCER_CC1P | TIM_CCER_CC1NP, pol);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1464,11 +1465,12 @@ void exTIM_SetIC1Plority(TIM_TypeDef* tim, TIMICP_Typedef pol)
 ///   This parameter can be one of the following values:
 ///     @arg TIM_ICPolarity_Rising
 ///     @arg TIM_ICPolarity_Falling
+///     @arg TIM_ICPolarity_BothEdge
 /// @retval None.
 ////////////////////////////////////////////////////////////////////////////////
 void exTIM_SetIC2Plority(TIM_TypeDef* tim, TIMICP_Typedef pol)
 {
-    (pol) ? SET_BIT(tim->CCER, TIM_CCER_CC2P) : CLEAR_BIT(tim->CCER, TIM_CCER_CC2P);
+    MODIFY_REG(tim->CCER, TIM_CCER_CC2P | TIM_CCER_CC2NP, (pol<<4));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1478,11 +1480,12 @@ void exTIM_SetIC2Plority(TIM_TypeDef* tim, TIMICP_Typedef pol)
 ///   This parameter can be one of the following values:
 ///     @arg TIM_ICPolarity_Rising
 ///     @arg TIM_ICPolarity_Falling
+///     @arg TIM_ICPolarity_BothEdge
 /// @retval None.
 ////////////////////////////////////////////////////////////////////////////////
 void exTIM_SetIC3Plority(TIM_TypeDef* tim, TIMICP_Typedef pol)
 {
-    (pol) ? SET_BIT(tim->CCER, TIM_CCER_CC3P) : CLEAR_BIT(tim->CCER, TIM_CCER_CC3P);
+    MODIFY_REG(tim->CCER, TIM_CCER_CC3P | TIM_CCER_CC3NP, (pol<<8));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1492,11 +1495,12 @@ void exTIM_SetIC3Plority(TIM_TypeDef* tim, TIMICP_Typedef pol)
 ///   This parameter can be one of the following values:
 ///     @arg TIM_ICPolarity_Rising
 ///     @arg TIM_ICPolarity_Falling
+///     @arg TIM_ICPolarity_BothEdge
 /// @retval None.
 ////////////////////////////////////////////////////////////////////////////////
 void exTIM_SetIC4Plority(TIM_TypeDef* tim, TIMICP_Typedef pol)
 {
-    (pol) ? SET_BIT(tim->CCER, TIM_CCER_CC4P) : CLEAR_BIT(tim->CCER, TIM_CCER_CC4P);
+    MODIFY_REG(tim->CCER, TIM_CCER_CC4P | TIM_CCER_CC4NP, (pol<<12));
 }
 
 

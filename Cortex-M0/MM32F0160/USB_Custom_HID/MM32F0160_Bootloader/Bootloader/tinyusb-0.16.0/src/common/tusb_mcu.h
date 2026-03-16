@@ -27,6 +27,7 @@
 #ifndef TUSB_MCU_H_
 #define TUSB_MCU_H_
 
+#include "tusb_option.h"
 //--------------------------------------------------------------------+
 // Port/Platform Specific
 // TUP stand for TinyUSB Port/Platform (can be renamed)
@@ -112,9 +113,17 @@
   #define TUP_USBIP_CHIPIDEA_FS_KINETIS
   #define TUP_DCD_ENDPOINT_MAX    16
 
+//------------- MindMotion -------------//
+#elif TU_CHECK_MCU(OPT_MCU_MM32F016X)
+  #define TUP_DCD_ENDPOINT_MAX    8
 #elif TU_CHECK_MCU(OPT_MCU_MM32F327X)
+  #define TUP_DCD_ENDPOINT_MAX    16  
+#elif TU_CHECK_MCU(OPT_MCU_MM32F533X)
   #define TUP_DCD_ENDPOINT_MAX    16
-
+#elif TU_CHECK_MCU(OPT_MCU_MM32F527X)
+  #define TUP_DCD_ENDPOINT_MAX    16
+#elif TU_CHECK_MCU(OPT_MCU_MM32F537X)
+  #define TUP_DCD_ENDPOINT_MAX    16 
 //--------------------------------------------------------------------+
 // Nordic
 //--------------------------------------------------------------------+
@@ -392,16 +401,7 @@
 #elif TU_CHECK_MCU(OPT_MCU_CH32F20X)
   #define TUP_DCD_ENDPOINT_MAX    16
   #define TUP_RHPORT_HIGHSPEED    1
-
-//------------- MindMotion -------------//
-#elif TU_CHECK_MCU(OPT_MCU_MM32F016X)
-  #define TUP_DCD_ENDPOINT_MAX    8
-#elif TU_CHECK_MCU(OPT_MCU_MM32F327X)
-  #define TUP_DCD_ENDPOINT_MAX    16  
-#elif TU_CHECK_MCU(OPT_MCU_MM32F533X)
-  #define TUP_DCD_ENDPOINT_MAX    16
-#elif TU_CHECK_MCU(OPT_MCU_MM32F527X)
-  #define TUP_DCD_ENDPOINT_MAX    16
+ 
 #endif
 
 

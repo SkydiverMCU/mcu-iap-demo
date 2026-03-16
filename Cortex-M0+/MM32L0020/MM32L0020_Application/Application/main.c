@@ -30,24 +30,25 @@
 #define _MAIN_C_
 
 /* Files include */
+#include <stdio.h>
 #include "platform.h"
 #include "uart_interrupt.h"
 #include "main.h"
+#include "app_protocol.h"
+/**
+ * @addtogroup MM32L0020_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup MM32L0020_LibSamples
-  * @{
-  */
+ * @addtogroup UART
+ * @{
+ */
 
 /**
-  * @addtogroup UART
-  * @{
-  */
-
-/**
-  * @addtogroup UART_Interrupt
-  * @{
-  */
+ * @addtogroup UART_Interrupt
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -58,38 +59,42 @@
 /* Private variables **************************************************************************************************/
 
 /* Private functions **************************************************************************************************/
-#define APP_ADDRESS_OFFSET  0x1400
+
 /***********************************************************************************************************************
-  * @brief  This function is main entrance
-  * @note   main
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function is main entrance
+ * @note   main
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 int main(void)
 {
-    SCB->VTOR = FLASH_BASE | APP_ADDRESS_OFFSET; //M0+可以对中断向量进行偏移，这样app的中断可以直接跳到自己的中断服务函数
-    __enable_irq();//跳转之后要确保打开总中断 
-	
-    PLATFORM_Init();
+  SCB->VTOR = FLASH_BASE | APP_ADDRESS_OFFSET; // M0+可以对中断向量进行偏移，这样app的中断可以直接跳到自己的中断服务函数
+  __enable_irq();                              // 跳转之后要确保打开总中断
 
-    UART_Interrupt_Sample();
+  PLATFORM_Init();
 
-    while (1)
-    {
-    }
+  printf("MM32L0020 enter application \r\n");
+
+  UART_Configure(115200);
+
+  while (1)
+  {
+    PLATFORM_LED_Toggle(LED1);
+
+    Receive_Protocol_Process(); // 添加串口，支持直接Application接收串口升级协议，跳转回Bootloader
+  }
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

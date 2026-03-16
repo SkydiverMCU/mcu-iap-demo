@@ -35,19 +35,19 @@
 #include "uart_receiveridleframe_interrupt.h"
 
 /**
-  * @addtogroup MM32F0160_LibSamples
-  * @{
-  */
+ * @addtogroup MM32F0160_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup UART
-  * @{
-  */
+ * @addtogroup UART
+ * @{
+ */
 
 /**
-  * @addtogroup UART_ReceiverIdleFrame_Interrupt
-  * @{
-  */
+ * @addtogroup UART_ReceiverIdleFrame_Interrupt
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -60,88 +60,117 @@
 /* Private functions **************************************************************************************************/
 
 /***********************************************************************************************************************
-  * @brief
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void UART_Configure(uint32_t Baudrate)
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
-    NVIC_InitTypeDef NVIC_InitStruct;
-    UART_InitTypeDef UART_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  NVIC_InitTypeDef NVIC_InitStruct;
+  UART_InitTypeDef UART_InitStruct;
 
-    RCC_APB1PeriphClockCmd(RCC_APB1ENR_UART2, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB1ENR_UART2, ENABLE);
 
-    UART_StructInit(&UART_InitStruct);
-    UART_InitStruct.BaudRate      = Baudrate;
-    UART_InitStruct.WordLength    = UART_WordLength_8b;
-    UART_InitStruct.StopBits      = UART_StopBits_1;
-    UART_InitStruct.Parity        = UART_Parity_No;
-    UART_InitStruct.HWFlowControl = UART_HWFlowControl_None;
-    UART_InitStruct.Mode          = UART_Mode_Rx | UART_Mode_Tx;
-    UART_Init(UART2, &UART_InitStruct);
+  UART_StructInit(&UART_InitStruct);
+  UART_InitStruct.BaudRate = Baudrate;
+  UART_InitStruct.WordLength = UART_WordLength_8b;
+  UART_InitStruct.StopBits = UART_StopBits_1;
+  UART_InitStruct.Parity = UART_Parity_No;
+  UART_InitStruct.HWFlowControl = UART_HWFlowControl_None;
+  UART_InitStruct.Mode = UART_Mode_Rx | UART_Mode_Tx;
+  UART_Init(UART2, &UART_InitStruct);
 
-    UART_ITConfig(UART2, UART_IT_RXIEN, ENABLE);
+  UART_ITConfig(UART2, UART_IT_RXIEN, ENABLE);
 
-    UART2->IER |= UART_IER_RXIDLE_IEN;
+  UART2->IER |= UART_IER_RXIDLE_IEN;
 
-    RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOA, ENABLE);
+  RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOA, ENABLE);
 
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_1);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_1);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_2;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2;
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin  = GPIO_Pin_3;
-    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    NVIC_InitStruct.NVIC_IRQChannel = UART2_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPriority = 0x01;
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
+  NVIC_InitStruct.NVIC_IRQChannel = UART2_IRQn;
+  NVIC_InitStruct.NVIC_IRQChannelPriority = 0x01;
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStruct);
 
-    UART_Cmd(UART2, ENABLE);
+  UART_Cmd(UART2, ENABLE);
 }
 
 /***********************************************************************************************************************
-  * @brief
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
-void UART_ReceiverIdleFrame_Interrupt_Sample(void)
+ * @brief  This function handles UART2 Handler
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
+void UART2_IRQHandler(void)
 {
-    printf("\r\nTest %s", __FUNCTION__);
 
-    UART_RxLength = 0;
-
-    UART_Configure(115200);
-
-    while (1)
+  if (RESET != UART_GetITStatus(UART2, UART_IT_RXIEN))
+  {
+    if ((UART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
     {
-        PLATFORM_LED_Toggle(LED1);
-        PLATFORM_DelayMS(100);
+      if (UART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
+      {
+        UART_RxBuff[UART_RX_STA++] = UART_ReceiveData(UART2); // UART_ReceiveData(UART1); // 记录接收到的值
+      }
+      else
+      {
+        UART_RX_STA |= 0x8000; // 强制标记接收完成
+      }
     }
+    UART_ClearITPendingBit(UART2, UART_IT_RXIEN);
+  }
+
+  if (RESET != (UART2->ISR & UART_ISR_RXIDLE_INTF))
+  {
+    UART_RX_STA |= 0x8000;
+
+    UART2->ICR = UART_ICR_RXIDLE_ICLR;
+  }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+/// @brief  UART send byte.
+/// @note   None.
+/// @param  buf:buffer address.
+/// @param  len:data length.
+/// @retval None.
+////////////////////////////////////////////////////////////////////////////////
+void UART_SendGroup(u8 *buf, u16 len)
+{
+  while (len--)
+  {
+    UART_SendData(UART2, *buf++);
+
+    while (RESET == UART_GetFlagStatus(UART2, UART_FLAG_TXEPT))
+    {
+    }
+  }
+}
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

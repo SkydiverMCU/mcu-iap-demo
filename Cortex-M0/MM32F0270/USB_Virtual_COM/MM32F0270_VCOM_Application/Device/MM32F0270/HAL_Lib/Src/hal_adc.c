@@ -156,7 +156,7 @@ void ADC_RegularChannelConfig(ADC_TypeDef* adc, u32 channel, u8 rank, u32 sample
     u32 tempchan;
     sample_time = sample_time & 0xF;
     tempchan = channel;
-    if(tempchan > 8) {
+    if(tempchan >= 8) {
         tempchan = tempchan & 0xF;
         tempchan = tempchan - 8;
         adc->SMPR2 &= ~(0xF << (tempchan << 2));

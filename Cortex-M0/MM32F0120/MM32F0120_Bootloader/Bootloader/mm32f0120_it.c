@@ -35,19 +35,19 @@
 #include "usart_interrupt.h"
 
 /**
-  * @addtogroup MM32F0120_LibSamples
-  * @{
-  */
+ * @addtogroup MM32F0120_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup USART
-  * @{
-  */
+ * @addtogroup USART
+ * @{
+ */
 
 /**
-  * @addtogroup USART_DMA_Interrupt
-  * @{
-  */
+ * @addtogroup USART_DMA_Interrupt
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -60,74 +60,73 @@
 /* Private functions **************************************************************************************************/
 
 /***********************************************************************************************************************
-  * @brief  This function handles NMI exception
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles NMI exception
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void NMI_Handler(void)
 {
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles Hard Fault exception
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles Hard Fault exception
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void HardFault_Handler(void)
 {
-    /* Go to infinite loop when Hard Fault exception occurs */
-    while (1)
-    {
-    }
+  /* Go to infinite loop when Hard Fault exception occurs */
+  while (1)
+  {
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles SVCall exception
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles SVCall exception
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void SVC_Handler(void)
 {
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles PendSVC exception
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles PendSVC exception
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void PendSV_Handler(void)
 {
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles SysTick Handler
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles SysTick Handler
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void SysTick_Handler(void)
 {
-    if (0 != PLATFORM_DelayTick)
-    {
-        PLATFORM_DelayTick--;
-    }
+  if (0 != PLATFORM_DelayTick)
+  {
+    PLATFORM_DelayTick--;
+  }
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

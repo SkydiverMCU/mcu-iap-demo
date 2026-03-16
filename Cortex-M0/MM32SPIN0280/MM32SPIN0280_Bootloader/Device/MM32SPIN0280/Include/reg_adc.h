@@ -511,9 +511,9 @@ typedef struct {
 #define ADC_SREXT_JEOSMPIF_Pos          (18)
 #define ADC_SREXT_JEOSMPIF              (0x01U << ADC_SREXT_JEOSMPIF_Pos)       ///< Injected channel end of sampling interrupt flag
 #define ADC_SREXT_JEOCIF_Pos            (19)
-#define ADC_SREXT_JEOCIF                (0x03U << ADC_SREXT_JEOCIF_Pos)         ///< Injected channel end of conversion interrupt flag
+#define ADC_SREXT_JEOCIF                (0x01U << ADC_SREXT_JEOCIF_Pos)         ///< Injected channel end of conversion interrupt flag
 #define ADC_SREXT_JEOSIF_Pos            (20)
-#define ADC_SREXT_JEOSIF                (0x03U << ADC_SREXT_JEOSIF_Pos)         ///< Injected channel end of sequential conversion interrupt flag
+#define ADC_SREXT_JEOSIF                (0x01U << ADC_SREXT_JEOSIF_Pos)         ///< Injected channel end of sequential conversion interrupt flag
 #define ADC_SREXT_JBUSY_Pos             (21)
 #define ADC_SREXT_JBUSY                 (0x01U << ADC_SREXT_JBUSY_Pos)          ///< Injection mode busy/idle
 #define ADC_SREXT_EOCALIF_Pos           (24)

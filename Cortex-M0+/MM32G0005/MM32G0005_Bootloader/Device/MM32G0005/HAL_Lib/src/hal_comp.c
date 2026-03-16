@@ -79,7 +79,6 @@ void COMP_StructInit(COMP_InitTypeDef *init_struct)
     init_struct->COMP_Output         = COMP_Output_None;
     init_struct->COMP_OutputPol      = COMP_Pol_NonInvertedOut;
     init_struct->COMP_Hysteresis     = COMP_Hysteresis_No;
-    init_struct->COMP_Mode           = COMP_Mode_LowPower;
     init_struct->COMP_OutAnaSel      = COMP_AnalogOutput_Sync;
     init_struct->COMP_OFLT           = COMP_Filter_4_Period; /*!< to adjust the speed/consumption. */
 }
@@ -116,7 +115,6 @@ void COMP_Init(uint8_t comp_x, COMP_InitTypeDef *init_struct)
                 COMP_COMP1CSR_OUT_SEL_Msk |     \
                 COMP_COMP1CSR_POL_Msk |         \
                 COMP_COMP1CSR_HYST_Msk |        \
-                COMP_COMP1CSR_MODE_Msk |        \
                 COMP_COMP1CSR_OUT_ANA_SEL_Msk | \
                 COMP_COMP1CSR_OFLT_Msk), 
                (init_struct->COMP_Invert |     \
@@ -124,9 +122,10 @@ void COMP_Init(uint8_t comp_x, COMP_InitTypeDef *init_struct)
                 init_struct->COMP_Output |     \
                 init_struct->COMP_OutputPol |  \
                 init_struct->COMP_Hysteresis | \
-                init_struct->COMP_Mode |       \
                 init_struct->COMP_OutAnaSel |  \
                 init_struct->COMP_OFLT) );
+    
+    COMP->COMP1CSR &= ~(0x03U << 2);
 }
 
 /**
@@ -159,28 +158,13 @@ void COMP_Cmd(uint8_t comp_x, FunctionalState state)
   *         @arg COMP_CRV_SRC_VREFINT
   *         @arg COMP_CRV_SRC_VDDA
   * @param  crv_level: Set level for CRV.
-  *         This parameter can be one of the following values:
-  * @arg   COMP_CRV_Sel_1_20
-  * @arg   COMP_CRV_Sel_2_20
-  * @arg   COMP_CRV_Sel_3_20
-  * @arg   COMP_CRV_Sel_4_20
-  * @arg   COMP_CRV_Sel_5_20
-  * @arg   COMP_CRV_Sel_6_20
-  * @arg   COMP_CRV_Sel_7_20
-  * @arg   COMP_CRV_Sel_8_20
-  * @arg   COMP_CRV_Sel_9_20
-  * @arg   COMP_CRV_Sel_10_20
-  * @arg   COMP_CRV_Sel_11_20
-  * @arg   COMP_CRV_Sel_12_20
-  * @arg   COMP_CRV_Sel_13_20
-  * @arg   COMP_CRV_Sel_14_20
-  * @arg   COMP_CRV_Sel_15_20
-  * @arg   COMP_CRV_Sel_16_20
+  *         VCRV = VDDA*(crv_level+1)/64       or
+  *         VCRV = VREFINT *(crv_level+1)/64
   * @retval None.
   */
 void COMP_SetCrv(uint32_t crv_source, uint32_t crv_level)
 {
-    MODIFY_REG(COMP->CRV, COMP_CRV_CRV_SEL_Msk, crv_level);
+    MODIFY_REG(COMP->CRV, COMP_CRV_CRV_SEL_Msk, (crv_level << COMP_CRV_CRV_SEL_Pos));
     MODIFY_REG(COMP->CRV, COMP_CRV_CRV_SRC_Msk, crv_source);
 }
 

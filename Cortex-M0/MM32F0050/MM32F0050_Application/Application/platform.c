@@ -34,19 +34,19 @@
 #include "platform.h"
 
 /**
-  * @addtogroup MM32F0050_LibSamples
-  * @{
-  */
+ * @addtogroup MM32F0050_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup USART
-  * @{
-  */
+ * @addtogroup USART
+ * @{
+ */
 
 /**
-  * @addtogroup USART_Interrupt
-  * @{
-  */
+ * @addtogroup USART_Interrupt
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -59,325 +59,324 @@
 /* Private functions **************************************************************************************************/
 
 /***********************************************************************************************************************
-  * @brief  Initialize SysTick for delay function
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  Initialize SysTick for delay function
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_InitDelay(void)
 {
-    RCC_ClocksTypeDef RCC_Clocks;
+  RCC_ClocksTypeDef RCC_Clocks;
 
-    RCC_GetClocksFreq(&RCC_Clocks);
+  RCC_GetClocksFreq(&RCC_Clocks);
 
-    if (SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000))
+  if (SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000))
+  {
+    while (1)
     {
-        while (1)
-        {
-        }
     }
+  }
 
-    NVIC_SetPriority(SysTick_IRQn, 0x0);
+  NVIC_SetPriority(SysTick_IRQn, 0x0);
 }
 
 /***********************************************************************************************************************
-  * @brief  Millisecond delay
-  * @note   none
-  * @param  Millisecond: delay time unit
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  Millisecond delay
+ * @note   none
+ * @param  Millisecond: delay time unit
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_DelayMS(uint32_t Millisecond)
 {
-    PLATFORM_DelayTick = Millisecond;
+  PLATFORM_DelayTick = Millisecond;
 
-    while (0 != PLATFORM_DelayTick)
-    {
-    }
+  while (0 != PLATFORM_DelayTick)
+  {
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  Initialize console for printf
-  * @note   none
-  * @param  Baudrate : UART2 communication baudrate
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  Initialize console for printf
+ * @note   none
+ * @param  Baudrate : UART2 communication baudrate
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_InitConsole(uint32_t Baudrate)
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
-    USART_InitTypeDef USART_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  USART_InitTypeDef USART_InitStruct;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 
-    USART_StructInit(&USART_InitStruct);
-    USART_InitStruct.USART_BaudRate      = Baudrate;
-    USART_InitStruct.USART_WordLength    = USART_WordLength_8b;
-    USART_InitStruct.USART_StopBits      = USART_StopBits_1;
-    USART_InitStruct.USART_Parity        = USART_Parity_No;
-    USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_InitStruct.USART_Mode          = USART_Mode_Tx;
-    USART_Init(USART1, &USART_InitStruct);
+  USART_StructInit(&USART_InitStruct);
+  USART_InitStruct.USART_BaudRate = Baudrate;
+  USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+  USART_InitStruct.USART_StopBits = USART_StopBits_1;
+  USART_InitStruct.USART_Parity = USART_Parity_No;
+  USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_InitStruct.USART_Mode = USART_Mode_Tx;
+  USART_Init(USART1, &USART_InitStruct);
 
-    RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOB, ENABLE);
+  RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOB, ENABLE);
 
-    GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_0);
+  GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_0);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_6;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOB, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_6;
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    USART_Cmd(USART1, ENABLE);
+  USART_Cmd(USART1, ENABLE);
 }
 
-#if   defined (__ICCARM__)
+#if defined(__ICCARM__)
 
-#if   (__VER__ >= 9030001)
+#if (__VER__ >= 9030001)
 
 /* Files include */
 #include <stddef.h>
 #include <LowLevelIOInterface.h>
 
 /***********************************************************************************************************************
-  * @brief  redefine __write function
-  * @note   for printf
-  * @param  handle
-  * @param  *buf
-  * @param  bufSize
-  * @retval nChars
-  *********************************************************************************************************************/
+ * @brief  redefine __write function
+ * @note   for printf
+ * @param  handle
+ * @param  *buf
+ * @param  bufSize
+ * @retval nChars
+ *********************************************************************************************************************/
 size_t __write(int handle, const unsigned char *buf, size_t bufSize)
 {
-    size_t nChars = 0;
+  size_t nChars = 0;
 
-    /* Check for the command to flush all handles */
-    if (-1 == handle)
-    {
-        return (0);
-    }
+  /* Check for the command to flush all handles */
+  if (-1 == handle)
+  {
+    return (0);
+  }
 
-    /* Check for stdout and stderr (only necessary if FILE descriptors are enabled.) */
-    if ((_LLIO_STDOUT != handle) && (_LLIO_STDERR != handle))
-    {
-        return (-1);
-    }
+  /* Check for stdout and stderr (only necessary if FILE descriptors are enabled.) */
+  if ((_LLIO_STDOUT != handle) && (_LLIO_STDERR != handle))
+  {
+    return (-1);
+  }
 
-    for (/* Empty */; bufSize > 0; --bufSize)
-    {
-        USART_SendData(USART1, *buf);
-
-        while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
-        {
-        }
-
-        ++buf;
-        ++nChars;
-    }
-
-    return (nChars);
-}
-
-#else
-
-/***********************************************************************************************************************
-  * @brief  Redefine fputc function
-  * @note   For printf
-  * @param  ch
-  * @param  f
-  * @retval ch
-  *********************************************************************************************************************/
-int fputc(int ch, FILE *f)
-{
-    UART_SendData(UART1, (uint8_t)ch);
-
-    while (RESET == UART_GetFlagStatus(UART1, UART_FLAG_TXEPT))
-    {
-    }
-
-    return (ch);
-}
-
-#endif
-
-#elif defined (__GNUC__)
-
-#else
-
-/***********************************************************************************************************************
-  * @brief  Redefine fputc function
-  * @note   For printf
-  * @param  ch
-  * @param  f
-  * @retval ch
-  *********************************************************************************************************************/
-int fputc(int ch, FILE *f)
-{
-    USART_SendData(USART1, (uint8_t)ch);
+  for (/* Empty */; bufSize > 0; --bufSize)
+  {
+    USART_SendData(USART1, *buf);
 
     while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
     {
     }
 
-    return (ch);
+    ++buf;
+    ++nChars;
+  }
+
+  return (nChars);
+}
+
+#else
+
+/***********************************************************************************************************************
+ * @brief  Redefine fputc function
+ * @note   For printf
+ * @param  ch
+ * @param  f
+ * @retval ch
+ *********************************************************************************************************************/
+int fputc(int ch, FILE *f)
+{
+  UART_SendData(UART1, (uint8_t)ch);
+
+  while (RESET == UART_GetFlagStatus(UART1, UART_FLAG_TXEPT))
+  {
+  }
+
+  return (ch);
+}
+
+#endif
+
+#elif defined(__GNUC__)
+
+#else
+
+/***********************************************************************************************************************
+ * @brief  Redefine fputc function
+ * @note   For printf
+ * @param  ch
+ * @param  f
+ * @retval ch
+ *********************************************************************************************************************/
+int fputc(int ch, FILE *f)
+{
+  USART_SendData(USART1, (uint8_t)ch);
+
+  while (RESET == USART_GetFlagStatus(USART1, USART_FLAG_TC))
+  {
+  }
+
+  return (ch);
 }
 
 #endif
 
 /***********************************************************************************************************************
-  * @brief  Initialize LED GPIO PIN
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  Initialize LED GPIO PIN
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_InitLED(void)
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
 
-    RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOB, ENABLE);
+  RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOB, ENABLE);
 
-    GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_0 | GPIO_Pin_1;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOB, &GPIO_InitStruct);
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    PLATFORM_LED_Enable(LED1, ENABLE);
-    PLATFORM_LED_Enable(LED2, ENABLE);
+  PLATFORM_LED_Enable(LED1, ENABLE);
+  PLATFORM_LED_Enable(LED2, ENABLE);
 }
 
 /***********************************************************************************************************************
-  * @brief  LED on or off
-  * @note   none
-  * @param  LEDn : LED index
-  * @arg    LED1, LED2
-  * @param  State
-  * @arg    ENABLE, DISABLE
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  LED on or off
+ * @note   none
+ * @param  LEDn : LED index
+ * @arg    LED1, LED2
+ * @param  State
+ * @arg    ENABLE, DISABLE
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_LED_Enable(LEDn_TypeDef LEDn, FunctionalState State)
 {
-    switch (LEDn)
-    {
-        case LED1:
-            GPIO_WriteBit(GPIOB, GPIO_Pin_0, (ENABLE == State) ? Bit_RESET : Bit_SET);
-            break;
+  switch (LEDn)
+  {
+  case LED1:
+    GPIO_WriteBit(GPIOB, GPIO_Pin_0, (ENABLE == State) ? Bit_RESET : Bit_SET);
+    break;
 
-        case LED2:
-            GPIO_WriteBit(GPIOB, GPIO_Pin_1, (ENABLE == State) ? Bit_RESET : Bit_SET);
-            break;
+  case LED2:
+    GPIO_WriteBit(GPIOB, GPIO_Pin_1, (ENABLE == State) ? Bit_RESET : Bit_SET);
+    break;
 
-        default:
-            break;
-    }
+  default:
+    break;
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  LED toggle display
-  * @note   none
-  * @param  LEDn : LED index
-  * @arg    LED1, LED2
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  LED toggle display
+ * @note   none
+ * @param  LEDn : LED index
+ * @arg    LED1, LED2
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_LED_Toggle(LEDn_TypeDef LEDn)
 {
-    switch (LEDn)
-    {
-        case LED1:
-            GPIO_WriteBit(GPIOB, GPIO_Pin_0, GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_0) ? Bit_RESET : Bit_SET);
-            break;
+  switch (LEDn)
+  {
+  case LED1:
+    GPIO_WriteBit(GPIOB, GPIO_Pin_0, GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_0) ? Bit_RESET : Bit_SET);
+    break;
 
-        case LED2:
-            GPIO_WriteBit(GPIOB, GPIO_Pin_1, GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_1) ? Bit_RESET : Bit_SET);
-            break;
+  case LED2:
+    GPIO_WriteBit(GPIOB, GPIO_Pin_1, GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_1) ? Bit_RESET : Bit_SET);
+    break;
 
-        default:
-            break;
-    }
+  default:
+    break;
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  Print information
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  Print information
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_PrintInfo(void)
 {
-    RCC_ClocksTypeDef RCC_Clocks;
-    uint8_t  divider = 0;
+  RCC_ClocksTypeDef RCC_Clocks;
+  uint8_t divider = 0;
 
-    printf("\r\nBOARD : Mini-F0050-OB");
-    printf("\r\nMCU : MM32F0050C1TV");
+  printf("\r\nBOARD : Mini-F0050-OB");
+  printf("\r\nMCU : MM32F0050C1TV");
 
-    printf("\r\n");
+  printf("\r\n");
 
-    switch (RCC->CFGR & RCC_CFGR_SWS_Msk)
+  switch (RCC->CFGR & RCC_CFGR_SWS_Msk)
+  {
+  case 0x00:
+    printf("\r\nHSI8 used as system clock source");
+    break;
+
+  case 0x04:
+    printf("\r\nHSE used as system clock source");
+    break;
+
+  case 0x08:
+    divider = (uint8_t)((RCC->CR & RCC_CR_HSI144DIV_Msk) >> RCC_CR_HSI144DIV_Pos);
+    if (divider == 0x01)
     {
-        case 0x00:
-            printf("\r\nHSI8 used as system clock source");
-            break;
-
-        case 0x04:
-            printf("\r\nHSE used as system clock source");
-            break;
-
-        case 0x08:
-            divider = (uint8_t)((RCC->CR & RCC_CR_HSI144DIV_Msk) >> RCC_CR_HSI144DIV_Pos);
-            if(divider == 0x01)
-            {
-                printf("\r\nHSI144/1.5 used as system clock source");
-            }
-            else 
-            {
-                printf("\r\nHSI144 used as system clock source");
-            }
-            break;
-        case 0x0C:
-            printf("\r\nLSI used as system clock source");
-            break;
-
-        default:
-            break;
+      printf("\r\nHSI144/1.5 used as system clock source");
     }
+    else
+    {
+      printf("\r\nHSI144 used as system clock source");
+    }
+    break;
+  case 0x0C:
+    printf("\r\nLSI used as system clock source");
+    break;
 
-    RCC_GetClocksFreq(&RCC_Clocks);
+  default:
+    break;
+  }
 
-    printf("\r\n");
-    printf("\r\nSYSCLK Frequency : %7.3f MHz", (double)RCC_Clocks.SYSCLK_Frequency / (double)1000000.0);
-    printf("\r\nHCLK   Frequency : %7.3f MHz", (double)RCC_Clocks.HCLK_Frequency   / (double)1000000.0);
-    printf("\r\nPCLK1  Frequency : %7.3f MHz", (double)RCC_Clocks.PCLK1_Frequency  / (double)1000000.0);
-    printf("\r\nPCLK2  Frequency : %7.3f MHz", (double)RCC_Clocks.PCLK2_Frequency  / (double)1000000.0);
-    printf("\r\n");
+  RCC_GetClocksFreq(&RCC_Clocks);
+
+  printf("\r\n");
+  printf("\r\nSYSCLK Frequency : %7.3f MHz", (double)RCC_Clocks.SYSCLK_Frequency / (double)1000000.0);
+  printf("\r\nHCLK   Frequency : %7.3f MHz", (double)RCC_Clocks.HCLK_Frequency / (double)1000000.0);
+  printf("\r\nPCLK1  Frequency : %7.3f MHz", (double)RCC_Clocks.PCLK1_Frequency / (double)1000000.0);
+  printf("\r\nPCLK2  Frequency : %7.3f MHz", (double)RCC_Clocks.PCLK2_Frequency / (double)1000000.0);
+  printf("\r\n");
 }
 
 /***********************************************************************************************************************
-  * @brief  Initialize platform
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  Initialize platform
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void PLATFORM_Init(void)
 {
-    PLATFORM_InitDelay();
+  PLATFORM_InitDelay();
 
-    PLATFORM_InitConsole(115200);
+  PLATFORM_InitConsole(115200);
 
-    PLATFORM_InitLED();
+  PLATFORM_InitLED();
 
-    PLATFORM_PrintInfo();
+  PLATFORM_PrintInfo();
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

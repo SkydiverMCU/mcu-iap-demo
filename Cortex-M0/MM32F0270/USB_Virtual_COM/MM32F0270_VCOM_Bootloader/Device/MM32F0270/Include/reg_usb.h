@@ -28,19 +28,9 @@
 #include "types.h"
 
 
-
-
 #if defined ( __CC_ARM )
 #pragma anon_unions
 #endif
-
-
-
-
-
-
-
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -49,100 +39,74 @@
 #define USB_BASE                        (APB1PERIPH_BASE + 0x5C00)              ///< Base Address: 0x40005C00
 
 
-
-
-
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief USB Register Structure Definition
 ////////////////////////////////////////////////////////////////////////////////
-typedef struct {
-    __IO u32 TOP;                                                               ///< Top Register                                   offset: 0x00
-    __IO u32 INT_STATE;                                                         ///< Interrupt State Register                       offset: 0x04
-    __IO u32 EP_INT_STATE;                                                      ///< Endpoint Interrupt State Register              offset: 0x08
-    __IO u32 EP0_INT_STATE;                                                     ///< EP0 Interrupt State Register                   offset: 0x0C
-    __IO u32 INT_EN;                                                            ///< Interrupt Enable Register                      offset: 0x10
-    __IO u32 EP_INT_EN;                                                         ///< Endpoint Interrupt Enable Register             offset: 0x14
-    __IO u32 EP0_INT_EN;                                                        ///< EP0 Interrupt Enable Register                  offset: 0x18
+typedef struct 
+{
+    __IO uint32_t TOP;                                                               ///< Top Register                                   offset: 0x00
+    __IO uint32_t INT_STATE;                                                         ///< Interrupt State Register                       offset: 0x04
+    __IO uint32_t EP_INT_STATE;                                                      ///< Endpoint Interrupt State Register              offset: 0x08
+    __IO uint32_t EP0_INT_STATE;                                                     ///< EP0 Interrupt State Register                   offset: 0x0C
+    __IO uint32_t INT_EN;                                                            ///< Interrupt Enable Register                      offset: 0x10
+    __IO uint32_t EP_INT_EN;                                                         ///< Endpoint Interrupt Enable Register             offset: 0x14
+    __IO uint32_t EP0_INT_EN;                                                        ///< EP0 Interrupt Enable Register                  offset: 0x18
 
-    __IO u32 RESERVED0;                                                         ///< Reserved                                       offset: 0x1C
+    __IO uint32_t RESERVED0;                                                         ///< Reserved                                       offset: 0x1C
 
-    __IO u32 EP1_INT_STATE;                                                     ///< EP1 Interrupt State Register                   offset: 0x20
-    __IO u32 EP2_INT_STATE;                                                     ///< EP2 Interrupt State Register                   offset: 0x24
-    __IO u32 EP3_INT_STATE;                                                     ///< EP3 Interrupt State Register                   offset: 0x28
-    __IO u32 EP4_INT_STATE;                                                     ///< EP4 Interrupt State Register                   offset: 0x2C
+    __IO uint32_t EPx_INT_STATE[4];                                                  ///< EP1 2 3 4 Interrupt State Register                   offset: 0x20
 
-    __IO u32 RESERVED1[4];                                                      ///< Reserved                                       offset: 0x30
+    __IO uint32_t RESERVED1[4];                                                      ///< Reserved                                       offset: 0x30
 
-    __IO u32 EP1_INT_EN;                                                        ///< EP0 Interrupt Enable Register                  offset: 0x40
-    __IO u32 EP2_INT_EN;                                                        ///< EP0 Interrupt Enable Register                  offset: 0x44
-    __IO u32 EP3_INT_EN;                                                        ///< EP0 Interrupt Enable Register                  offset: 0x48
-    __IO u32 EP4_INT_EN;                                                        ///< EP0 Interrupt Enable Register                  offset: 0x4C
+    __IO uint32_t EPx_INT_EN[4];                                                     ///< EP1 2 3 4 Interrupt Enable Register                  offset: 0x40
 
-    __IO u32 RESERVED5[4];                                                      ///< Reserved                                       offset: 0x50
+    __IO uint32_t RESERVED5[4];                                                      ///< Reserved                                       offset: 0x50
 
-    __IO u32 ADDR;                                                              ///< USB Address Register                           offset: 0x60
-    __IO u32 EP_EN;                                                             ///< Endpoint Enable Register                       offset: 0x64
-    __IO u32 EP_DMA_DIR;                                                        ///< Endpoint DMA direction Register                offset: 0x68
-    __IO u32 EP_TYPE;                                                           ///< Endpoint type Register                         offset: 0x6C
-    __IO u32 EP_INDEX1_2;                                                       ///< Endpoint index Register                        offset: 0x70
-    __IO u32 EP_INDEX3_4;                                                       ///< Endpoint index Register                        offset: 0x74
+    __IO uint32_t ADDR;                                                              ///< USB Address Register                           offset: 0x60
+    __IO uint32_t EP_EN;                                                             ///< Endpoint Enable Register                       offset: 0x64
+    __IO uint32_t EP_DMA_DIR;                                                        ///< Endpoint DMA direction Register                offset: 0x68
+    __IO uint32_t EP_TYPE;                                                           ///< Endpoint type Register                         offset: 0x6C
+    __IO uint32_t EP_INDEX1_2;                                                       ///< Endpoint index Register                        offset: 0x70
+    __IO uint32_t EP_INDEX3_4;                                                       ///< Endpoint index Register                        offset: 0x74
 
-    __IO u32 TOG_CTRL1_4;                                                       ///< Toggle Control Register                        offset: 0x78
+    __IO uint32_t TOG_CTRL1_4;                                                       ///< Toggle Control Register                        offset: 0x78
 
-    __IO u32 TOG_STAT1_4;                                                       ///< Toggle status Register                         offset: 0x7C
+    __IO uint32_t TOG_STAT1_4;                                                       ///< Toggle status Register                         offset: 0x7C
 
-    __IO u32 SETUP0;                                                            ///< SETUP Packet Byte 0 Register                   offset: 0x80
-    __IO u32 SETUP1;                                                            ///< SETUP Packet Byte 1 Register                   offset: 0x84
-    __IO u32 SETUP2;                                                            ///< SETUP Packet Byte 2 Register                   offset: 0x88
-    __IO u32 SETUP3;                                                            ///< SETUP Packet Byte 3 Register                   offset: 0x8C
-    __IO u32 SETUP4;                                                            ///< SETUP Packet Byte 4 Register                   offset: 0x90
-    __IO u32 SETUP5;                                                            ///< SETUP Packet Byte 5 Register                   offset: 0x94
-    __IO u32 SETUP6;                                                            ///< SETUP Packet Byte 6 Register                   offset: 0x98
-    __IO u32 SETUP7;                                                            ///< SETUP Packet Byte 7 Register                   offset: 0x9C
-    __IO u32 PACKET_SIZEL;                                                      ///< Packet SIZE Register                           offset: 0xA0
-    __IO u32 PACKET_SIZEH;                                                      ///< Packet SIZE Register                           offset: 0xA4
+    __IO uint32_t SETUPx[8];                                                         ///< SETUP Packet Byte 0 Register                   offset: 0x80
+    __IO uint32_t PACKET_SIZEL;                                                      ///< Packet SIZE Register                           offset: 0xA0
+    __IO uint32_t PACKET_SIZEH;                                                      ///< Packet SIZE Register                           offset: 0xA4
 
-    __IO u32 RESERVED14[22];                                                    ///< Reserved                                       offset: 0xA8
+    __IO uint32_t RESERVED14[22];                                                    ///< Reserved                                       offset: 0xA8
 
-    __IO u32 EP0_AVIL;                                                          ///< EP0 Available Data Register                    offset: 0x100
-    __IO u32 EP1_AVIL;                                                          ///< EP1 Available Data Register                    offset: 0x104
-    __IO u32 EP2_AVIL;                                                          ///< EP2 Available Data Register                    offset: 0x108
-    __IO u32 EP3_AVIL;                                                          ///< EP3 Available Data Register                    offset: 0x10C
-    __IO u32 EP4_AVIL;                                                          ///< EP4 Available Data Register                    offset: 0x110
+    __IO uint32_t EPx_AVAIL[5];                                                      ///< EP0 1 2 3 4 Available Data Register                    offset: 0x100
 
-    __IO u32 RESERVED36[3];                                                    ///< Reserved                                       offset: 0x114
-    __IO u32 DMA_ADDR0;                                                        ///< USB endpoint 2 DMA address 0 register          offset: 0x120
-    __IO u32 DMA_ADDR1;                                                        ///< USB endpoint 2 DMA address 1 register          offset: 0x124
-    __IO u32 DMA_ADDR2;                                                        ///< USB endpoint 2 DMA address 2 register          offset: 0x128
-    __IO u32 DMA_ADDR3;                                                        ///< USB endpoint 2 DMA address 3 register          offset: 0x12C
-    __IO u32 DMA2_NUML;                                                         ///< DMA data  Register                            offset: 0x130
-    __IO u32 DMA2_NUMH;                                                         ///< DMA data  Register                            offset: 0x134
-    __IO u32 RESERVED361;
-    __IO u32 RESERVED371;
-    __IO u32 EP0_CTRL;                                                          ///< EP0 Control Register                           offset: 0x140
-    __IO u32 EP1_CTRL;                                                          ///< EP1 Control Register                           offset: 0x144
-    __IO u32 EP2_CTRL;                                                          ///< EP2 Control Register                           offset: 0x148
-    __IO u32 EP3_CTRL;                                                          ///< EP3 Control Register                           offset: 0x14C
-    __IO u32 EP4_CTRL;                                                          ///< EP4 Control Register                           offset: 0x150
+    __IO uint32_t RESERVED36[3];                                                    ///< Reserved                                       offset: 0x114
+    __IO uint32_t DMA_ADDR0;                                                        ///< USB endpoint 2 DMA address 0 register          offset: 0x120
+    __IO uint32_t DMA_ADDR1;                                                        ///< USB endpoint 2 DMA address 1 register          offset: 0x124
+    __IO uint32_t DMA_ADDR2;                                                        ///< USB endpoint 2 DMA address 2 register          offset: 0x128
+    __IO uint32_t DMA_ADDR3;                                                        ///< USB endpoint 2 DMA address 3 register          offset: 0x12C
+    __IO uint32_t DMA_NUML;                                                         ///< DMA data  Register                            offset: 0x130
+    __IO uint32_t DMA_NUMH;                                                         ///< DMA data  Register                            offset: 0x134
+    
+    __IO uint32_t RESERVED138[2]; 
+    
+    __IO uint32_t EPx_CTRL[5];                                                       ///< EP0 1 2 3 4 5 Control Register                           offset: 0x140
 
-    __IO u32 RESERVED47[3];                                                     ///< Reserved                                       offset: 0x154
+    __IO uint32_t RESERVED47[3];                                                     ///< Reserved                                       offset: 0x154
 
-    __IO u32 EP0_FIFO;                                                          ///< EP0 FIFO Register                              offset: 0x160
-    __IO u32 EP1_FIFO;                                                          ///< EP1 FIFO Register                              offset: 0x164
-    __IO u32 EP2_FIFO;                                                          ///< EP2 FIFO Register                              offset: 0x168
-    __IO u32 EP3_FIFO;                                                          ///< EP3 FIFO Register                              offset: 0x16C
-    __IO u32 EP4_FIFO;                                                          ///< EP4 FIFO Register                              offset: 0x170
+    __IO uint32_t EPx_FIFO[5];                                                       ///< EP0 1 2 3 4 FIFO Register                              offset: 0x160
 
-    __IO u32 RESERVED50[3];                                                     ///< Reserved                                       offset: 0x174
-    __IO u32 EP_MEM;                                                           ///<  EP data Register                               offset: 0x180
-    __IO u32 EP_DMA;                                                           ///<  EP DMA Enable Register                         offset: 0x184
-    __IO u32 EP_HALT;                                                           ///< EP Halt Register                               offset: 0x188
+    __IO uint32_t RESERVED50[3];                                                     ///< Reserved                                       offset: 0x174
+    __IO uint32_t EP_MEM;                                                            ///<  EP data Register                               offset: 0x180
+    __IO uint32_t EP_DMA;                                                            ///<  EP DMA Enable Register                         offset: 0x184
+    __IO uint32_t EP_HALT;                                                           ///< EP Halt Register                               offset: 0x188
 
-    __IO u32 RESERVED54[13];                                                    ///< Reserved                                       offset: 0x18C
+    __IO uint32_t RESERVED54[13];                                                    ///< Reserved                                       offset: 0x18C
 
-    __IO u32 POWER;                                                             ///< Power Register                                 offset: 0x1C0
-    __IO u32 AHB_DMA;                                                           ///< AHB_DMA Register                               offset: 0x1C4
-    __IO u32 AHB_RST;                                                           ///< AHB rest Register                              offset: 0x1C8
+    __IO uint32_t POWER;                                                             ///< Power Register                                 offset: 0x1C0
+    __IO uint32_t AHB_DMA;                                                           ///< AHB_DMA Register                               offset: 0x1C4
+    __IO uint32_t AHB_RST;                                                           ///< AHB rest Register                              offset: 0x1C8
 
 } USB_TypeDef;
 
@@ -377,12 +341,12 @@ typedef struct {
 /// @brief PACKET_SIZEL Register Bit Definition
 ////////////////////////////////////////////////////////////////////////////////
 #define PACKET_SIZEL_Pos                (0)
-#define PACKET_SIZEL                    (0xFFU << PACKET_SIZEL_Pos)                   ///< USB DMA Max Packet Size
+#define PACKET_SIZEL_Msk                (0xFFU << PACKET_SIZEL_Pos)                   ///< USB DMA Max Packet Size
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief PACKET_SIZEH Register Bit Definition
 ////////////////////////////////////////////////////////////////////////////////
 #define PACKET_SIZEH_Pos                (0)
-#define PACKET_SIZEH                    (0xFFU << PACKET_SIZEH_Pos)                   ///< USB DMA Max Packet Size
+#define PACKET_SIZEH_Msk                (0xFFU << PACKET_SIZEH_Pos)                   ///< USB DMA Max Packet Size
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief EPn_AVIL Register Bit Definition
@@ -414,12 +378,12 @@ typedef struct {
 /// @brief DMA_NUML Register Bit Definition
 ////////////////////////////////////////////////////////////////////////////////
 #define DMA_NUML_Pos                    (0)
-#define DMA_NUML                        (0xFFU << DMA_NUML_Pos)                ///< EP2 DMA numbe(0-7)
+#define DMA_NUML_Msk                    (0xFFU << DMA_NUML_Pos)                ///< EP2 DMA numbe(0-7)
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief DMA_NUMH Register Bit Definition
 ////////////////////////////////////////////////////////////////////////////////
 #define DMA_NUMH_Pos                   (0)
-#define DMA_NUMH                       (0xFFU << DMA_NUMH_Pos)                ///< EP2 DMA numbe(8-15)
+#define DMA_NUMH_Msk                   (0xFFU << DMA_NUMH_Pos)                ///< EP2 DMA numbe(8-15)
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief EPn_CTRL Register Bit Definition
@@ -483,13 +447,13 @@ typedef struct {
 /// @brief USB_AHB_DMA Register Bit Definition
 ////////////////////////////////////////////////////////////////////////////////
 #define USB_AHB_DMA_CH0_BS_Pos          (0)
-#define USB_AHB_DMA_CH0_BS              (0x01U << USB_AHB_DMA_CH0_BS_Pos)        ///< Channel 0 transmits 2 bytes at a time
+#define USB_AHB_DMA_CH0_BS              (0x03U << USB_AHB_DMA_CH0_BS_Pos)        ///< Channel 0 transmits 2 bytes at a time
 #define USB_AHB_DMA_CH1_BS_Pos          (2)
-#define USB_AHB_DMA_CH1_BS              (0x01U << USB_AHB_DMA_CH1_BS_Pos)        ///< Channel 1 transmits 2 bytes at a time
+#define USB_AHB_DMA_CH1_BS              (0x03U << USB_AHB_DMA_CH1_BS_Pos)        ///< Channel 1 transmits 2 bytes at a time
 #define USB_AHB_DMA_CH2_BS_Pos          (4)
-#define USB_AHB_DMA_CH2_BS              (0x01U << USB_AHB_DMA_CH2_BS_Pos)        ///< Channel 2 transmits 2 bytes at a time
+#define USB_AHB_DMA_CH2_BS              (0x03U << USB_AHB_DMA_CH2_BS_Pos)        ///< Channel 2 transmits 2 bytes at a time
 #define USB_AHB_DMA_CH3_BS_Pos          (6)
-#define USB_AHB_DMA_CH3_BS              (0x01U << USB_AHB_DMA_CH3_BS_Pos)        ///< Channel 3 transmits 2 bytes at a time
+#define USB_AHB_DMA_CH3_BS              (0x03U << USB_AHB_DMA_CH3_BS_Pos)        ///< Channel 3 transmits 2 bytes at a time
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief USB_AHB_RST Register Bit Definition
 ////////////////////////////////////////////////////////////////////////////////
@@ -501,6 +465,8 @@ typedef struct {
 #define USB_AHB_RST_EP2                 (0x01U << USB_AHB_RST_EP2_Pos)        ///< point 2 rest
 #define USB_AHB_RST_EP3_Pos             (3)
 #define USB_AHB_RST_EP3                 (0x01U << USB_AHB_RST_EP3_Pos)        ///< point 3 rest
+#define USB_AHB_RST_EP4_Pos             (4)
+#define USB_AHB_RST_EP4                 (0x01U << USB_AHB_RST_EP4_Pos)        ///< point 4 rest
 
 
 

@@ -326,7 +326,7 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>1</v6Lang>
@@ -395,14 +395,19 @@
               <FilePath>..\mm32f0010_it.c</FilePath>
             </File>
             <File>
-              <FileName>uart_interrupt.c</FileName>
+              <FileName>uart_receiveridleframe_interrupt.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\uart_interrupt.c</FilePath>
+              <FilePath>..\uart_receiveridleframe_interrupt.c</FilePath>
             </File>
             <File>
               <FileName>platform.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\platform.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app_protocol.c</FilePath>
             </File>
           </Files>
         </Group>

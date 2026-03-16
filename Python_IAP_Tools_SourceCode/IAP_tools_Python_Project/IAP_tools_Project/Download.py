@@ -3,21 +3,23 @@ import time
 import os
 import serial
 import serial.tools.list_ports
-import tempfile
 import tkinter as tk
 from tkinter import filedialog, messagebox, END, NORMAL, DISABLED
 from PIL import Image, ImageTk
-import pywinusb.hid as hid
+from pywinusb import hid as py_hid, hid  # 使用Windows原生HID库
 import IAP_tools
 import threading
 from intelhex import IntelHex
-from datetime import datetime  #用于版本信息
+from datetime import datetime
+import traceback
+import crcmod #添加CRC32
+
 
 class IAPControl:
     #版本信息常量
-    SOFTWARE_VERSION = "Version:0.1.0"
+    SOFTWARE_VERSION = "Version:0.2.0"
     BUILD_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 动态生成构建时间
-    BUILD_NUMBER = "2025091002"
+    BUILD_NUMBER = "2025122501"
     NAME = "Skydiver"
 
     # 宏定义HID设备参数
@@ -70,15 +72,17 @@ class IAPControl:
 
         # 配置日志文本标签样式
         self.app.Message.tag_config("error", foreground="red")  # 错误日志红色
-        self.app.Message.tag_config("normal", foreground="black")  # 普通日志黑色
-        self.app.Message.tag_config("info", foreground="blue")    # warning日志蓝色
+        self.app.Message.tag_config("info", foreground="black")    # 普通信息日志黑色
+        self.app.Message.tag_config("attention", foreground="orange")  # 标注信息橙色
+        self.app.Message.tag_config("data", foreground="blue")       # 数据信息蓝色
+        self.app.Message.tag_config("command", foreground="green")  # 指令日志绿色
 
         # 初始化4个段的信息，每个段包含长度、地址和校验和
         self.mcu_app_info = [
             {"length": 0, "address": 0, "checksum": 0},  # 段1
             {"length": 0, "address": 0, "checksum": 0},  # 段2
             {"length": 0, "address": 0, "checksum": 0},  # 段3
-            {"length": 0, "address": 0, "checksum": 0}  # 段4
+            {"length": 0, "address": 0, "checksum": 0}   # 段4
         ]
 
         # 初始化图标
@@ -130,7 +134,7 @@ class IAPControl:
         if hasattr(self, 'Connect_State'):
             self.Connect_State.destroy()
 
-        # 正确创建：使用 tk.Label，父容器为 self.app.Connect_State_Labe
+        # 使用 tk.Label，父容器为 self.app.Connect_State_Labe
         self.Connect_State_Icon = tk.Label(
             self.app.Connect_State_Labe,  # 直接指定父容器
             background="#d9d9d9",
@@ -141,7 +145,7 @@ class IAPControl:
     # 事件绑定与界面初始化
     def _bind_events(self):
         self.app.Clear_Message.config(command=self.clear_message)
-        self.app.Open_Port.config(command=self.toggle_port)
+        self.app.Open_Port.config(command=self.open_ser_port)
         self.app.Open_file.config(command=self.open_file)
         self.app.Download.config(command=self.start_download_thread)
         self.app.Port_Select.bind("<<ComboboxSelected>>", self.on_port_select_change)
@@ -154,7 +158,7 @@ class IAPControl:
         self.app.BaudRate_Select.current(4)
         self.update_connection_state(False)
         self.set_mode_ui("HID")
-        # 新增：顶部中间版本信息标签（核心修改）
+        # 顶部中间版本信息标签
         self.version_label = tk.Label(
             self.app.top,  # 父容器
             text=f"软件版本: {self.SOFTWARE_VERSION} | 构建时间: {self.BUILD_TIME}",
@@ -256,6 +260,7 @@ class IAPControl:
 
     def refresh_com_ports(self):
         """刷新COM端口列表，严格按「设备描述 (端口名)」格式显示"""
+        # 假设self.app和self.log是已定义的对象，这里保留原有逻辑仅修改输出部分
         ports = serial.tools.list_ports.comports()
         port_list = []
 
@@ -269,44 +274,23 @@ class IAPControl:
         if port_list:
             self.app.COM_Select['values'] = port_list
             self.app.COM_Select.current(0)
-            self.log(f"可用COM口：{', '.join(port_list)}")
+            self.log("列出所有扫描到的串口：")
+            # 遍历列表，逐个输出每个串口，实现一行一个的效果
+            for port_item in port_list:
+                self.log(f"  {port_item}")
         else:
             self.app.COM_Select['values'] = ["无可用端口"]
             self.log("未发现可用COM口", "WARNING")
 
-    def toggle_port(self):
-        """切换端口连接状态（原有方法修改）"""
-        current_mode = self.app.Port_Select.get()
-
-        if current_mode == "HID":
-            # HID模式连接/断开逻辑
-            if self.hid_connected:
-                if self.hid_handle and self.hid_handle.is_opened:
-                    self.hid_handle.close()
-                    self.hid_handle = None
-                    self.log("HID设备已断开连接", "INFO")
-                    self.update_connection_state(False)
-            else:
-                # 尝试连接HID设备
-                if self.hid_device:
-                    try:
-                        self.hid_handle = self.hid_device.open()
-                        self.log("HID设备连接成功", "INFO")
-                        self.update_connection_state(True)
-                    except Exception as e:
-                        self.log(f"HID设备连接失败: {str(e)}", "ERROR")
-                else:
-                    self.log("未找到可用HID设备，请检查设备连接", "ERROR")
+    def open_ser_port(self):
+        if self.ser and self.ser.is_open:
+            self.ser.close()
+            self.ser = None
+            self.log("串口已关闭", "INFO")
+            self.update_connection_state(False)
         else:
-            # 原有VCOM模式处理逻辑保持不变
-            if self.ser and self.ser.is_open:
-                self.ser.close()
-                self.ser = None
-                self.log("串口已关闭", "INFO")
-                self.update_connection_state(False)
-            else:
-                self._open_port()
-                pass
+            self._open_port()
+            pass
 
     def _open_port(self):
         # 1. 获取下拉列表选中的完整文本（如“USB 串行设备 (COM6)”）
@@ -379,7 +363,6 @@ class IAPControl:
             recv_data = data[1:self.PACKET_SIZE + 1]
             with self.response_lock:  # 加锁确保数据一致性
                 self.last_response = recv_data
-
     # 协议相关函数
     def _calculate_checksum(self, data):
         """
@@ -407,24 +390,13 @@ class IAPControl:
         # 确保结果为32位无符号整数
         return checksum & 0xFFFFFFFF
 
+    def calc_crc_mpeg2(self,data):
+        crc32_mpeg2 = crcmod.mkCrcFun(0x104C11DB7, initCrc=0xFFFFFFFF, rev=False, xorOut=0x00000000)
+        return crc32_mpeg2(data)
+
     def _calculate_crc32(self, data):
-        """
-        计算32位CRC值
-        使用标准CRC32多项式：0xEDB88320
-        """
-        crc = 0xFFFFFFFF  # 初始值
-        polynomial = 0xEDB88320  # 标准CRC32多项式
-
-        for byte in data:
-            crc ^= byte
-            for _ in range(8):
-                if crc & 0x00000001:
-                    crc = (crc >> 1) ^ polynomial
-                else:
-                    crc >>= 1
-
-        # 最终异或并确保为32位无符号整数
-        return crc ^ 0xFFFFFFFF & 0xFFFFFFFF
+        crc_value = self.calc_crc_mpeg2(data)
+        return crc_value
 
     def _build_packet(self, cmd, data=None):
         """构建协议数据包"""
@@ -461,10 +433,11 @@ class IAPControl:
 
     def _send_packet(self, cmd, data=None, timeout=DEFAULT_TIMEOUT_VALUE):
         """发送数据包，返回响应（支持自定义超时）"""
+        global current_mode, original_com_timeout
         try:
             # 1. 构建协议数据包
             packet = self._build_packet(cmd, data)
-            self.log(f"发送命令: 0x{cmd:02X}, 数据长度: {len(data) if data else 0}, 超时: {timeout}秒", "DEBUG")
+            self.log(f"发送命令: 0x{cmd:02X}, 数据长度: {len(data) if data else 0}", "COMMAND")
 
             current_mode = self.app.Port_Select.get()
             response = None
@@ -502,7 +475,7 @@ class IAPControl:
                             else:
                                 # 收到不匹配的响应（可能是上一条命令的延迟响应），忽略并继续等待
                                 self.log(f"收到不匹配的响应：预期0x{expected_cmd:02X}，实际0x{response_cmd:02X}，忽略",
-                                         "DEBUG")
+                                         "ERROR")
                                 self.last_response = None  # 清空错误响应
 
                     time.sleep(0.001)
@@ -566,7 +539,7 @@ class IAPControl:
 
     def _process_response(self, response):
         """处理接收到的响应数据"""
-        if len(response) < 2:
+        if len(response) < 4:
             self.log("无效的响应数据", "ERROR")
             return
 
@@ -577,9 +550,34 @@ class IAPControl:
         self.last_response = response
 
         # 解析特定命令的响应
+        # 处理“获取版本”响应命令的逻辑
         if cmd == self.GET_VERSION | self.RESPONSE_MASK:
+            # 1. 检查response的长度是否至少有3个字节（避免索引越界）
+            if len(response) < 3:
+                raise Exception("响应数据长度不足，无法获取第三个字节")
+
+            # 2. 获取第三个字节（索引2），并转换为字符
+            third_byte = response[2]
+            third_char = chr(third_byte)  # 字节转字符（如65→'A'，66→'B'）
+
+            # 3. 判断是否为'A'或'B'，否则抛出异常
+            if third_char not in ('A', 'B'):
+                raise Exception(f"第三个字节数据错误，期望为'A'或'B'，实际为'{third_char}'（字节值：0x{third_byte:02X}）")
+
+            # 4. 根据字符判断并打印对应内容
+            if third_char == 'A':
+                module_state = "Application"
+                self.current_location = 1
+            else:  # third_char == 'B'
+                module_state = "Bootloader"
+                self.current_location = 0
+
+            # 同时写入日志，便于后续查看
+            self.log(f"MCU当前处在: {module_state}", "INFO")
+
             version_str = ''.join([chr(b) for b in response[2:packet_length - 2] if b != 0])
             self.log(f"当前MCU固件版本号: {version_str}", "INFO")
+
         elif cmd == self.MCU_INFO | self.RESPONSE_MASK:
             # 解析MCU信息：起始地址(4字节)和大小(4字节)
             if packet_length >= 10:  # 1+1+8+2=12，至少需要10字节有效数据
@@ -590,7 +588,7 @@ class IAPControl:
                 self.mcu_app_start_addr = start_addr
                 self.mcu_app_total_size = size
 
-                self.log(f"MCU返回应用信息 - 起始地址:0x{start_addr:08X}, 大小:0x{size:08X}", "INFO")
+                self.log(f"MCU返回应用信息 - 编程起始地址:0x{start_addr:08X}, 可编程大小:0x{size:08X}", "ATTENTION")
 
     # 固件解析相关函数
     def _parse_intel_hex(self, hex_path, print_bin=True):
@@ -610,10 +608,10 @@ class IAPControl:
             self.log(f"Hex文件加载失败：{str(e)}", "ERROR")
             return bytearray(), None
 
-        # 获取所有非空段（兼容不同版本的返回格式）
+        # 获取所有非空段
         segments = ih.segments()
 
-        # 处理段信息（核心修复：检查返回值格式）
+        # 处理段信息
         processed_segments = []
         for seg in segments:
             # 兼容 (start, end) 和 (start, end, data) 两种格式
@@ -646,7 +644,7 @@ class IAPControl:
             self.log(f"警告：Hex文件包含{len(processed_segments)}个段，仅保留前4个", "WARNING")
             processed_segments = processed_segments[:4]
         else:
-            self.log(f"当前选择的.hex文件包含：{len(processed_segments)}个段")#self.log(f"警告：Hex文件包含{len(processed_segments)}个段，仅保留前4个", "WARNING")
+            self.log(f"当前选择的.hex文件包含：{len(processed_segments)}个段")
 
         for start, end, data in processed_segments:
             original_length = end - start
@@ -669,7 +667,7 @@ class IAPControl:
         start_addr = None
 
         for i, segment in enumerate(self.segments):
-            segment["checksum"] = self._calculate_checksum(segment["data"])
+            segment["checksum"] = self._calculate_crc32(segment["data"]) #段内校验修改成CRC32
             self.mcu_app_info[i] = {
                 "length": segment["length"],
                 "address": segment["address"],
@@ -692,7 +690,7 @@ class IAPControl:
         for i in range(len(self.segments), 4):
             self.mcu_app_info[i] = {"length": 0, "address": 0, "checksum": 0}
 
-        # 打印逻辑保持不变
+        # Debug 打印输出信息
         if print_bin and bin_data:
             self.log("Hex解析生成Bin数据（每行16字节）：", "INFO")
             print("\n===== Hex解析Bin数据 =====")
@@ -739,7 +737,7 @@ class IAPControl:
     def open_file(self):
         file_path = filedialog.askopenfilename(
             title="选择固件文件",
-            filetypes=[("固件文件", "*.bin *.hex"), ("所有文件", "*.*")]
+            filetypes=[("固件文件", "*.hex"), ("所有文件", "*.*")]   #去掉.bin文件烧录支持，只支持hex文件加载
         )
         if file_path:
             self.firmware_path = file_path
@@ -765,7 +763,6 @@ class IAPControl:
 
         start_addr = 0x08001800  # .bin default start address
         version_str = default_ver
-        temp_bin_path = None
 
         try:
             file_ext = os.path.splitext(self.firmware_path)[1].lower()
@@ -797,40 +794,8 @@ class IAPControl:
                 # 显示段信息
                 for i, seg in enumerate(self.mcu_app_info):
                     self.log(
-                        f"段{i + 1} - 地址:0x{seg['address']:08X}, 长度:0x{seg['length']:08X}, 校验和:0x{seg['checksum']:08X}",
-                        "INFO")
-
-            elif file_ext == ".bin":
-                self.log("处理Bin文件...", "INFO")
-                with open(self.firmware_path, 'rb') as f:
-                    bin_data = f.read()
-
-                # 对于Bin文件，只使用第一段，起始地址默认为0x08001800
-                self.mcu_app_info[0] = {
-                    "length": len(bin_data),
-                    "address": start_addr,
-                    "checksum": self._calculate_checksum(bin_data)  # 32位校验和
-                }
-                # 其他段填充0
-                for i in range(1, 4):
-                    self.mcu_app_info[i] = {"length": 0, "address": 0, "checksum": 0}
-
-                # 显示Bin数据
-                print("\n===== 直接读取Bin数据 =====")
-                for i in range(0, len(bin_data), 16):
-                    chunk = bin_data[i:i + 16]
-                    hex_str = ' '.join([f"{b:02X}" for b in chunk])
-                    print(f"0x{i:08X}: {hex_str}")
-                print("=========================\n")
-
-                self.bin_data = bin_data
-                found_ver = self._find_version(bin_data)
-                if found_ver:
-                    version_str = found_ver
-
-                self.log(
-                    f"段1 - 地址:0x{start_addr:08X}, 长度:0x{len(bin_data):08X}, 校验和:0x{self.mcu_app_info[0]['checksum']:08X}",
-                    "INFO")
+                        f"段{i + 1} - 起始地址:0x{seg['address']:08X}, 数据长度:0x{seg['length']:08X}, 本段CRC32校验和:0x{seg['checksum']:08X}",
+                        "DATA")
 
             else:
                 self.log(f"不支持格式：{file_ext}", "ERROR")
@@ -841,24 +806,20 @@ class IAPControl:
                 self.bin_data = None
                 return
 
-            with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.bin') as temp_f:
-                temp_f.write(self.bin_data)
-                temp_bin_path = temp_f.name
-
-            bin_length = os.path.getsize(temp_bin_path)
-            length_display = f"0x{bin_length:08X}"
+            self.bin_length = len(self.bin_data)
+            length_display = f"0x{self.bin_length:08X}"
             # 使用CRC32计算整个文件的校验值
-            crc32_val = self._calculate_crc32(self.bin_data)
-            crc_display = f"0x{crc32_val:08X}"
+            self.crc32_val = self._calculate_crc32(self.bin_data)
+            crc_display = f"0x{self.crc32_val:08X}"
             addr_display = f"0x{start_addr:08X}"
 
             # 更新UI显示
-            self.app.Length.config(text=length_display)
+            self.app.Length.config(text=length_display) #在UI上显示整个固件.bin数据长度
             self.app.Checksum.config(text=crc_display)  # 在UI上显示CRC32值
             self.app.Address.config(text=addr_display)
             self.app.AppVersion.config(text=version_str if version_str else default_ver)
-            self.log(f"固件信息：地址:{addr_display} | 长度:{length_display} | CRC32:{crc_display} | 版本{version_str}",
-                     "INFO")
+            self.log(f"固件信息：起始地址:{addr_display} | 固件长度:{length_display} | 固件CRC32:{crc_display} | 固件版本{version_str}",
+                     "ATTENTION")
 
         except Exception as e:
             self.log(f"解析异常：{str(e)}", "ERROR")
@@ -868,25 +829,18 @@ class IAPControl:
             self.app.AppVersion.config(text=default_ver)
             self.bin_data = None
 
-        finally:
-            if temp_bin_path and os.path.exists(temp_bin_path):
-                try:
-                    os.unlink(temp_bin_path)
-                except Exception as e:
-                    self.log(f"删除临时文件失败：{str(e)}", "WARNING")
-
     # 启动下载线程的方法
     def start_download_thread(self):
-        # 修复：先检查线程对象是否存在且非None，再判断是否活跃
+        # 先检查线程对象是否存在且非None，再判断是否活跃
         if self.download_thread is not None and self.download_thread.is_alive():
             self.log("下载正在进行中，请等待完成", "WARNING")
             return
 
         # 启动新线程执行下载（覆盖旧的线程对象）
-        self.download_thread = threading.Thread(target=self.download_firmware, daemon=True)
+        self.download_thread = threading.Thread(target=self.download_firmware_process, daemon=True)
         self.download_thread.start()
 
-    def download_firmware(self):
+    def download_firmware_process(self):
         current_mode = self.app.Port_Select.get()
         is_connected = False
         self.download_abort = False
@@ -896,6 +850,16 @@ class IAPControl:
             is_connected = self.hid_handle and self.hid_handle.is_opened
         else:
             is_connected = self.ser and self.ser.is_open
+
+        self.log("检查连接状态...", "INFO")
+
+        current_mode = self.app.Port_Select.get()
+        if current_mode == "HID":
+            if self.hid_handle:
+                self.hid_handle.close()
+                self.hid_handle = None
+            self.hid_device = None
+            self.set_mode_ui(current_mode)
 
         if not is_connected:
             # 使用after在主线程显示错误
@@ -908,9 +872,9 @@ class IAPControl:
         # 检查Bin数据
         if self.bin_data is None or len(self.bin_data) == 0:
             self.app.top.after(0, lambda: messagebox.showerror(
-                "错误", "无有效Bin数据（请先选择并解析固件）"
+                "错误", "无有效bin数据（请先选择hex并解析固件）"
             ))
-            self.log("下载失败：无Bin数据", "ERROR")
+            self.log("下载失败：无bin数据", "ERROR")
             return
         # 筛选有效段（排除长度为0的段）
         valid_segments = [seg for seg in self.segments if seg["length"] > 0]
@@ -932,7 +896,32 @@ class IAPControl:
             if not success:
                 raise Exception(f"获取版本失败: {response}")
 
-            # 2. 获取MCU信息
+            # 2. 清除复位标志，擦除1K information 区间数据
+            self.log("清除Boot标志信息", "INFO")
+            success, response = self._send_packet(self.CLEAR_FLAG)
+            if not success:
+                raise Exception(f"获取MCU信息失败: {response}")
+
+            if self.current_location == 1:  #当前处在Application
+                self.log("当前处在Application,复位芯片到Bootloader,请等待...", "INFO")
+                success, response = self._send_packet(self.SYSTEM_RESET)
+                if not success:
+                    raise Exception(f"获取MCU信息失败: {response}")
+                if current_mode == "HID":
+                    time.sleep(3)
+                    if self.hid_handle:
+                        self.hid_handle.close()
+                        self.hid_handle = None
+                    self.hid_device = None
+                    self.set_mode_ui(current_mode)
+                else:
+                    time.sleep(3)
+            elif self.current_location == 0: #当前处在Bootloader
+                self.log("Boot模式下直接下载", "INFO")
+            else:
+                raise Exception(f"返回芯片状态异常: {response}")
+
+            # 3. 获取MCU信息
             self.log("获取MCU信息...", "INFO")
             success, response = self._send_packet(self.MCU_INFO)
             if not success:
@@ -944,7 +933,7 @@ class IAPControl:
             if self.mcu_app_start_addr == 0:
                 raise Exception("未获取到有效的MCU应用区起始地址")
 
-            # 3. 检查固件第一段起始地址是否匹配
+            # 检查固件第一段起始地址是否匹配
             firmware_first_segment_addr = self.mcu_app_info[0]["address"]
             if firmware_first_segment_addr != self.mcu_app_start_addr:
                 raise Exception(
@@ -963,7 +952,14 @@ class IAPControl:
 
             # 5. 擦除应用空间
             self.log("擦除应用空间（预计耗时较长，超时30秒）...", "INFO")
-            success, response = self._send_packet(self.ERASE_APP, timeout=self.ERASEAPP_TIMEOUT_VALUE)
+            erase_page = ( total_firmware_size//1024 ) + 1
+            erase_page_byte = erase_page.to_bytes(2, byteorder='big', signed=False)
+
+            # 拼接两个字节序列，得到最终的send_data
+            erase_send_data = bytearray()
+            erase_send_data.extend(erase_page_byte)  # 再添加总大小的2个字节
+
+            success, response = self._send_packet(self.ERASE_APP, erase_send_data, timeout=self.ERASEAPP_TIMEOUT_VALUE)
             if not success:
                 raise Exception(f"擦除应用空间失败: {response}")
             # 更新进度条
@@ -996,7 +992,7 @@ class IAPControl:
             if not success:
                 raise Exception(f"设置段信息失败: {response}")
 
-            # 7. 按有效段分块写入应用程序（核心修改部分）
+            # 7. 按有效段分块写入应用程序
             self.log("开始写入应用程序...", "INFO")
             total_write_progress = 70  # 写入阶段总进度占比
             processed_bytes = 0  # 已处理的总有效字节数
@@ -1016,7 +1012,7 @@ class IAPControl:
                 total_valid_bytes = sum(seg["length"] for seg in valid_segments)
                 # 计算本段在总写入进度中的占比
                 seg_progress_weight = (seg_length / total_valid_bytes) * total_write_progress
-                # 计算本段的起始进度（10%是擦除进度，加上前面段的进度）
+                # 计算本段的起始进度
                 seg_base_progress = 10 + (processed_bytes / total_valid_bytes) * total_write_progress
 
                 # 分包发送本段数据
@@ -1051,8 +1047,6 @@ class IAPControl:
 
                 self.log(f"段{seg_idx}写入完成", "INFO")
 
-                #time.sleep(0.005)
-
             # 8. 验证应用程序
             self.log("验证应用程序...", "INFO")
             success, response = self._send_packet(self.VERIFY_APP)
@@ -1060,12 +1054,23 @@ class IAPControl:
                 raise Exception(f"应用程序验证失败: {response}")
             self.app.top.after(0, lambda: self.app.DownloadTProgressbar.config(value=85))
 
-            # 9. 写入标志
+            # 9. 写入标志（整个程序CRC32和程序长度）
             self.log("写入应用标志...", "INFO")
-            success, response = self._send_packet(self.WRITE_FLAG)
+
+            # 按大端模式将32位整数转换为4字节的字节序列
+            start_addr_bytes = self.bin_length.to_bytes(4, byteorder='big', signed=False)
+            # 处理应用区总大小（32bit → 4字节，大端）
+            total_size_bytes = self.crc32_val.to_bytes(4, byteorder='big', signed=False)
+
+            # 拼接两个字节序列，得到最终的send_data
+            send_data = bytearray()
+            send_data.extend(start_addr_bytes)  # 先添加起始地址的4个字节
+            send_data.extend(total_size_bytes)  # 再添加总大小的4个字节
+
+            # 发送写应用命令
+            success, response = self._send_packet(self.WRITE_FLAG, send_data)
             if not success:
                 raise Exception(f"写入应用标志失败: {response}")
-            self.app.top.after(0, lambda: self.app.DownloadTProgressbar.config(value=90))
 
             # 10. 复位MCU（如果勾选）
             if self.app.che76.get() == 1:
@@ -1094,201 +1099,23 @@ class IAPControl:
                 "错误", f"下载失败：{msg}"  # 使用提前保存的msg变量
             ))
 
-    # 固件下载流程（核心函数）
-    def Before_download_firmware(self):
-        current_mode = self.app.Port_Select.get()
-        is_connected = False
-        self.download_abort = False
-
-        # 检查连接状态
-        if current_mode == "HID":
-            is_connected = self.hid_handle and self.hid_handle.is_opened
-        else:
-            is_connected = self.ser and self.ser.is_open
-
-        if not is_connected:
-            messagebox.showerror("错误", f"{current_mode}未连接或通信句柄异常")
-            self.log(f"下载失败：{current_mode}通信异常", "ERROR")
-            return
-
-        # 检查Bin数据
-        if self.bin_data is None or len(self.bin_data) == 0:
-            messagebox.showerror("错误", "无有效Bin数据（请先选择并解析固件）")
-            self.log("下载失败：无Bin数据", "ERROR")
-            return
-
-        self.log("开始固件下载流程...", "INFO")
-        self.app.DownloadTProgressbar.config(value=0, maximum=100)
-
-        try:
-            # 1. 获取设备版本
-            self.log("获取设备版本...", "INFO")
-            success, response = self._send_packet(self.GET_VERSION)
-            if not success:
-                raise Exception(f"获取版本失败: {response}")
-
-            # 2. 获取MCU信息
-            self.log("获取MCU信息...", "INFO")
-            success, response = self._send_packet(self.MCU_INFO)
-            if not success:
-                raise Exception(f"获取MCU信息失败: {response}")
-
-            # 验证是否成功获取MCU空间信息
-            if self.mcu_app_total_size == 0:
-                raise Exception("未获取到有效的MCU应用空间大小信息")
-            if self.mcu_app_start_addr == 0:
-                raise Exception("未获取到有效的MCU应用区起始地址")
-
-            # 3. 检查固件第一段起始地址是否与MCU应用区起始地址匹配
-            firmware_first_segment_addr = self.mcu_app_info[0]["address"]
-            if firmware_first_segment_addr != self.mcu_app_start_addr:
-                raise Exception(
-                    f"固件起始地址与MCU应用区地址不匹配！\n"
-                    f"固件第一段地址: 0x{firmware_first_segment_addr:08X}\n"
-                    f"MCU应用区起始地址: 0x{self.mcu_app_start_addr:08X}"
-                )
-            # 4. 检查固件是否适合MCU（使用MCU返回的实际空间大小）
-            total_firmware_size = len(self.bin_data)  # 整个bin文件的实际长度
-            if total_firmware_size > self.mcu_app_total_size:
-                raise Exception(
-                    f"固件总大小超过MCU应用空间，固件:0x{total_firmware_size:08X}({total_firmware_size}字节), "
-                    f"可用:0x{self.mcu_app_total_size:08X}({self.mcu_app_total_size}字节)"
-                )
-
-            # 5. 擦除应用空间
-            self.log("擦除应用空间（预计耗时较长，超时30秒）...", "INFO")
-            success, response = self._send_packet(self.ERASE_APP, timeout=self.ERASEAPP_TIMEOUT_VALUE)
-            if not success:
-                raise Exception(f"擦除应用空间失败: {response}")
-            self.app.DownloadTProgressbar.config(value=10)
-            self.app.top.update_idletasks()
-
-            # 6. 发送段起始地址和信息（0x27指令）
-            self.log("发送段信息...", "INFO")
-
-            # 构建0x27指令的数据部分
-            seg_data = bytearray()
-            for seg in self.mcu_app_info:
-                # 添加长度（4字节，大端）
-                seg_data.extend([
-                    (seg["length"] >> 24) & 0xFF,
-                    (seg["length"] >> 16) & 0xFF,
-                    (seg["length"] >> 8) & 0xFF,
-                    seg["length"] & 0xFF
-                ])
-                # 添加地址（4字节，大端）
-                seg_data.extend([
-                    (seg["address"] >> 24) & 0xFF,
-                    (seg["address"] >> 16) & 0xFF,
-                    (seg["address"] >> 8) & 0xFF,
-                    seg["address"] & 0xFF
-                ])
-                # 添加32位校验和（4字节，大端）
-                seg_data.extend([
-                    (seg["checksum"] >> 24) & 0xFF,
-                    (seg["checksum"] >> 16) & 0xFF,
-                    (seg["checksum"] >> 8) & 0xFF,
-                    seg["checksum"] & 0xFF
-                ])
-
-            # 发送0x27指令
-            success, response = self._send_packet(self.SEG_STARTADDR, seg_data)
-            if not success:
-                raise Exception(f"设置段信息失败: {response}")
-
-            # 7. 分块写入应用程序
-            self.log("开始写入应用程序...", "INFO")
-            total_bytes = len(self.bin_data)
-            total_packets = (total_bytes + self.PACKET_SIZE - 5) // (self.PACKET_SIZE - 5)  # 减去命令、长度和校验和的5字节
-            sent_bytes = 0
-
-            print(f"Download total_bytes: {total_bytes} total_packets:{total_packets}")
-
-            for packet_idx in range(total_packets):
-                if self.download_abort:
-                    raise Exception("下载被用户中断")
-
-                # 计算当前包数据
-                start_idx = packet_idx * (self.PACKET_SIZE - 5)
-                end_idx = min(start_idx + (self.PACKET_SIZE - 5), total_bytes)
-                current_data = self.bin_data[start_idx:end_idx]
-
-                # 发送写应用命令
-                success, response = self._send_packet(self.WRITE_APP, current_data)
-                if not success:
-                    raise Exception(f"第{packet_idx + 1}包写入失败: {response}")
-
-                # 更新进度
-                sent_bytes += len(current_data)
-                progress = 10 + (sent_bytes / total_bytes) * 70  # 10%到80%
-                self.app.DownloadTProgressbar.config(value=progress)
-                self.app.top.update_idletasks()
-
-                # 日志输出
-                if (packet_idx + 1) % 5 == 0 or (packet_idx + 1) == total_packets:
-                    self.log(
-                        f"写入进度：{progress:.1f}% | 第{packet_idx + 1}/{total_packets}包 | 已发送: {sent_bytes}/{total_bytes}字节",
-                        "INFO")
-
-                time.sleep(0.005)  # 短暂延时
-                #self.root.update()  # 处理所有未完成的UI事件（包括刷新）
-
-            # 8. 验证应用程序
-            self.log("验证应用程序...", "INFO")
-            success, response = self._send_packet(self.VERIFY_APP)
-            if not success:
-                raise Exception(f"应用程序验证失败: {response}")
-            self.app.DownloadTProgressbar.config(value=85)
-            self.app.top.update_idletasks()
-
-            # 9. 写入标志
-            self.log("写入应用标志...", "INFO")
-            success, response = self._send_packet(self.WRITE_FLAG)
-            if not success:
-                raise Exception(f"写入应用标志失败: {response}")
-            self.app.DownloadTProgressbar.config(value=90)
-            self.app.top.update_idletasks()
-
-            # 10. 复位MCU（如果勾选）
-            if self.app.che76.get() == 1:
-                self.log("执行系统复位...", "INFO")
-                success, response = self._send_packet(self.SYSTEM_RESET)
-                if not success:
-                    self.log(f"复位命令发送警告: {response}", "WARNING")  # 复位命令可能不返回响应
-                self.app.DownloadTProgressbar.config(value=95)
-                self.app.top.update_idletasks()
-                time.sleep(0.5)
-
-            # 11. 下载完成
-            self.app.DownloadTProgressbar.config(value=100)
-            self.log("固件下载流程完成！", "INFO")
-            messagebox.showinfo("完成", f"{current_mode}模式固件下载成功！")
-
-            # 下载完成之后检查连接状态
-            if current_mode == "HID":
-                # 下载完成，开始HID监听
-                self.start_hid_monitor()
-
-        except Exception as e:
-            self.log(f"下载异常：{str(e)}", "ERROR")
-            self.app.DownloadTProgressbar.config(value=0)
-            messagebox.showerror("错误", f"下载失败：{str(e)}")
-            # 下载失败之后检查连接状态
-            if current_mode == "HID":
-                # 下载失败，开始HID监听
-                self.start_hid_monitor()
-
     # 日志和状态更新
     def log(self, message, level="INFO"):
         self.app.Message.config(state=NORMAL)
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        log_entry = f"[{timestamp}] [{level}] {message}\n"
+        log_entry = f"[{timestamp}] {message}\n"
 
         # 根据日志级别选择标签
-        if level == "ERROR":
+        if level == "INFO":
+            self.app.Message.insert(END, log_entry, "info")
+        elif level == "ERROR":
             self.app.Message.insert(END, log_entry, "error")
-        elif level == "INFO":
-            self.app.Message.insert(END, log_entry, "normal")
+        elif level == "ATTENTION":
+            self.app.Message.insert(END, log_entry, "attention")
+        elif level == "DATA":
+            self.app.Message.insert(END, log_entry, "data")
+        elif level == "COMMAND":
+            self.app.Message.insert(END, log_entry, "command")
         else:
             self.app.Message.insert(END, log_entry, "info")
 
@@ -1305,15 +1132,16 @@ class IAPControl:
         if connected:
             self.Connect_State_Icon.config(image=self.connect_icon)
             if self.app.Port_Select.get() == "VCOM":
-                self.app.Open_Port.config(text="关闭端口")
+                self.app.Open_Port.config(text="Close_Port")
         else:
             self.Connect_State_Icon.config(image=self.disconnect_icon)
             if self.app.Port_Select.get() == "VCOM":
-                self.app.Open_Port.config(text="打开端口")
+                self.app.Open_Port.config(text="Open_Port")
 
 
 def main():
     root = IAP_tools.tk.Tk()
+
     try:
         def get_logo_path():
             if getattr(sys, 'frozen', False):
@@ -1351,8 +1179,9 @@ def main():
     # 对主窗口进行居中
     center_window(root)
 
-    control = IAPControl(app)
+    IAPControl(app)
     root.mainloop()
+
 
 
 if __name__ == "__main__":

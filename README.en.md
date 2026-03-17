@@ -5,7 +5,7 @@ MM32 MCU IAP host computer/protocol/source code, periodically collected and shar
 Based on the original open-source repository, we have upgraded to Version 2.0
 
 #### IAP Flowchart
-![image](https://https://gitee.com/skydiver/mm32-iap-demo/Flowchart/IAP_Flowchart.png)
+![image](https://gitee.com/skydiver/mm32-iap-demo/raw/master/Flowchart/IAP_Flowchart.png)
 
 ### Project File
 

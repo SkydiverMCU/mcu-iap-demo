@@ -40,8 +40,8 @@ class IAPControl:
     MCU_INFO = 0x28  # 获取MCU分给APP空间大小和起始位置
 
     # 通讯超时时间定义
-    DEFAULT_TIMEOUT_VALUE = 5
-    ERASEAPP_TIMEOUT_VALUE = 30  # 擦除应用超时时间
+    DEFAULT_TIMEOUT_VALUE = 500
+    ERASEAPP_TIMEOUT_VALUE = 800  # 擦除应用超时时间
 
     # 响应命令掩码
     RESPONSE_MASK = 0xC0

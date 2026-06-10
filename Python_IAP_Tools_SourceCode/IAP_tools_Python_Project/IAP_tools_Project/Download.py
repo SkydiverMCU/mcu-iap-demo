@@ -953,6 +953,8 @@ class IAPControl:
             # 5. 擦除应用空间
             self.log("擦除应用空间（预计耗时较长，超时30秒）...", "INFO")
             erase_page = ( total_firmware_size//1024 ) + 1
+            if total_firmware_size % 1024 != 0:
+                erase_page += 1
             erase_page_byte = erase_page.to_bytes(2, byteorder='big', signed=False)
 
             # 拼接两个字节序列，得到最终的send_data

@@ -40,8 +40,8 @@ class IAPControl:
     MCU_INFO = 0x28  # 获取MCU分给APP空间大小和起始位置
 
     # 通讯超时时间定义
-    DEFAULT_TIMEOUT_VALUE = 5
-    ERASEAPP_TIMEOUT_VALUE = 30  # 擦除应用超时时间
+    DEFAULT_TIMEOUT_VALUE = 500
+    ERASEAPP_TIMEOUT_VALUE = 800  # 擦除应用超时时间
 
     # 响应命令掩码
     RESPONSE_MASK = 0xC0
@@ -953,6 +953,8 @@ class IAPControl:
             # 5. 擦除应用空间
             self.log("擦除应用空间（预计耗时较长，超时30秒）...", "INFO")
             erase_page = ( total_firmware_size//1024 ) + 1
+            if total_firmware_size % 1024 != 0:
+                erase_page += 1
             erase_page_byte = erase_page.to_bytes(2, byteorder='big', signed=False)
 
             # 拼接两个字节序列，得到最终的send_data

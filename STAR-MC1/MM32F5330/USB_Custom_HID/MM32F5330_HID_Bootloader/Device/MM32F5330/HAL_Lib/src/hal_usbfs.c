@@ -54,8 +54,8 @@ void USBFS_DeInit(USB_FS_TypeDef * usbfs)
 {
     if (usbfs == USB_FS)
     {
-        RCC_AHBPeriphClockCmd(RCC_AHBPeriph_USB_FS, ENABLE);
-        RCC_AHBPeriphClockCmd(RCC_AHBPeriph_USB_FS, DISABLE);
+        RCC_AHBPeriphResetCmd(RCC_AHBPeriph_USB_FS, ENABLE);
+        RCC_AHBPeriphResetCmd(RCC_AHBPeriph_USB_FS, DISABLE);
     }
 }
 
@@ -85,7 +85,6 @@ void USBFS_InitDevice(USB_FS_TypeDef * usbfs, USBFS_Device_Init_Type *init)
     {
         return;
     }
-
     USBFS_SetBufDespTableAddr(usbfs, init->BufDespTable_Addr);
 
     /* disable host mode. */

@@ -34,7 +34,7 @@
 #include "platform.h"
 
 /**
-  * @addtogroup MM32F5270_TinyUSB
+  * @addtogroup MM32F5330_TinyUSB
   * @{
   */
 

@@ -35,19 +35,19 @@
 #include "mm32f5370_it.h"
 
 /**
-  * @addtogroup MM32F5370_LibSamples
-  * @{
-  */
+ * @addtogroup MM32F5370_LibSamples
+ * @{
+ */
 
 /**
-  * @addtogroup USART
-  * @{
-  */
+ * @addtogroup USART
+ * @{
+ */
 
 /**
-  * @addtogroup USART_Interrupt
-  * @{
-  */
+ * @addtogroup USART_Interrupt
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -60,125 +60,124 @@
 /* Private functions **************************************************************************************************/
 
 /***********************************************************************************************************************
-  * @brief  This function handles Non maskable interrupt
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles Non maskable interrupt
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void NMI_Handler(void)
 {
-    while (1)
-    {
-    }
+  while (1)
+  {
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles Hard fault interrupt
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles Hard fault interrupt
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void HardFault_Handler(void)
 {
-    while (1)
-    {
-    }
+  while (1)
+  {
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles Memory management fault
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles Memory management fault
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void MemManage_Handler(void)
 {
-    while (1)
-    {
-    }
+  while (1)
+  {
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles Pre-fetch fault, memory access fault
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles Pre-fetch fault, memory access fault
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void BusFault_Handler(void)
 {
-    while (1)
-    {
-    }
+  while (1)
+  {
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles Undefined instruction or illegal state
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles Undefined instruction or illegal state
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void UsageFault_Handler(void)
 {
-    while (1)
-    {
-    }
+  while (1)
+  {
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles System service call via SWI instruction
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles System service call via SWI instruction
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void SVCall_Handler(void)
 {
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles Debug monitor
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles Debug monitor
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void DebugMon_Handler(void)
 {
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles Pendable request for system service
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles Pendable request for system service
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void PendSV_Handler(void)
 {
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles System tick timer
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles System tick timer
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void SysTick_Handler(void)
 {
-    if (0 != PLATFORM_DelayTick)
-    {
-        PLATFORM_DelayTick--;
-    }
+  if (0 != PLATFORM_DelayTick)
+  {
+    PLATFORM_DelayTick--;
+  }
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

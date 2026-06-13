@@ -276,8 +276,8 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x8001800</StartAddress>
-                <Size>0x3e800</Size>
+                <StartAddress>0x8001c00</StartAddress>
+                <Size>0x3e400</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -403,6 +403,11 @@
               <FileName>platform.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\platform.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app_protocol.c</FilePath>
             </File>
           </Files>
         </Group>

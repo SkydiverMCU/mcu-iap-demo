@@ -51,19 +51,19 @@ extern "C" {
 extern void SystemInit(void);
 
 
-/* MM32 Library version is V1.5 --------------------------------------------*/
+/* MM32 Library version is V1.8 --------------------------------------------*/
 
 #define __MM32_LIB_VERSION_MAIN                 (0x01U) /*!< [15:8] main version */
-#define __MM32_LIB_VERSION_SUB                  (0x05U) /*!< [7:0]  sub version */
+#define __MM32_LIB_VERSION_SUB                  (0x08U) /*!< [7:0]  sub version */
 #define __MM32_LIB_VERSION               \
         ((__MM32_LIB_VERSION_MAIN << 8U) \
          | (__MM32_LIB_VERSION_SUB << 0U))
 
-/* MM32 Library release date is 2024-12-20 -----------------------------------*/
+/* MM32 Library release date is 2026-04-10 -----------------------------------*/
 #define __MM32_LIB_RELESE_YEARH                 (0x20U) /*!< [31:24] release year high */
-#define __MM32_LIB_RELESE_YEARL                 (0x24U) /*!< [23:16] release year low */
-#define __MM32_LIB_RELESE_MONTH                 (0x12U) /*!< [15:8]  release month */
-#define __MM32_LIB_RELESE_DAY                   (0x20U) /*!< [7:0]   release day */
+#define __MM32_LIB_RELESE_YEARL                 (0x26U) /*!< [23:16] release year low */
+#define __MM32_LIB_RELESE_MONTH                 (0x04U) /*!< [15:8]  release month */
+#define __MM32_LIB_RELESE_DAY                   (0x10U) /*!< [7:0]   release day */
 #define __MM32_LIB_RELESE_DATE              \
         ((__MM32_LIB_RELESE_YEARH << 24U)   \
          | (__MM32_LIB_RELESE_YEARL << 16U) \
@@ -288,7 +288,7 @@ typedef enum
 /**
   * @brief UID type pointer Definition
   */
-#define UID_BASE                (0x1FFFF7E8U) /*!< Unique device ID register base address */
+#define UID_BASE                (0x1FFFF7E0U) /*!< Unique device ID register base address */
 
 #include "reg_adc.h"
 #include "reg_bkp.h"

@@ -127,7 +127,7 @@ void LPUART_Cmd(LPUART_TypeDef *lpuart, FunctionalState state)
 
     if (state)
     {
-        while(!(lpuart->LPUEN & LPUART_LPUEN_TXEN) && (lpuart->LPUEN & LPUART_LPUEN_RXEN))
+        while((!(lpuart->LPUEN & LPUART_LPUEN_TXEN)) || (!(lpuart->LPUEN & LPUART_LPUEN_RXEN)))
         {
             __NOP();
         }
@@ -184,9 +184,10 @@ void LPUART_RX_Cmd(LPUART_TypeDef *lpuart, FunctionalState state)
   * @param  it: specifies the LPUART interrupt sources to be enabled or disabled.
   *         This parameter can be one of the following values:
   * @arg    LPUART_IT_ERR : Error interrupt Enable
-  * @arg    LPUART_IT_RX  : Receive interrupt Enable
   * @arg    LPUART_IT_TC  : Transmit complete interrupt Enable
   * @arg    LPUART_IT_TX  : Transmit Buffer Empty interrupt Enable
+  * @arg    LPUART_IT_RXNEG  : Allow receiving error interrupt Enable
+  * @arg    LPUART_IT_RX  : Receive interrupt Enable
   * @param  state: new state of the specified lpuart interrupts.
   *         This parameter can be: ENABLE or DISABLE.
   * @retval None.
@@ -213,7 +214,7 @@ void LPUART_DMACmd(LPUART_TypeDef *lpuart, FunctionalState state)
 
     if (state)
     {
-        while(!((lpuart->LPUEN & LPUART_LPUEN_DMAT) && (lpuart->LPUEN & LPUART_LPUEN_DMAR)))
+        while((!(lpuart->LPUEN & LPUART_LPUEN_DMAT)) || (!(lpuart->LPUEN & LPUART_LPUEN_DMAR)))
         {
             __NOP();
         }

@@ -38,7 +38,7 @@
 #include "usb_descriptors.h"
 
 /**
- * @addtogroup MM32F5270_TinyUSB
+ * @addtogroup MM32F5330_TinyUSB
  * @{
  */
 
@@ -48,7 +48,7 @@
  */
 
 /**
- * @addtogroup TinyUSB_Device_HID_
+ * @addtogroup TinyUSB_Device_HID_inout
  * @{
  */
 
@@ -71,7 +71,7 @@ enum
 /* Private variables **************************************************************************************************/
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 void led_blinking_task(void);
-static void hid_task(void);
+
 /* Private functions **************************************************************************************************/
 /***********************************************************************************************************************
  * @brief  TinyUSB Device Configure

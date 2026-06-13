@@ -112,6 +112,17 @@ void ADC_CalibrationConfig(ADC_TypeDef *adc, uint16_t precal)
 }
 
 /**
+  * @brief  Jump over the ADC calibration when ADC initialization.
+  * @param  adc: select the ADC peripheral.
+  * @retval None.
+  */
+void ADC_CalibrationEscape(ADC_TypeDef *adc)
+{
+    adc->ANY_CR &= ~(0x01U << ADC_ANY_CR_ADCAL_Pos);
+    adc->ADDATA  = 0x2430;
+}
+
+/**
   * @brief  Initializes the adc peripheral according to the specified parameters
   *         in the init_struct, Please use this function if you want to be
   *         compatible with older versions of the library.

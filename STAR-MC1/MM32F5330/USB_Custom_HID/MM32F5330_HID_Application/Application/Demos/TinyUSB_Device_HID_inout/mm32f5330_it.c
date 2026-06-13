@@ -34,7 +34,7 @@
 #include "mm32f5330_it.h"
 
 /**
-  * @addtogroup MM32F5270_TinyUSB
+  * @addtogroup MM32F5330_TinyUSB
   * @{
   */
 
@@ -44,7 +44,7 @@
   */
 
 /**
-  * @addtogroup TinyUSB_Device_HID_Comp
+  * @addtogroup TinyUSB_Device_HID_inout
   * @{
   */
 

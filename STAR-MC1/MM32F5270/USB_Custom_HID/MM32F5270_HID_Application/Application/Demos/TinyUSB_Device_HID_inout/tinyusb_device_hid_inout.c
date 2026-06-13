@@ -88,6 +88,18 @@ void TinyUSB_Device_Configure(void)
   tud_init(BOARD_TUD_RHPORT);
 }
 
+/***********************************************************************************************************************
+ * @brief
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
+void USB_SendGroup(uint8_t *pBuff, uint16_t length)
+{
+  tud_hid_report(0, pBuff, length);
+  // tud_hid_set_report_cb(instance, 0, HID_REPORT_TYPE_INVALID, pBuff, (uint16_t) length);
+}
+
 void hid_task(void)
 {
   // Poll every 10ms

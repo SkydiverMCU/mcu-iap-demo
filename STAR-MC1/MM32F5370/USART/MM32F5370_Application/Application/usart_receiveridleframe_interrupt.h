@@ -37,6 +37,7 @@ extern "C"
 
 /* Files include */
 #include "hal_conf.h"
+#include "app_protocol.h"
 
 /* Exported types *****************************************************************************************************/
 
@@ -53,11 +54,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-EXTERN volatile uint8_t USART_RxBuffer[255];
-EXTERN volatile uint8_t USART_RxLength;
-
-/* Exported functions *************************************************************************************************/
-void USART_ReceiverIdleFrame_Interrupt_Sample(void);
+  /* Exported functions *************************************************************************************************/
+  void UART_SendGroup(uint8_t *pBuff, uint16_t length);
+  void USART_Configure(uint32_t Baudrate);
 
 #ifdef __cplusplus
 }

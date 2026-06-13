@@ -294,6 +294,7 @@ typedef struct
   */
 void ADC_DeInit(ADC_TypeDef *adc);
 void ADC_CalibrationConfig(ADC_TypeDef *adc, uint16_t precal);
+void ADC_CalibrationEscape(ADC_TypeDef *adc);
 void ADC_Init(ADC_TypeDef *adc, ADC_InitTypeDef *init_struct);
 void ADC_StructInit(ADC_InitTypeDef *init_struct);
 void ADC_Cmd(ADC_TypeDef *adc, FunctionalState state);

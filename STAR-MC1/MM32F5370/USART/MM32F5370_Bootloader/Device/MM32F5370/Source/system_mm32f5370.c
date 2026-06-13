@@ -165,41 +165,59 @@ void MPU_Config(void)
   * @brief  use to return the pll_div & pll_mul.
   * @param  pllclkSourceFrq : PLL1 source clock frquency;
   *         pllclkFrq : Target PLL1 clock frquency;
+  *         pll_pdiv : PLL1 factor PLL1  pre-divide Factor
   *         pll_mul : PLL1 factor PLL1  Multiplication Factor
   *         pll_div : PLL1 factor PLL1 Divide Factor
   * @retval amount of error
   */
-uint32_t AutoCalPllFactor(uint32_t pllclkSourceFrq, uint32_t pllclkFrq, uint8_t *pll_mul, uint8_t *pll_div)
+uint32_t AutoCalPllFactor(uint32_t pllclkSourceFrq, uint32_t pllclkFrq, uint8_t *pll_pdiv, uint8_t *pll_mul, uint8_t *pll_div)
 {
-    uint32_t mul_temp, div_temp, mul_max, div_max;
-    uint32_t tempFrq = 0;
+    uint32_t pdiv_temp, mul_temp, div_temp, pdiv_max, mul_max, div_max;
+    uint32_t tempFrq = 0, tempFvco = 0;
     uint32_t minDiff = pllclkFrq;
     uint8_t  flag    = 0;
 
-    mul_max = RCC_PLL1CFGR_PLL1MUL_Msk >> RCC_PLL1CFGR_PLL1MUL_Pos;
-    div_max = RCC_PLL1CFGR_PLL1DIV_Msk >> RCC_PLL1CFGR_PLL1DIV_Pos;
+    pdiv_max = RCC_PLL1CFGR_PLL1PDIV_Msk >> RCC_PLL1CFGR_PLL1PDIV_Pos;
+    mul_max  = RCC_PLL1CFGR_PLL1MUL_Msk >> RCC_PLL1CFGR_PLL1MUL_Pos;
+    div_max  = RCC_PLL1CFGR_PLL1DIV_Msk >> RCC_PLL1CFGR_PLL1DIV_Pos;
 
     for (div_temp = 1; div_temp <= div_max; div_temp += 2)
     {
-        for (mul_temp = 0; mul_temp <= mul_max; mul_temp++)
-        {
-            tempFrq = pllclkSourceFrq / (div_temp + 1) * (mul_temp + 1);
-            tempFrq = (tempFrq > pllclkFrq) ? (tempFrq - pllclkFrq) : (pllclkFrq - tempFrq);
-
-            if (minDiff > tempFrq)
+        for (pdiv_temp = 0; pdiv_temp <= pdiv_max; pdiv_temp++)
+        {            
+            for (mul_temp = 0; mul_temp <= mul_max; mul_temp++)
             {
-                minDiff    = tempFrq;
-                *pll_mul   = mul_temp;
-                *pll_div   = div_temp;
+                tempFvco = pllclkSourceFrq / (pdiv_temp + 1) * (mul_temp + 1);
+
+                if ((tempFvco > 400000000) || (tempFvco < 200000000))
+                {
+                    continue;
+                }
+                    
+                tempFrq = tempFvco / (div_temp + 1);
+                tempFrq = (tempFrq > pllclkFrq) ? (tempFrq - pllclkFrq) : (pllclkFrq - tempFrq);
+
+                if (minDiff > tempFrq)
+                {
+                    minDiff    = tempFrq;
+                    *pll_pdiv  = pdiv_temp;
+                    *pll_mul   = mul_temp;
+                    *pll_div   = div_temp;
+                }
+
+                if (minDiff == 0)
+                {
+                    flag = 1;
+                    break;
+                }
             }
 
-            if (minDiff == 0)
+            if (flag != 0)
             {
-                flag = 1;
                 break;
             }
         }
-
+        
         if (flag != 0)
         {
             break;
@@ -216,8 +234,8 @@ uint32_t AutoCalPllFactor(uint32_t pllclkSourceFrq, uint32_t pllclkFrq, uint8_t 
   */
 static void SetSysClockToDefine(void)
 {
-    __IO uint32_t  tn, tm, StartUpCounter = 0, ClkSrcStatus = 1;
-    uint8_t pll_mul, pll_div;
+    __IO uint32_t  tn, tm, StartUpCounter = 0, ClkSrcStatus = 0;
+    uint8_t pll_pdiv = 0, pll_mul = 0, pll_div = 0;
     uint32_t temp = 0, i = 0;
 
 #ifdef SYSCLK_HSE_XXMHz
@@ -259,7 +277,7 @@ static void SetSysClockToDefine(void)
     RCC->PLL1CFGR |= (0x01U << RCC_PLL1CFGR_PLL1SRC_Pos);
 
     /* calculate PLL1 factor*/
-    AutoCalPllFactor(HSE_VALUE, SystemCoreClock, &pll_mul, &pll_div);
+    AutoCalPllFactor(HSE_VALUE, SystemCoreClock, &pll_pdiv, &pll_mul, &pll_div);
 
     /* set PLL1 CP Current Control Signals */
     RCC->PLL1CFGR &= ~RCC_PLL1CFGR_PLL1_ICTRL_Msk;
@@ -299,7 +317,7 @@ static void SetSysClockToDefine(void)
     RCC->PLL1CFGR &= ~(0x01U << RCC_PLL1CFGR_PLL1SRC_Pos);
 
     /* calculate PLL1 factor*/
-    AutoCalPllFactor(HSI_VALUE, SystemCoreClock, &pll_mul, &pll_div);
+    AutoCalPllFactor(HSI_VALUE, SystemCoreClock, &pll_pdiv, &pll_mul, &pll_div);
 
     /* set PLL1 CP Current Control Signals */
     RCC->PLL1CFGR &= ~RCC_PLL1CFGR_PLL1_ICTRL_Msk;
@@ -363,7 +381,7 @@ static void SetSysClockToDefine(void)
         RCC->PLL1CFGR &= ~RCC_PLL1CFGR_PLL1MUL_Msk;
         RCC->PLL1CFGR &= ~RCC_PLL1CFGR_PLL1DIV_Msk;
 
-        RCC->PLL1CFGR |= ((pll_mul << RCC_PLL1CFGR_PLL1MUL_Pos) | (pll_div << RCC_PLL1CFGR_PLL1DIV_Pos));
+        RCC->PLL1CFGR |= ((pll_pdiv << RCC_PLL1CFGR_PLL1PDIV_Pos) | (pll_mul << RCC_PLL1CFGR_PLL1MUL_Pos) | (pll_div << RCC_PLL1CFGR_PLL1DIV_Pos));
 
         /* Enable PLL1 */
         RCC->CR |= (0x01U << RCC_CR_PLL1ON_Pos);
@@ -425,7 +443,7 @@ static void SetSysClockToDefine(void)
     }
     else
     {
-        /* If HSE not ready within the given time, the program will stop here.
+        /* If HSE or HSI not ready within the given time, the program will stop here.
            User can add here some code to deal with this error */
         while (1)
         {

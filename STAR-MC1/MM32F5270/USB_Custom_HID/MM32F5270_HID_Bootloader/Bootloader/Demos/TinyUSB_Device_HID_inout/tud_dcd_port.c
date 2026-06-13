@@ -436,8 +436,8 @@ void USB_DeviceClockInit(void)
     MODIFY_REG(RCC->CR, RCC_CR_HSEON_Msk, 1 << RCC_CR_HSEON_Pos);
 
     // Config PLL2 clock param.
-    //RCC_PLL2Config(1, 0, 7, 1); // PLL2 = HSE(12) * (7+1) / (1+1) = 48MHz
-    RCC_PLL2Config(1, 0, 11, 1); // PLL2 = HSE(8) * (11+1) / (1+1) = 48MHz
+    RCC_PLL2Config(1, 0, 7, 1); // PLL2 = HSE(12) * (7+1) / (1+1) = 48MHz
+    //RCC_PLL2Config(1, 0, 11, 1); // PLL2 = HSE(8) * (11+1) / (1+1) = 48MHz
     MODIFY_REG(RCC->PLL2CFGR, RCC_PLL2CFGR_PLL2_ICTRL_Msk, 3 << RCC_PLL2CFGR_PLL2_ICTRL_Pos);
 
     // Enable PLL2 clock.

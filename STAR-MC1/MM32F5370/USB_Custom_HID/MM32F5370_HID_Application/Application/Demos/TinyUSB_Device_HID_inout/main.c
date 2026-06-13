@@ -33,20 +33,21 @@
 #include "platform.h"
 #include "tinyusb_device_hid_inout.h"
 #include "main.h"
+#include "app_protocol.h"
 /**
-  * @addtogroup MM32F5270_TinyUSB
-  * @{
-  */
+ * @addtogroup MM32F5370_TinyUSB
+ * @{
+ */
 
 /**
-  * @addtogroup TinyUSB_Device
-  * @{
-  */
+ * @addtogroup TinyUSB_Device
+ * @{
+ */
 
 /**
-  * @addtogroup TinyUSB_Device_HID_Comp
-  * @{
-  */
+ * @addtogroup TinyUSB_Device_HID_inout
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -60,41 +61,42 @@
 /*请注意/Please note*/
 /*修改 Bootloader 和 Application Flash空间大小分配，请到Options for Target -> Linker -> ..\..\..\..\Device\MM32F5370\Source\MM32F5370.sct  分散加载文件里面去修改*/
 /*To modify the allocation of Bootloader and Application Flash space, please go to Options for Target -> Linker -> ..\..\..\..\Device\MM32F5370\Source\MM32F5370.sct in the scatter-loading file to make the changes.*/
-#define APP_ADDRESS_OFFSET 0x6000
+
 /***********************************************************************************************************************
-  * @brief  This function is main entrance
-  * @note   main
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function is main entrance
+ * @note   main
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 /*Please using an External 8MHz Crystal Oscillator*/
 int main(void)
 {
-    SCB->VTOR = FLASH_START_ADDR | APP_ADDRESS_OFFSET; // STAR-MC1可以对中断向量进行偏移，这样app的中断可以直接跳到自己的中断服务函数
-    __enable_irq();                              // 跳转之后要确保打开总中断
-	
-    PLATFORM_Init();
+  SCB->VTOR = FLASH_START_ADDR | APP_ADDRESS_OFFSET; // STAR-MC1可以对中断向量进行偏移，这样app的中断可以直接跳到自己的中断服务函数
+  __enable_irq();                                    // 跳转之后要确保打开总中断
 
-    TinyUSB_Device_Configure();
+  PLATFORM_Init();
 
-    while (1)
-    {
-		tud_task(); // TinyUSB device task
-        hid_task();		
-    }
+  printf("MM32F5370 enter application \r\n");
+
+  TinyUSB_Device_Configure();
+
+  while (1)
+  {
+    tud_task(); // TinyUSB device task
+    Receive_Protocol_Process(); // 添加USB，支持直接Application接收USB升级协议，跳转回Bootloader
+  }
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

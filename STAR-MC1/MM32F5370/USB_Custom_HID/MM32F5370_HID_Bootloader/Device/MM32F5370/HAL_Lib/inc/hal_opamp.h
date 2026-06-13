@@ -77,8 +77,8 @@ typedef struct
 #define OPAMP_InvertingInput_IO3            (0x03U << OPAMP_OPACHSR_MSEL_Pos)     /*!< INM3 as OPAMP inverting input */
 #define OPAMP_InvertingInput_IO4            (0x04U << OPAMP_OPACHSR_MSEL_Pos)     /*!< INM4 as OPAMP inverting input */
 #define OPAMP_InvertingInput_IO5            (0x05U << OPAMP_OPACHSR_MSEL_Pos)     /*!< INM5 as OPAMP inverting input */
-#define OPAMP_InvertingInput_VOUT           (0x06U << OPAMP_OPACHSR_MSEL_Pos)     /*!< Internal VOUT output as OPAMP inverting input */
-#define OPAMP_InvertingInput_VREF           (0x07U << OPAMP_OPACHSR_MSEL_Pos)     /*!< Internal resistor partial voltage output as OPAMP inverting input */
+#define OPAMP_InvertingInput_VREF           (0x06U << OPAMP_OPACHSR_MSEL_Pos)     /*!< Internal resistor partial voltage output as OPAMP inverting input */
+#define OPAMP_InvertingInput_VOUT           (0x07U << OPAMP_OPACHSR_MSEL_Pos)     /*!< Internal VOUT output as OPAMP inverting input */
 
 /**
   * @brief OPAMP_NonInvertingInput

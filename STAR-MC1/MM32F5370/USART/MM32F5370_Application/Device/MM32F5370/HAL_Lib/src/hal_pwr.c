@@ -313,6 +313,7 @@ void PWR_EnterSTOPMode(uint32_t stop_mode, uint32_t stop_entry)
 {
     if (stop_mode == PWR_MODE_STOP)
     {
+        PWR->CR1 &= ~(0x01U << PWR_CR1_PDDS_Pos);
         PWR->CR1 &= ~(0x01U << PWR_CR1_LPDS_Pos);
         SCB->SCR |= (0x01U << SCB_SCR_SLEEPDEEP_Pos);
     }

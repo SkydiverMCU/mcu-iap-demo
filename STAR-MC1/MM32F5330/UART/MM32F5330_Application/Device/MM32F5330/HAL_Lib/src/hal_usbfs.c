@@ -54,8 +54,8 @@ void USBFS_DeInit(USB_FS_TypeDef * usbfs)
 {
     if (usbfs == USB_FS)
     {
-        RCC_AHBPeriphClockCmd(RCC_AHBPeriph_USB_FS, ENABLE);
-        RCC_AHBPeriphClockCmd(RCC_AHBPeriph_USB_FS, DISABLE);
+        RCC_AHBPeriphResetCmd(RCC_AHBPeriph_USB_FS, ENABLE);
+        RCC_AHBPeriphResetCmd(RCC_AHBPeriph_USB_FS, DISABLE);
     }
 }
 

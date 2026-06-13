@@ -47,7 +47,7 @@
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION
 //--------------------------------------------------------------------
-#define CFG_TUSB_MCU          OPT_MCU_MM32F533X
+#define CFG_TUSB_MCU          OPT_MCU_MM32F527X
 // defined by compiler flags for flexibility
 #ifndef CFG_TUSB_MCU
 #error CFG_TUSB_MCU must be defined

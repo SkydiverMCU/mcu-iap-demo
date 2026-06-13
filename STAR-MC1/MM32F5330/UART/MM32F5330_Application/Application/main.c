@@ -31,8 +31,11 @@
 
 /* Files include */
 #include "platform.h"
-#include "uart_interrupt.h"
+#include "uart_receiveridleframe_interrupt.h"
 #include "main.h"
+#include "string.h"
+#include "stdio.h"
+#include "app_protocol.h"
 
 /**
  * @addtogroup MM32F5330_LibSamples
@@ -62,7 +65,6 @@
 /*修改 Bootloader 和 Application Flash空间大小分配，请到Options for Target -> Linker -> ..\..\Device\MM32F5330\Source\mm32f5330.sct  分散加载文件里面去修改*/
 /*To modify the allocation of Bootloader and Application Flash space, please go to Options for Target -> Linker -> ....\Device\MM32F5330\Source\mm32f5330.sct in the scatter-loading file to make the changes.*/
 
-#define APP_ADDRESS_OFFSET 0x2000
 /***********************************************************************************************************************
  * @brief  This function is main entrance
  * @note   main
@@ -75,11 +77,14 @@ int main(void)
   __enable_irq();                              // 跳转之后要确保打开总中断
 
   PLATFORM_Init();
+    
+  printf("MM32F5330 enter application \r\n");
 
-  UART_Interrupt_Sample();
+  UART_Configure(115200);
 
   while (1)
   {
+      Receive_Protocol_Process(); // 添加串口，支持直接Application接收串口升级协议，跳转回Bootloader
   }
 }
 

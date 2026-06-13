@@ -172,7 +172,7 @@ typedef struct
     __IO uint32_t RESERVED0x01C8[239]; ///< Reserved                                        offset 0x01C8 ~ 0x0580
     __IO uint32_t MACVLTTR;            ///< MAC VLAN TAG Transmit Register                  offset 0x0584
     __IO uint32_t MACVLHTR;            ///< MAC VLAN HASH Table Register                    offset 0x0588
-    __IO uint32_t RESERVED0x058C[69];  ///< Reserved                                        offset 0x058C ~ 0x069C
+    __IO uint32_t RESERVED0x058C[93];  ///< Reserved                                        offset 0x058C ~ 0x06EC
     __IO uint32_t PTPCR;               ///< PTP Control Register                            offset 0x0700
     __IO uint32_t PTPNSAR;             ///< PTP Nanosecond Addend Register                  offset 0x0704
     __IO uint32_t PTPSBSR;             ///< PTP Nanosecond Addend Register                  offset 0x0708

@@ -33,6 +33,7 @@
 #include "platform.h"
 #include "tinyusb_device_hid_inout.h"
 #include "main.h"
+#include "app_protocol.h"
 /**
   * @addtogroup MM32F5270_TinyUSB
   * @{
@@ -60,7 +61,7 @@
 /*请注意/Please note*/
 /*修改 Bootloader 和 Application Flash空间大小分配，请到Options for Target -> Linker -> ..\..\..\..\Device\MM32F5270\Source\MM32F5270.sct  分散加载文件里面去修改*/
 /*To modify the allocation of Bootloader and Application Flash space, please go to Options for Target -> Linker -> ..\..\..\..\Device\MM32F5270\Source\MM32F5270.sct in the scatter-loading file to make the changes.*/
-#define APP_ADDRESS_OFFSET 0x4000
+
 /***********************************************************************************************************************
   * @brief  This function is main entrance
   * @note   main
@@ -79,8 +80,8 @@ int main(void)
 
     while (1)
     {
-		tud_task(); // TinyUSB device task
-        hid_task();		
+        tud_task();                 // TinyUSB device task
+        Receive_Protocol_Process(); // 添加HID，支持直接Application接收串口升级协议，跳转回Bootloader		
     }
 }
 

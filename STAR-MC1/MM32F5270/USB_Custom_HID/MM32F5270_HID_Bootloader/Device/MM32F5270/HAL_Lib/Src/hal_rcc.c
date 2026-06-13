@@ -32,11 +32,11 @@
 /* Files includes ------------------------------------------------------------*/
 #include "hal_rcc.h"
 
-uint8_t AHBPreTable[] =
+static __I uint8_t AHBPreTable[] =
 {
     0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9
 };
-uint8_t APBPreTable[] =
+static __I uint8_t APBPreTable[] =
 {
     0, 0, 0, 0, 1, 2, 3, 4
 };

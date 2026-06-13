@@ -34,20 +34,21 @@
 #include "tinyusb_device_hid_inout.h"
 #include "main.h"
 #include "boot.h"
+#include "crc32_algorithm.h"
 /**
-  * @addtogroup MM32F5270_TinyUSB
-  * @{
-  */
+ * @addtogroup MM32F5330_TinyUSB
+ * @{
+ */
 
 /**
-  * @addtogroup TinyUSB_Device
-  * @{
-  */
+ * @addtogroup TinyUSB_Device
+ * @{
+ */
 
 /**
-  * @addtogroup TinyUSB_Device_HID_Comp
-  * @{
-  */
+ * @addtogroup TinyUSB_Device_HID_inout
+ * @{
+ */
 
 /* Private typedef ****************************************************************************************************/
 
@@ -62,55 +63,98 @@
 /*修改 Bootloader 和 Application Flash空间大小分配，请到Options for Target -> Linker -> ..\..\Device\MM32F5330\Source\mm32f5330.sct  分散加载文件里面去修改*/
 /*To modify the allocation of Bootloader and Application Flash space, please go to Options for Target -> Linker -> ....\Device\MM32F5330\Source\mm32f5330.sct in the scatter-loading file to make the changes.*/
 /***********************************************************************************************************************
-  * @brief  This function is main entrance
-  * @note   main
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function is main entrance
+ * @note   main
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 /*Please using an External 8MHz Crystal Oscillator*/
 int main(void)
 {
   uint8_t flag[4];
   uint16_t len;
+  uint32_t Read_address = 0x08000000;
 
-  FLASH_Read(flag, BootJumpFlagAddress, 4);
+  uint32_t Calculation_crc_result = 0;
 
-  if ((flag[0] == 0x55) && (flag[1] == 0xAA) && (flag[2] == 0xAA) && (flag[3] == 0x55)) // 如果用户程序有效，则跳转到用户程序执行用户程序。
+  uint32_t Bootloader_crc_result = 0;
+  uint32_t Information_crc_result = 0;
+  uint32_t Application_crc_result = 0;
+  uint32_t Application_lenth = 0;
+
+  Bootloader_crc_result = *(volatile uint32_t *)(BootJumpFlagAddress - 4);
+  Information_crc_result = *(volatile uint32_t *)(ApplicationAddress - 4);
+  Application_crc_result = *(volatile uint32_t *)(BootJumpFlagAddress + 8);
+
+  Calculation_crc_result = crc32_mpeg2_calculate((uint8_t *)Read_address, (BOOT_SIZE * 1024) - 4); // Bootloader CRC 校验
+  if (Calculation_crc_result != Bootloader_crc_result)
   {
-    // Reset_Periph();//跳转之前，需要关闭boot初始化过的外设，避免导致跳到APP里面后boot里面的外设仍然在工作
-    __disable_irq();
-    __set_MSP(*(u32 *)ApplicationAddress);                     // 设置SP.，堆栈栈顶地址
-    ((void (*)(void)) * (u32 *)(0x04 + ApplicationAddress))(); // 生成跳转函数.将复位中断向量地址做为函数指针
-  }	
-	
     PLATFORM_Init();
-
-    TinyUSB_Device_Configure();
-
-    while (1)
+    printf("Boot Error\r\n");
+    while (1) // Bootloader CRC32校验失败
     {
-		tud_task(); // TinyUSB device task
-        
-		if (USART_RX_STA & 0x8000)
-		{
-		  len = USART_RX_STA & 0x7FFF;
-		  boot_protocol(UART_RxBuff, len);
-		  USART_RX_STA = 0;
-		}		
     }
+  }
+
+  Calculation_crc_result = crc32_mpeg2_calculate((uint8_t *)BootJumpFlagAddress, 1024 - 4); // 1K Information CRC 校验
+  if (Calculation_crc_result == Information_crc_result)
+  {
+    Application_lenth = *(volatile uint32_t *)(BootJumpFlagAddress + 4);
+    if ((Application_lenth != 0xFFFFFFFF) && (Application_lenth <= (APP_SIZE * 1024))) // 获取 Application 程序区长度
+    {
+      Calculation_crc_result = crc32_mpeg2_calculate((uint8_t *)ApplicationAddress, Application_lenth); // Application CRC 校验
+      if (Calculation_crc_result == Application_crc_result)
+      {
+        FLASH_Read(flag, BootJumpFlagAddress, 4);
+
+        if ((flag[0] == 0x55) && (flag[1] == 0xAA) && (flag[2] == 0xAA) && (flag[3] == 0x55)) // 如果用户程序有效，则跳转到用户程序执行用户程序。
+        {
+          if (((*(__IO uint32_t *)ApplicationAddress) & SRAM_LEGAL_ADDRESS_MASK) == 0x20000000) // 检查栈顶地址是否SRAM合法
+          {
+
+            // Reset_Periph();//跳转之前，需要关闭boot初始化过的外设，避免导致跳到APP里面后boot里面的外设仍然在工作
+            __disable_irq();
+            __set_MSP(*(u32 *)ApplicationAddress);                     // 设置SP堆栈栈顶地址
+            ((void (*)(void)) * (u32 *)(0x04 + ApplicationAddress))(); // 生成跳转函数.将复位中断向量地址做为函数指针
+          }
+        }
+      }
+    }
+  }
+
+  PLATFORM_Init();
+
+  printf("MM32F5330 enter bootloader \r\n");
+
+  TinyUSB_Device_Configure();
+  
+  while (1)
+  {
+            GPIOB->BSRR = GPIO_Pin_1;
+ 
+    tud_task(); // TinyUSB device task
+      
+            GPIOB->BRR = GPIO_Pin_1;
+ 
+    if (USB_RX_STA & 0x8000)
+    {
+      len = USB_RX_STA & 0x7FFF;
+      boot_protocol(USB_RxBuff, len);
+      USB_RX_STA = 0;
+    }
+  }
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /********************************************** (C) Copyright MindMotion **********************************************/
-

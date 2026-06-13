@@ -49,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>UART_ReceiverIdleFrame_Interrupt</OutputName>
+          <OutputName>Bootloader</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -81,9 +81,9 @@
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
-            <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name></UserProg1Name>
-            <UserProg2Name></UserProg2Name>
+            <RunUserProg2>1</RunUserProg2>
+            <UserProg1Name>fromelf.exe --bin -o "@L.bin" "#L"</UserProg1Name>
+            <UserProg2Name>.\crc_gen_keil.bat</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
@@ -134,12 +134,12 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4102</DriverSelection>
+            <DriverSelection>4097</DriverSelection>
           </Flash1>
-          <bUseTDR>1</bUseTDR>
-          <Flash2>BIN\UL2V8M.DLL</Flash2>
+          <bUseTDR>0</bUseTDR>
+          <Flash2>Segger\JL2CM3.dll</Flash2>
           <Flash3>"" ()</Flash3>
-          <Flash4></Flash4>
+          <Flash4>.\crc_load.ini</Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
           <pFcArmRoot></pFcArmRoot>
@@ -277,7 +277,7 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x1400</Size>
+                <Size>0x1800</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -302,7 +302,7 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x30000000</StartAddress>
-                <Size>0x1c000</Size>
+                <Size>0x20000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
@@ -329,8 +329,8 @@
             <uC99>1</uC99>
             <uGnu>1</uGnu>
             <useXO>0</useXO>
-            <v6Lang>1</v6Lang>
-            <v6LangP>1</v6LangP>
+            <v6Lang>3</v6Lang>
+            <v6LangP>3</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
@@ -409,17 +409,15 @@
               <FileType>1</FileType>
               <FilePath>..\boot.c</FilePath>
             </File>
+            <File>
+              <FileName>crc32_algorithm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\crc32_algorithm.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>DOC</GroupName>
-          <Files>
-            <File>
-              <FileName>readme.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\readme.txt</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>HAL_LIB</GroupName>

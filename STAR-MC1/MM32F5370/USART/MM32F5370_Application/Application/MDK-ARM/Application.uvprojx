@@ -276,8 +276,8 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x8004000</StartAddress>
-                <Size>0x7c000</Size>
+                <StartAddress>0x8002000</StartAddress>
+                <Size>0x7e000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -338,7 +338,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_STDPERIPH_DRIVER,CUSTOM_HSE_VAL</Define>
+              <Define>USE_STDPERIPH_DRIVER, DCACHE_DISABLED</Define>
               <Undefine></Undefine>
               <IncludePath>..\..\Application;..\..\Device\CMSIS\Core\Include;..\..\Device\MM32F5370\Include;..\..\Device\MM32F5370\HAL_Lib\inc</IncludePath>
             </VariousControls>
@@ -403,6 +403,11 @@
               <FileName>usart_receiveridleframe_interrupt.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\usart_receiveridleframe_interrupt.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app_protocol.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -338,7 +338,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_STDPERIPH_DRIVER,CUSTOM_HSE_VAL</Define>
+              <Define>USE_STDPERIPH_DRIVER, DCACHE_DISABLED</Define>
               <Undefine></Undefine>
               <IncludePath>..\..\Application;..\..\Device\CMSIS\Core\Include;..\..\Device\MM32F5330\Include;..\..\Device\MM32F5330\HAL_Lib\inc</IncludePath>
             </VariousControls>
@@ -395,14 +395,19 @@
               <FilePath>..\mm32f5330_it.c</FilePath>
             </File>
             <File>
-              <FileName>uart_interrupt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\uart_interrupt.c</FilePath>
-            </File>
-            <File>
               <FileName>platform.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\platform.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app_protocol.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart_receiveridleframe_interrupt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\uart_receiveridleframe_interrupt.c</FilePath>
             </File>
           </Files>
         </Group>

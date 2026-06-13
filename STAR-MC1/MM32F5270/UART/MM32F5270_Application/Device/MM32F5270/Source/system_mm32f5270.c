@@ -25,13 +25,9 @@
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *********************************************************************************************************************/
 
-/* Files includes ------------------------------------------------------------*/
+/* Files includes ----------------------------------------------------------------------------------------------------*/
 #include "mm32_device.h"
 #include "mpu_armv8.h"
-
-/**
-  * @}
-  */
 
 /*
  *  Only one of SYSCLK_HSI_XXMHz and SYSCLK_HSE_XXMHz can be defined at a time. 
@@ -40,8 +36,8 @@
  *  Whichever one is used, its value must be greater than or equal to 25 million. 
  *  If it is less than 25 million, HSI or HSE will be used as the system clock.    
  */
-//#define SYSCLK_HSI_XXMHz                120000000
-#define SYSCLK_HSI_XXMHz                96000000
+#define SYSCLK_HSI_XXMHz                120000000
+//#define SYSCLK_HSI_XXMHz                96000000
 //#define SYSCLK_HSI_XXMHz                72000000
 //#define SYSCLK_HSI_XXMHz                48000000
 
@@ -169,18 +165,25 @@ void MPU_Config(void)
 uint32_t AutoCalPllFactor(uint32_t pllclkSourceFrq, uint32_t pllclkFrq, uint8_t *pll_mul, uint8_t *pll_div)
 {
     uint32_t mul_temp, div_temp, mul_max, div_max;
-    uint32_t tempFrq = 0;
+    uint32_t tempFrq = 0, tempFvco = 0;
     uint32_t minDiff = pllclkFrq;
     uint8_t  flag    = 0;
 
-    mul_max = RCC_PLL1CFGR_PLL1MUL_Msk >> RCC_PLL1CFGR_PLL1MUL_Pos;
-    div_max = RCC_PLL1CFGR_PLL1DIV_Msk >> RCC_PLL1CFGR_PLL1DIV_Pos;
+    mul_max  = RCC_PLL1CFGR_PLL1MUL_Msk >> RCC_PLL1CFGR_PLL1MUL_Pos;
+    div_max  = RCC_PLL1CFGR_PLL1DIV_Msk >> RCC_PLL1CFGR_PLL1DIV_Pos;
 
     for (div_temp = 1; div_temp <= div_max; div_temp += 2)
-    {
+    {         
         for (mul_temp = 0; mul_temp <= mul_max; mul_temp++)
         {
-            tempFrq = pllclkSourceFrq / (div_temp + 1) * (mul_temp + 1);
+            tempFvco = pllclkSourceFrq * (mul_temp + 1);
+
+            if ((tempFvco > 400000000) || (tempFvco < 200000000))
+            {
+                continue;
+            }
+                
+            tempFrq = tempFvco / (div_temp + 1);
             tempFrq = (tempFrq > pllclkFrq) ? (tempFrq - pllclkFrq) : (pllclkFrq - tempFrq);
 
             if (minDiff > tempFrq)
@@ -213,8 +216,8 @@ uint32_t AutoCalPllFactor(uint32_t pllclkSourceFrq, uint32_t pllclkFrq, uint8_t 
   */
 static void SetSysClockToDefine(void)
 {
-    __IO uint32_t  tn, tm, StartUpCounter = 0, ClkSrcStatus = 1;
-    uint8_t pll_mul, pll_div;
+    __IO uint32_t  tn, tm, StartUpCounter = 0, ClkSrcStatus = 0;
+    uint8_t pll_mul = 0, pll_div = 0;
     uint32_t temp = 0, i = 0;
 
 #ifdef SYSCLK_HSE_XXMHz
@@ -259,7 +262,8 @@ static void SetSysClockToDefine(void)
 
     /* set PLL1 CP Current Control Signals */
     RCC->PLL1CFGR &= ~RCC_PLL1CFGR_PLL1_ICTRL_Msk;
-    if(HSE_VALUE >= 8000000)
+
+    if (HSE_VALUE >= 8000000)
     {
         RCC->PLL1CFGR |= (0x03 << RCC_PLL1CFGR_PLL1_ICTRL_Pos);
     }
@@ -298,7 +302,8 @@ static void SetSysClockToDefine(void)
 
     /* set PLL1 CP Current Control Signals */
     RCC->PLL1CFGR &= ~RCC_PLL1CFGR_PLL1_ICTRL_Msk;
-    if(HSI_VALUE >= 8000000)
+
+    if (HSI_VALUE >= 8000000)
     {
         RCC->PLL1CFGR |= (0x03 << RCC_PLL1CFGR_PLL1_ICTRL_Pos);
     }
@@ -320,7 +325,6 @@ static void SetSysClockToDefine(void)
         }
 
         FLASH->ACR |= temp;
-
 
         /* HCLK = SYSCLK/8 */
         temp      = RCC->CFGR;
@@ -376,7 +380,6 @@ static void SetSysClockToDefine(void)
         }
 #endif
 
-
         for (i = 0; i < 1000; i++)
         {
             __ASM("nop");
@@ -417,10 +420,13 @@ static void SetSysClockToDefine(void)
     }
     else
     {
-        /* If HSE or HSI not ready within the given time, the program will stop here. 
-           User can add here some code to deal with this error */       
-        while(1);
-    } 
+        /* If HSE or HSI not ready within the given time, the program will stop here.
+           User can add here some code to deal with this error */
+        while (1)
+        {
+            /* please check Whether the crystal oscillator starts*/
+        }
+    }
 }
 
 /**

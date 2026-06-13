@@ -66,16 +66,7 @@
   */
 #define FLEXCAN_HAS_RX_FIFO_DMA (0)
 
-/**
-  *@brief Is affected by errata with ID 6032 (FlexCAN: A frame with wrong ID or payload is transmitted into the CAN bus
-  * when the Message Buffer under transmission is either aborted or deactivated while the CAN bus is in the Bus Idle state).
-  */
-#define FLEXCAN_HAS_ERRATA_6032 (0)
-
-
 #define FLEXCAN_WAIT_TIMEOUT (1000U)
-
-
 
 
 /* The count of CAN_WORD0 */
@@ -84,16 +75,13 @@
 #define CAN_WORD1_COUNT                          (32U)
 
 
-
 /**
   * @brief FlexCAN Frame ID helper macro.
   */
 #define FLEXCAN_ID_STD(id) \
-        (((uint32_t)(((uint32_t)(id)) << FLEXCAN_ID_STD_Pos))&FLEXCAN_ID_STD_Msk) /*!< Standard Frame ID helper macro. */
+        (((uint32_t)(((uint32_t)(id)) << FLEXCAN_ID_STD_Pos)) & FLEXCAN_ID_STD_Msk) /*!< Standard Frame ID helper macro. */
 #define FLEXCAN_ID_EXT(id)                                    \
-        (((uint32_t)(((uint32_t)(id)) << FLEXCAN_ID_EXT_Pos)) & \
-         (FLEXCAN_ID_EXT_Msk | FLEXCAN_ID_STD_Msk))                                /*!< Extend Frame ID helper macro. */
-
+        (((uint32_t)(((uint32_t)(id)) << FLEXCAN_ID_EXT_Pos)) & (FLEXCAN_ID_EXT_Msk | FLEXCAN_ID_STD_Msk)) /*!< Extend Frame ID helper macro. */
 
 
 /**
@@ -176,6 +164,46 @@
 #define FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_C_LOW(id) \
         FLEXCAN_RX_FIFO_EXT_MASK_TYPE_C_LOW(id)       /*!< Extend Rx FIFO Filter helper macro Type C lower part helper macro. */
 
+/**
+  * @brief FlexCAN FD Rx FIFO Filter helper macro.
+  */
+
+#define FLEXCAN_FD_RX_FIFO_STD_FILTER_TYPE_0(id, rtr, id_msk, rtr_msk) \
+    ((uint32_t)(((uint32_t)(0x00) << 30) | ((uint32_t)(rtr) << 27) | ((uint32_t)(id) << 16) | ((uint32_t)(rtr_msk) << 11) | ((uint32_t)(id_msk) << 0)))          
+
+#define FLEXCAN_FD_RX_FIFO_STD_FILTER_TYPE_1(id2, rtr, id1, rtr_msk) \
+    ((uint32_t)(((uint32_t)(0x01) << 30) | ((uint32_t)(rtr) << 27) | ((uint32_t)(id2) << 16) | ((uint32_t)(rtr_msk) << 11) | ((uint32_t)(id1) << 0)))          
+
+#define FLEXCAN_FD_RX_FIFO_STD_FILTER_TYPE_2(id2, rtr2, id1, rtr1) \
+    ((uint32_t)(((uint32_t)(0x02) << 30) | ((uint32_t)(rtr2) << 27) | ((uint32_t)(id2) << 16) | ((uint32_t)(rtr1) << 11) | ((uint32_t)(id1) << 0)))          
+
+
+#define FLEXCAN_FD_RX_FIFO_EXT_FILTER_TYPE_0_0(id, rtr) \
+    ((uint32_t)(((uint32_t)(0x00) << 30) | ((uint32_t)(rtr) << 29) | ((uint32_t)(id) << 0)))          
+#define FLEXCAN_FD_RX_FIFO_EXT_FILTER_TYPE_0_1(id_msk, rtr_msk) \
+    ((uint32_t)(((uint32_t)(rtr_msk) << 29) | ((uint32_t)(id_msk) << 0)))          
+
+#define FLEXCAN_FD_RX_FIFO_EXT_FILTER_TYPE_1_0(id2, rtr) \
+    ((uint32_t)(((uint32_t)(0x01) << 30) | ((uint32_t)(rtr) << 29) | ((uint32_t)(id2) << 0)))          
+#define FLEXCAN_FD_RX_FIFO_EXT_FILTER_TYPE_1_1(id1, rtr_msk) \
+    ((uint32_t)(((uint32_t)(rtr_msk) << 29) | ((uint32_t)(id1) << 0)))  
+
+#define FLEXCAN_FD_RX_FIFO_EXT_FILTER_TYPE_2_0(id2, rtr2) \
+    ((uint32_t)(((uint32_t)(0x02) << 30) | ((uint32_t)(rtr2) << 29) | ((uint32_t)(id2) << 0)))          
+#define FLEXCAN_FD_RX_FIFO_EXT_FILTER_TYPE_2_1(id1, rtr1) \
+    ((uint32_t)(((uint32_t)(rtr1) << 29) | ((uint32_t)(id1) << 0)))  
+
+
+#define FLEXCAN_ERFDID_EXT_Pos                      (0U)
+#define FLEXCAN_ERFDID_EXT_Msk                      (0x3FFFFU)
+#define FLEXCAN_ERFDID_STD_Pos                      (18U)
+#define FLEXCAN_ERFDID_STD_Msk                      (0x1FFC0000U)
+#define FLEXCAN_ERFCS_IDE_Msk                       (0x200000U)
+#define FLEXCAN_ERFCS_RTR_Msk                       (0x100000U)
+#define FLEXCAN_ERFCS_DLC_Msk                       (0xF0000U)
+#define FLEXCAN_ERFCS_DLC_Pos                       (16U)
+#define FLEXCAN_ERFCS_TIME_STAMP_Pos                (0U)
+#define FLEXCAN_ERFCS_TIME_STAMP_Msk                (0xFFFFU)
 
 /**
   * @brief Generic status return codes.
@@ -208,6 +236,35 @@
 #define    Status_Flexcan_UnHandled              0x0001000D   /*!< UnHadled Interrupt asserted. */
 #define    Status_Flexcan_RxRemote               0x0001000E   /*!< Rx Remote Message Received in Mail box. */
 #define    Status_Flexcan_RxFifoUnderflow        0x0001000F   /*!< Enhanced Rx Message FIFO is underflow. */
+
+/**
+  * @brief FlexCAN FD Rx FIFO interrupt
+  */
+#define    FlexCANFD_RxFifoUsableInterrupt      FLEXCAN_ERFIER_ERFDAIE_Msk        /*!< Enhanced Rx FIFO usable interrupt. */
+#define    FlexCANFD_RxFifoWaterlineInterrupt   FLEXCAN_ERFIER_ERFWMIIE_Msk       /*!< Enhanced Rx FIFO waterline interrupt. */
+#define    FlexCANFD_RxFifoOverflowInterrupt    FLEXCAN_ERFIER_ERFOVFIE_Msk       /*!< Enhanced Rx FIFO overflow interrupt. */
+#define    FlexCANFD_RxFifoUnderflowInterrupt   FLEXCAN_ERFIER_ERFUFWIE_Msk       /*!< Enhanced Rx FIFO underflow interrupt. */
+
+/**
+  * @brief FlexCAN FD Rx FIFO status
+  */
+#define    FlexCANFD_RxFifoUsable      FLEXCAN_ERFSR_ERFDA_Msk                    /*!< Enhanced Rx FIFO usable status. */
+#define    FlexCANFD_RxFifoWaterline   FLEXCAN_ERFSR_ERFWMI_Msk                   /*!< Enhanced Rx FIFO waterline status. */
+#define    FlexCANFD_RxFifoOverflow    FLEXCAN_ERFSR_ERFOVF_Msk                   /*!< Enhanced Rx FIFO overflow status. */
+#define    FlexCANFD_RxFifoUnderflow   FLEXCAN_ERFSR_ERFUFW_Msk                   /*!< Enhanced Rx FIFO underflow status. */
+#define    FlexCANFD_RxFifoEmpty       FLEXCAN_ERFSR_ERFE_Msk                     /*!< Enhanced Rx FIFO empty status. */
+#define    FlexCANFD_RxFifoFull        FLEXCAN_ERFSR_ERFF_Msk                     /*!< Enhanced Rx FIFO full status. */
+
+
+enum _flexcan_state {
+    Enum_Flexcan_StateIdle     = 0x0,                                           /*!< MB/RxFIFO idle. */
+    Enum_Flexcan_StateRxData   = 0x1,                                           /*!< MB receiving. */
+    Enum_Flexcan_StateRxRemote = 0x2,                                           /*!< MB receiving remote reply. */
+    Enum_Flexcan_StateTxData   = 0x3,                                           /*!< MB transmitting. */
+    Enum_Flexcan_StateTxRemote = 0x4,                                           /*!< MB transmitting remote request. */
+    Enum_Flexcan_StateRxFifo   = 0x5,                                           /*!< RxFIFO receiving. */
+};
+
 
 /**
   * @brief FlexCAN frame format.
@@ -257,6 +314,25 @@ typedef enum _flexcan_rx_fifo_filter_type
 } flexcan_rx_fifo_filter_type_t;
 
 /**
+  * @brief FlexCAN FD Rx Fifo Filter type.
+  */
+typedef enum _flexcan_fd_rx_fifo_filter_type 
+{
+    Enum_Flexcan_FD_RxFifoFilterType0 = 0x0U,                                   /*!< The filter scheme is based on mask and filter. */
+    Enum_Flexcan_FD_RxFifoFilterType1 = 0x1U,                                   /*!< The filter scheme is based on range. */
+    Enum_Flexcan_FD_RxFifoFilterType2 = 0x2U,                                   /*!< The filter scheme is based on two filters without masks. */
+} flexcan_fd_rx_fifo_filter_type_t;
+
+/**
+  * @brief FlexCAN FD Rx Fifo Filter format.
+  */
+typedef enum _flexcan_fd_rx_fifo_filter_format {
+    Enum_Flexcan_FD_RxFifoFilterFormatSTD = 0x0U,                               /*!< Standard ID filter element. */
+    Enum_Flexcan_FD_RxFifoFilterFormatEXT = 0x1U,                               /*!< Extended filter element. */
+} flexcan_fd_rx_fifo_filter_format_t;
+
+
+/**
   * @brief FlexCAN Message Buffer Payload size.
   */
 typedef enum _flexcan_mb_size
@@ -266,7 +342,6 @@ typedef enum _flexcan_mb_size
     FLEXCAN_32BperMB = 0x2U,           /*!< Selects 32 bytes per Message Buffer. */
     FLEXCAN_64BperMB = 0x3U            /*!< Selects 64 bytes per Message Buffer. */
 } flexcan_mb_size_t;
-
 
 /**
   * @brief  FlexCAN Rx FIFO priority.
@@ -309,7 +384,7 @@ enum _flexcan_flags
 {
     Enum_Flexcan_SynchFlag            = FLEXCAN_ESR1_SYNCH_Msk,   /*!< CAN Synchronization Status. */
     Enum_Flexcan_TxWarningIntFlag     = FLEXCAN_ESR1_TWRNINT_Msk, /*!< Tx Warning Interrupt Flag. */
-    Enum_Flexcan_RxWarningIntFlag     = FLEXCAN_ESR1_RXWRN_Msk, /*!< Rx Warning Interrupt Flag. */
+    Enum_Flexcan_RxWarningIntFlag     = FLEXCAN_ESR1_RWRNINT_Msk, /*!< Rx Warning Interrupt Flag. */
     Enum_Flexcan_IdleFlag             = FLEXCAN_ESR1_IDLE_Msk,    /*!< CAN IDLE Status Flag. */
     Enum_Flexcan_FaultConfinementFlag = FLEXCAN_ESR1_FLTCONF_Msk, /*!< Fault Confinement State Flag. */
     Enum_Flexcan_TransmittingFlag     = FLEXCAN_ESR1_TX_Msk,      /*!< FlexCAN In Transmission Status. */
@@ -566,6 +641,16 @@ typedef struct _flexcan_rx_fifo_config
     flexcan_rx_fifo_filter_type_t idFilterType;  /*!< The FlexCAN Rx FIFO Filter type. */
     flexcan_rx_fifo_priority_t    priority;      /*!< The FlexCAN Rx FIFO receive priority. */
 } flexcan_rx_fifo_config_t;
+
+/**
+  * @brief FlexCAN FD Rx FIFO configuration structure.
+  */
+typedef struct _flexcan_fd_rx_fifo_config {
+    uint32_t                          *idFilterTable;        /*!< Pointer to the FlexCAN FD Rx FIFO identifier filter table. */
+    uint8_t                            rfWaterline;          /*!< Set the enhanced Rx FIFO waterline, The minimum number of CAN messages to store. */
+    flexcan_fd_rx_fifo_filter_type_t   idFilterType;         /*!< The FlexCAN Rx FIFO Filter type. */
+    flexcan_fd_rx_fifo_filter_format_t idFilterFormat;       /*!< The FlexCAN Rx FIFO Filter format. */
+} flexcan_fd_rx_fifo_config_t;
 
 /**
   * @brief FlexCAN Message Buffer transfer.
@@ -880,7 +965,11 @@ void FLEXCAN_SetBaudRate(FLEXCAN_TypeDef *flex_can, flexcan_timing_config_t timi
 void FLEXCAN_SetFDBaudRate(FLEXCAN_TypeDef *flex_can, flexcan_timing_config_t timingConfig);
 uint32_t FLEXCAN_GetFDMailboxOffset(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx);
 
-
+void FLEXCAN_FDRxFifoConfig(FLEXCAN_TypeDef *flex_can, const flexcan_fd_rx_fifo_config_t *pRxFifoConfig, FunctionalState state);
+void FLEXCAN_ReadFDRxFifo(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, flexcan_fd_frame_t *pRxFrame);
+void FLEXCAN_FDRxFifoITConfig(FLEXCAN_TypeDef *flex_can, uint32_t it, FunctionalState state);
+FlagStatus FLEXCAN_FDGetRxFifoFlagStatus(FLEXCAN_TypeDef *flex_can, uint32_t flag);
+void FLEXCAN_FDClearRxFifoFlag(FLEXCAN_TypeDef *flex_can, uint32_t flag);
 
 #endif
 

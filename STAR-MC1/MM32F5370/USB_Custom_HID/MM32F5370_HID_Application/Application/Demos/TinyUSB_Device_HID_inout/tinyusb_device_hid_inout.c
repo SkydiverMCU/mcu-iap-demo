@@ -71,8 +71,7 @@ enum
 /* Private variables **************************************************************************************************/
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 void led_blinking_task(void);
-void hid_task(void);
-uint8_t report_pBuff[64] = {0};
+static void hid_task(void);
 /* Private functions **************************************************************************************************/
 /***********************************************************************************************************************
  * @brief  TinyUSB Device Configure
@@ -88,34 +87,18 @@ void TinyUSB_Device_Configure(void)
   tud_init(BOARD_TUD_RHPORT);
 }
 
-void hid_task(void)
+/***********************************************************************************************************************
+ * @brief
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
+void USB_SendGroup(uint8_t *pBuff, uint16_t length)
 {
-  // Poll every 10ms
-  const uint32_t interval_ms = 10;
-  static uint32_t start_ms = 0;
-
-  if (board_millis() - start_ms < interval_ms)
-    return; // not enough time
-  start_ms += interval_ms;
-
-  uint32_t const btn = board_button_read();
-
-  if(1)
-  {
-      // Remote wakeup
-      if ( tud_suspended() && btn )
-      {
-        // Wake up host if we are in suspend mode
-        // and REMOTE_WAKEUP feature is enabled by host
-        tud_remote_wakeup();
-      }else
-      {
-        // Send the 1st of report chain, the rest will be sent by tud_hid_report_complete_cb()
-        tud_hid_report(0, report_pBuff, 64);
-        report_pBuff[0]++;
-      }
-  }
+  tud_hid_report(0, pBuff, length);
+  // tud_hid_set_report_cb(instance, 0, HID_REPORT_TYPE_INVALID, pBuff, (uint16_t) length);
 }
+
 //--------------------------------------------------------------------+
 // Device callbacks
 //--------------------------------------------------------------------+

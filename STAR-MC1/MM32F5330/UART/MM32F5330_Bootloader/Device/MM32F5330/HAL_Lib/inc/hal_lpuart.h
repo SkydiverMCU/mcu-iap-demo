@@ -86,7 +86,7 @@ typedef struct
 #define LPUART_StopBits_2                   (0x01U << LPUART_LPUCON_SL_Pos)
 
 #define LPUART_Parity_No                    (0x00U << LPUART_LPUCON_PAREN_Pos)
-#define LPUART_Parity_Even                  (0x01U << LPUART_LPUCON_PAREN_Pos)
+#define LPUART_Parity_Even                  ((0x01U << LPUART_LPUCON_PAREN_Pos) | (0x00U << LPUART_LPUCON_PTYP_Pos))
 #define LPUART_Parity_Odd                   ((0x01U << LPUART_LPUCON_PAREN_Pos) | (0x01U << LPUART_LPUCON_PTYP_Pos))
 
 #define LPUART_ClockSource_LSE              (0x00U << RCC_CFGR2_LPUARTCLKSEL_Pos)
@@ -112,10 +112,11 @@ typedef struct
 #define LPUART_RecvEvent_Falling_Edge       (0x03U << LPUART_LPUCON_RXEV_Pos)
 
 #define LPUART_IT_ERR                       (0x01U << LPUART_LPUCON_ERRIE_Pos)
-#define LPUART_IT_RX                        (0x01U << LPUART_LPUCON_RXIE_Pos)
 #define LPUART_IT_TC                        (0x01U << LPUART_LPUCON_TCIE_Pos)
 #define LPUART_IT_TX                        (0x01U << LPUART_LPUCON_TXIE_Pos)
-#define LPUART_IT_RXNEG                     (0x01U << LPUART_LPUIF_RXNEGIF_Pos)
+#define LPUART_IT_RXNEG                     (0x01U << LPUART_LPUCON_NEDET_Pos)
+#define LPUART_IT_RX                        (0x01U << LPUART_LPUCON_RXIE_Pos)
+
 
 #define LPUART_FLAG_START                   (0x01U << LPUART_LPUSTA_START_Pos)
 #define LPUART_FLAG_PERR                    (0x01U << LPUART_LPUSTA_PERR_Pos)

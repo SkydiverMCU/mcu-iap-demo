@@ -11,8 +11,8 @@
 ;   <o1> Flash Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
  *----------------------------------------------------------------------------*/
-#define __ROM_BASE     0x08001800
-#define __ROM_SIZE     0x0003E800
+#define __ROM_BASE     0x08001C00
+#define __ROM_SIZE     0x0003E400
 
 /*---------------------------- ITCM Configuration -----------------------------
 ; <h> ITCM Configuration

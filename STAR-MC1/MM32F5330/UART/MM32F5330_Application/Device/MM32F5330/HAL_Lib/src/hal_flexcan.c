@@ -75,22 +75,6 @@
 
 #define MAX_TDCOFF ((uint32_t)FLEXCAN_FDCTRL_TDCOFF_Msk >> FLEXCAN_FDCTRL_TDCOFF_Pos)
 
-#define MAX_NTSEG1            (CAN_ENCBT_NTSEG1_MASK >> CAN_ENCBT_NTSEG1_SHIFT)
-#define MAX_NTSEG2            (CAN_ENCBT_NTSEG2_MASK >> CAN_ENCBT_NTSEG2_SHIFT)
-#define MAX_NRJW              (CAN_ENCBT_NRJW_MASK >> CAN_ENCBT_NRJW_SHIFT)
-#define MAX_ENPRESDIV         (CAN_EPRS_ENPRESDIV_MASK >> CAN_EPRS_ENPRESDIV_SHIFT)
-#define ENCBT_MAX_TIME_QUANTA (1U + MAX_NTSEG1 + 1U + MAX_NTSEG2 + 1U)
-#define ENCBT_MIN_TIME_QUANTA (8U)
-
-#define MAX_DTSEG1            (CAN_EDCBT_DTSEG1_MASK >> CAN_EDCBT_DTSEG1_SHIFT)
-#define MAX_DTSEG2            (CAN_EDCBT_DTSEG2_MASK >> CAN_EDCBT_DTSEG2_SHIFT)
-#define MAX_DRJW              (CAN_EDCBT_DRJW_MASK >> CAN_EDCBT_DRJW_SHIFT)
-#define MAX_EDPRESDIV         (CAN_EPRS_EDPRESDIV_MASK >> CAN_EPRS_EDPRESDIV_SHIFT)
-#define EDCBT_MAX_TIME_QUANTA (1U + MAX_DTSEG1 + 1U + MAX_DTSEG2 + 1U)
-#define EDCBT_MIN_TIME_QUANTA (5U)
-
-#define MAX_ETDCOFF ((uint32_t)CAN_ETDC_ETDCOFF_MASK >> CAN_ETDC_ETDCOFF_SHIFT)
-
 /* TSEG1 corresponds to the sum of xPROPSEG and xPSEG1, TSEG2 corresponds to the xPSEG2 value. */
 #define MIN_TIME_SEGMENT1 (2U)
 #define MIN_TIME_SEGMENT2 (2U)
@@ -103,16 +87,6 @@
 #define CAN_ESR1_FLTCONF_BUSOFF (2U << FLEXCAN_ESR1_FLTCONF_Pos)
 #endif
 
-/* @brief FlexCAN Internal State. */
-enum _flexcan_state
-{
-    Enum_Flexcan_StateIdle     = 0x0,  /*!< MB/RxFIFO idle. */
-    Enum_Flexcan_StateRxData   = 0x1,  /*!< MB receiving. */
-    Enum_Flexcan_StateRxRemote = 0x2,  /*!< MB receiving remote reply. */
-    Enum_Flexcan_StateTxData   = 0x3,  /*!< MB transmitting. */
-    Enum_Flexcan_StateTxRemote = 0x4,  /*!< MB transmitting remote request. */
-    Enum_Flexcan_StateRxFifo   = 0x5   /*!< RxFIFO receiving. */
-};
 
 /**
   * @brief FlexCAN message buffer CODE for Rx buffers.
@@ -123,13 +97,13 @@ enum _flexcan_mb_code_rx
     Enum_Flexcan_RxMbFull     = 0x2,   /*!< MB is full. */
     Enum_Flexcan_RxMbEmpty    = 0x4,   /*!< MB is active and empty. */
     Enum_Flexcan_RxMbOverrun  = 0x6,   /*!< MB is overwritten into a full buffer. */
-    Enum_Flexcan_RxMbBusy     = 0x8,   /*!< FlexCAN is updating the contents of the MB. The CPU must not access the MB. */
+    Enum_Flexcan_RxMbBusy     = 0x1,   /*!< FlexCAN is updating the contents of the MB. The CPU must not access the MB. */
     Enum_Flexcan_RxMbRanswer  = 0xA,   /*!< A frame was configured to recognize a Remote Request Frame and transmit a Response Frame in return. */
     Enum_Flexcan_RxMbNotUsed  = 0xF    /*!< Not used. */
 };
 
 /**
-  * @brief FlexCAN message buffer CODE FOR Tx buffers.
+  * @brief FlexCAN message buffer CODE for Tx buffers.
   */
 enum _flexcan_mb_code_tx
 {
@@ -329,9 +303,8 @@ static void FLEXCAN_Reset(FLEXCAN_TypeDef *flex_can)
   *   flexcanConfig.enableIndividMask    = false;
   *   flexcanConfig.disableSelfReception = false;
   *   flexcanConfig.enableListenOnlyMode = false;
-  *   flexcanConfig.enableDoze           = false;
   *   flexcanConfig.timingConfig         = timingConfig;
-  *   FLEXCAN_Init(CAN0, &flexcanConfig);
+  *   FLEXCAN_Init(FLEXCAN1, &flexcanConfig);
   *   endcode
   *
   * @param flex_can FlexCAN peripheral Struct Point.
@@ -409,9 +382,8 @@ void FLEXCAN_Init(FLEXCAN_TypeDef *flex_can, const flexcan_config_t *pConfig)
   *   flexcanConfig.enableIndividMask    = false;
   *   flexcanConfig.disableSelfReception = false;
   *   flexcanConfig.enableListenOnlyMode = false;
-  *   flexcanConfig.enableDoze           = false;
   *   flexcanConfig.timingConfig         = timingConfig;
-  *   FLEXCAN_FDInit(CAN0, &flexcanConfig, kFLEXCAN_16BperMB, false);
+  *   FLEXCAN_FDInit(FLEXCAN1, &flexcanConfig, FLEXCAN_16BperMB, false);
   *   endcode
   *
   * @param flex_can FlexCAN peripheral base address.
@@ -439,26 +411,13 @@ void FLEXCAN_FDInit(FLEXCAN_TypeDef *flex_can, const flexcan_config_t *pConfig, 
         fdctrl &= ~FLEXCAN_FDCTRL_FDRATE_Msk;
     }
 
-//    /* Before use "|=" operation for multi-bits field, CPU should clean previous Setting. */
-//    fdctrl = (fdctrl & ~FLEXCAN_FDCTRL_MBDSR0_Msk) | (dataSize << FLEXCAN_FDCTRL_MBDSR0_Pos);
-
-//    /* Enter Freeze Mode. */
-//    FLEXCAN_EnterFreezeMode(flex_can);
-
-//    /* Enable CAN FD operation. */
-//    flex_can->MCR |= FLEXCAN_MCR_FDEN_Msk;
-
-//    /* Clear SMP bit when CAN FD is enabled (CAN FD only can use one regular sample point plus one optional secondary
-//     * sampling point). */
-//    flex_can->CTRL1 &= ~FLEXCAN_CTRL1_SMP_Msk;
-
     if (brs && !(pConfig->enableLoopBack))
     {
          /* The TDC offset should be configured as shown in this equation : offset = PSEG1 + PROPSEG + 2 */
         if (((uint32_t)pConfig->timingConfig.fphaseSeg1 + pConfig->timingConfig.fpropSeg + 2U) < MAX_TDCOFF)
         {
-            fdctrl = (fdctrl & ~FLEXCAN_FDCTRL_TDCOFF_Msk) | (((uint32_t)pConfig->timingConfig.fphaseSeg1 +
-                                                                            pConfig->timingConfig.fpropSeg + 2U) << FLEXCAN_FDCTRL_TDCOFF_Pos);
+            fdctrl = (fdctrl & ~FLEXCAN_FDCTRL_TDCOFF_Msk) | 
+			         (((uint32_t)pConfig->timingConfig.fphaseSeg1 + pConfig->timingConfig.fpropSeg + 2U) << FLEXCAN_FDCTRL_TDCOFF_Pos);
         }
         else
         {
@@ -519,7 +478,6 @@ void FLEXCAN_Deinit(FLEXCAN_TypeDef *flex_can)
   *   flexcanConfig->enableIndividMask       = false;
   *   flexcanConfig->disableSelfReception    = false;
   *   flexcanConfig->enableListenOnlyMode    = false;
-  *   flexcanConfig->enableDoze              = false;
   *   flexcanConfig.timingConfig             = timingConfig;
   *
   * @param pConfig Pointer to the FlexCAN configuration structure.
@@ -809,7 +767,7 @@ static ErrorStatus FLEXCAN_GetSegments(uint32_t baudRate, uint32_t tqNum, flexca
   */
 ErrorStatus FLEXCAN_CalculateImprovedTimingValues(uint32_t baudRate, uint32_t sourceClock_Hz, flexcan_timing_config_t *pTimingConfig)
 {
-    uint32_t clk;                      /* the clock is tqNumb x baudRateFD. */
+    uint32_t clk;                      /* the clock is tqNumb x baudRate. */
     uint32_t tqNum;                    /* Numbers of TQ. */
     ErrorStatus fgRet = ERROR;
 
@@ -1307,7 +1265,7 @@ void FLEXCAN_RxMbConfig(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, const flexcan_
 }
 
 /**
-  * @brief Configures a FlexCAN Receive Message Buffer.
+  * @brief Configures a FlexCAN FD Receive Message Buffer.
   *
   * This function cleans a FlexCAN build-in Message Buffer and configures it
   * as a Receive Message Buffer.
@@ -1372,9 +1330,9 @@ void FLEXCAN_FDRxMbConfig(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, const flexca
   *
   * @param flex_can FlexCAN peripheral Struct Point.
   * @param pRxFifoConfig Pointer to the FlexCAN Rx FIFO configuration structure.
-  * @param enable Enable/disable Rx FIFO.
-  *               - ENABLE: Enable Rx FIFO.
-  *               - DISABLE: Disable Rx FIFO.
+  * @param state Enable/disable Rx FIFO.
+  *         - ENABLE: Enable Rx FIFO.
+  *         - DISABLE: Disable Rx FIFO.
   */
 void FLEXCAN_RxFifoConfig(FLEXCAN_TypeDef *flex_can, const flexcan_rx_fifo_config_t *pRxFifoConfig, FunctionalState state)
 {
@@ -1390,8 +1348,7 @@ void FLEXCAN_RxFifoConfig(FLEXCAN_TypeDef *flex_can, const flexcan_rx_fifo_confi
         /* Get the setup_mb value. */
         setup_mb = (uint8_t)((flex_can->MCR & FLEXCAN_MCR_MAXMB_Msk) >> FLEXCAN_MCR_MAXMB_Pos);
         setup_mb = (setup_mb < (uint32_t)FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(flex_can)) ?
-                   setup_mb :
-                   (uint32_t)FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(flex_can);
+                   setup_mb : (uint32_t)FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(flex_can);
 
         /* Determine RFFN value. */
         for (i = 0; i <= 0xFU; i++)
@@ -1488,7 +1445,7 @@ void FLEXCAN_RxFifoConfig(FLEXCAN_TypeDef *flex_can, const flexcan_rx_fifo_confi
 /**
   * @brief  Gets the Rx FIFO Head address.
   *
-  * This function returns the FlexCAN Rx FIFO Head address, which is mainly used for the DMA/eDMA use case.
+  * This function returns the FlexCAN Rx FIFO Head address, which is mainly used for the DMA use case.
   *
   * @param flex_can FlexCAN peripheral Struct Point.
   * @return FlexCAN Rx FIFO Head address.
@@ -1533,81 +1490,6 @@ void FLEXCAN_EnableRxFifoDMA(FLEXCAN_TypeDef *flex_can, FunctionalState state)
 }
 #endif /* FLEXCAN_HAS_RX_FIFO_DMA */
 
-
-#if (defined (FLEXCAN_HAS_ERRATA_6032) && FLEXCAN_HAS_ERRATA_6032)
-/**
-  * FlexCAN: A frame with wrong ID or payload is transmitted into
-  * the CAN bus when the Message Buffer under transmission is
-  * either aborted or deactivated while the CAN bus is in the Bus Idle state
-  *
-  * This function to do workaround for ERR006032
-  *
-  * @param flex_can FlexCAN peripheral Struct Point.
-  * @param mbIdx The FlexCAN Message Buffer index.
-  */
-static void FLEXCAN_ERRATA_6032(FLEXCAN_TypeDef *flex_can, volatile uint32_t *mbCSAddr)
-{
-    uint32_t dbg_temp      = 0U;
-    uint32_t uint32_tTempCS     = 0U;
-    uint32_t uint32_tTimeout    = DELAY_BUSIDLE;
-    uint32_t u32TempIMASK1 = flex_can->IMASK1;
-
-    /* after backup all interruption, disable ALL interruption */
-    flex_can->IMASK1 = 0;
-    dbg_temp         = (uint32_t)(flex_can->DBG1);
-
-    switch (dbg_temp & CAN_DBG1_CFSM_MASK)
-    {
-        case RXINTERMISSION:
-
-            if (CBN_VALUE3 == (dbg_temp & CAN_DBG1_CBN_MASK))
-            {
-                 /* wait until CFSM is different from RXINTERMISSION */
-                while (RXINTERMISSION == (flex_can->DBG1 & CAN_DBG1_CFSM_MASK))
-                {
-                    __NOP();
-                }
-            }
-
-            break;
-
-        case TXINTERMISSION:
-
-            if (CBN_VALUE3 == (dbg_temp & CAN_DBG1_CBN_MASK))
-            {
-                 /* wait until CFSM is different from TXINTERMISSION */
-                while (TXINTERMISSION == (flex_can->DBG1 & CAN_DBG1_CFSM_MASK))
-                {
-                    __NOP();
-                }
-            }
-
-            break;
-
-        default:
-             /* To avoid MISRA-C 2012 rule 16.4 issue. */
-            break;
-    }
-
-     /* Anyway, BUSIDLE need to delay */
-    if (BUSIDLE == (flex_can->DBG1 & CAN_DBG1_CFSM_MASK))
-    {
-        while (uint32_tTimeout-- > 0U)
-        {
-            __NOP();
-        }
-
-         /* Write 0x0 into Code field of CS word. */
-        uint32_tTempCS  = (uint32_t)(*mbCSAddr);
-        uint32_tTempCS &= ~FLEXCAN_CS_CODE_Msk;
-        *mbCSAddr  = uint32_tTempCS;
-    }
-
-     /* restore interruption */
-    flex_can->IMASK1 = u32TempIMASK1;
-}
-#endif
-
 #if (defined (FLEXCAN_HAS_ERRATA_5829) && FLEXCAN_HAS_ERRATA_5829)
 static uint8_t FLEXCAN_GetFirstValidMb(FLEXCAN_TypeDef *flex_can)
 {
@@ -1627,6 +1509,171 @@ static uint8_t FLEXCAN_GetFirstValidMb(FLEXCAN_TypeDef *flex_can)
 }
 #endif
 
+
+/**
+  * @brief Configures the FlexCAN FD Rx FIFO.
+  *
+  * This function configures the enhanced Rx FIFO with given Rx FIFO configuration.
+  *
+  * @param flex_can FlexCAN peripheral Struct Point.
+  * @param pRxFifoConfig Pointer to the FlexCAN FD Rx FIFO configuration structure.
+  * @param state Enable/disable enhanced Rx FIFO.
+  *         - true: Enable enhanced Rx FIFO.
+  *         - false: Disable enhanced Rx FIFO.
+  */
+void FLEXCAN_FDRxFifoConfig(FLEXCAN_TypeDef *flex_can, const flexcan_fd_rx_fifo_config_t *pRxFifoConfig, FunctionalState state)
+{
+    /* Enter Freeze Mode. */
+    FLEXCAN_EnterFreezeMode(flex_can);
+
+    /* Reset ERFFELn RAM. */
+    flex_can->ERFFEL[0] &= ~FLEXCAN_ERFFEL_FEL_Msk; 
+    flex_can->ERFFEL[1] &= ~FLEXCAN_ERFFEL_FEL_Msk; 
+
+    if (state)
+    {
+        /* Disable standard RX FIFO. */
+        flex_can->MCR &= ~FLEXCAN_MCR_RFEN_Msk;  
+        
+        /* Setup ID fitlter type. */
+        flex_can->ERFFEL[0] &= ~0x3FFFFFFF;
+        flex_can->ERFFEL[0] |= pRxFifoConfig->idFilterType << 30;
+
+        flex_can->ERFFEL[1] &= ~0x3FFFFFFF;
+        flex_can->ERFFEL[1] |= pRxFifoConfig->idFilterType << 30;
+
+        /* Setup enhanced Rx FIFO filter element. */
+        flex_can->ERFFEL[0] = pRxFifoConfig->idFilterTable[0];
+        flex_can->ERFFEL[1] = pRxFifoConfig->idFilterTable[1];
+
+        /* Setup ID fitlter format. */
+        if(pRxFifoConfig->idFilterFormat == Enum_Flexcan_FD_RxFifoFilterFormatSTD)
+        {
+            flex_can->ERFCR &= ~FLEXCAN_ERFCR_NEXIF_Msk;
+        }
+        else
+        {
+            flex_can->ERFCR |= FLEXCAN_ERFCR_NEXIF_Msk;
+        }
+
+        /* Set the enhanced Rx FIFO waterline */
+        flex_can->ERFCR &= ~FLEXCAN_ERFCR_ERFWM_Msk; 
+        flex_can->ERFCR |=  pRxFifoConfig->rfWaterline << FLEXCAN_ERFCR_ERFWM_Pos;
+
+        /* Clear enhanced Rx FIFO status flag */
+        flex_can->ERFSR |= FLEXCAN_ERFSR_ERFUFW_Msk | FLEXCAN_ERFSR_ERFOVF_Msk | FLEXCAN_ERFSR_ERFWMI_Msk | FLEXCAN_ERFSR_ERFDA_Msk;
+
+        /* Enable enhanced Rx FIFO. */
+        flex_can->ERFCR |= FLEXCAN_ERFCR_ERFEN_Msk;
+
+        /* Reset enhanced Rx FIFO pointer. */
+        flex_can->ERFSR |= FLEXCAN_ERFSR_ERFCLR_Msk;
+
+    }
+    else
+    {
+        /* Disable enhanced Rx Message FIFO. */
+        flex_can->ERFCR &= ~FLEXCAN_ERFCR_ERFEN_Msk;
+    }
+
+    /* Exit Freeze Mode. */
+    FLEXCAN_ExitFreezeMode(flex_can);
+}
+
+
+/**
+  * @brief Reads a FlexCAN Message from the enhanced Rx FIFO.
+  *
+  * This function reads a CAN message from the enhanced Rx FIFO.
+  * The function fills a receive CAN message frame structure with just received data.
+  * The function returns immediately.
+  *
+  * @param flex_can FlexCAN peripheral Struct Point.
+  * @param mbIdx The FlexCAN Message Buffer index.
+  * @param pRxFrame Pointer to CAN message frame structure for reception.
+  */
+void FLEXCAN_ReadFDRxFifo(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, flexcan_fd_frame_t *pRxFrame)
+{
+    uint32_t cs_temp;
+    uint32_t id_temp;
+	uint8_t i = 0;
+
+    cs_temp = flex_can->ERFMB[mbIdx].ERFCS;
+    id_temp = flex_can->ERFMB[mbIdx].ERFDID;
+
+    pRxFrame->id = id_temp & (FLEXCAN_ERFDID_EXT_Msk | FLEXCAN_ERFDID_STD_Msk);
+    
+    /* Get the message ID and format. */
+    pRxFrame->format = 
+	    (cs_temp & FLEXCAN_ERFCS_IDE_Msk) != 0U ? (uint8_t)Enum_Flexcan_FrameFormatExtend : (uint8_t)Enum_Flexcan_FrameFormatStandard;
+    
+    /* Get the message type. */
+    pRxFrame->type =
+        (cs_temp & FLEXCAN_ERFCS_RTR_Msk) != 0U ? (uint8_t)Enum_Flexcan_FrameTypeRemote : (uint8_t)Enum_Flexcan_FrameTypeData;
+    
+    /* Get the message length. */
+    pRxFrame->length = (uint8_t)((cs_temp & FLEXCAN_ERFCS_DLC_Msk) >> FLEXCAN_ERFCS_DLC_Pos);
+    
+    /* Get the time stamp. */
+    pRxFrame->timestamp = (u16)((cs_temp & FLEXCAN_ERFCS_TIME_STAMP_Msk) >> FLEXCAN_ERFCS_TIME_STAMP_Pos);
+    
+    /* Store Message Payload. */
+    for(i = 0; i < 16; i++)
+    {    
+        pRxFrame->dataWord[i] = flex_can->ERFMB[mbIdx].ERFDWORD[i];
+    }
+}
+
+/**
+  * @brief  Enables or disables the FlexCAN FD Rx FIFO interrupt.
+  * @param flex_can FlexCAN peripheral Struct Point.
+  * @param it FlexCAN FD Rx FIFO interrupt.
+            -FlexCANFD_RxFifoUsableInterrupt   
+            -FlexCANFD_RxFifoWaterlineInterrupt
+            -FlexCANFD_RxFifoOverflowInterrupt 
+            -FlexCANFD_RxFifoUnderflowInterrupt
+  * @param ENABLE true to enable, DISABLE to disable.
+  * @retval None.
+  */
+void FLEXCAN_FDRxFifoITConfig(FLEXCAN_TypeDef *flex_can, uint32_t it, FunctionalState state)
+{
+    (state) ?                  \
+    (flex_can->ERFIER |= it) : \
+    (flex_can->ERFIER &= ~it);
+}
+
+/**
+  * @brief  Gets the selected FlexCAN FD Rx FIFO status flag.
+  * @param flex_can FlexCAN peripheral Struct Point.
+  * @param flag the selected FlexCAN FD Rx FIFO status flag.
+            -FlexCANFD_RxFifoUsable   
+            -FlexCANFD_RxFifoWaterline
+            -FlexCANFD_RxFifoOverflow 
+            -FlexCANFD_RxFifoUnderflow
+            -FlexCANFD_RxFifoEmpty    
+            -FlexCANFD_RxFifoFull     
+  * @retval The new state ofthe selected FlexCAN FD Rx FIFO status flag. (SET or RESET).
+  */
+FlagStatus FLEXCAN_FDGetRxFifoFlagStatus(FLEXCAN_TypeDef *flex_can, uint32_t flag)
+{
+    return ((flex_can->ERFSR & flag) ? SET : RESET);
+}
+
+/**
+  * @brief  Clears the FlexCAN FD Rx FIFO pending flags.
+  * @param flex_can FlexCAN peripheral Struct Point.
+  * @param flag the selected FlexCAN FD Rx FIFO status flag.
+            -FlexCANFD_RxFifoUsable   
+            -FlexCANFD_RxFifoWaterline
+            -FlexCANFD_RxFifoOverflow 
+            -FlexCANFD_RxFifoUnderflow
+  * @retval None.
+  */
+void FLEXCAN_FDClearRxFifoFlag(FLEXCAN_TypeDef *flex_can, uint32_t flag)
+{
+    flex_can->ERFSR = flag;
+}
+
 /**
   * @brief Writes a FlexCAN Message to the Transmit Message Buffer.
   *
@@ -1644,10 +1691,6 @@ int32_t FLEXCAN_WriteTxMb(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, const flexca
 {
     uint32_t cs_temp = 0;
     uint32_t status;
-
-#if (defined (FLEXCAN_HAS_ERRATA_6032) && FLEXCAN_HAS_ERRATA_6032)
-    FLEXCAN_ERRATA_6032(flex_can, &(flex_can->MB[mbIdx].CS));
-#endif
 
     /* Check if Message Buffer is available. */
     if ((Enum_Flexcan_TxMbDataOrRemote << FLEXCAN_CS_CODE_Pos) != (flex_can->MB[mbIdx].CS & FLEXCAN_CS_CODE_Msk))
@@ -1723,10 +1766,6 @@ int32_t FLEXCAN_WriteFDTxMb(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, const flex
     volatile uint32_t *mbAddr = &(flex_can->MB[0].CS);
     uint32_t offset           = FLEXCAN_GetFDMailboxOffset(flex_can, mbIdx);
 
-#if (defined (FLEXCAN_HAS_ERRATA_6032) && FLEXCAN_HAS_ERRATA_6032)
-    FLEXCAN_ERRATA_6032(flex_can, &(mbAddr[offset]));
-#endif
-
     can_cs = mbAddr[offset];
 
      /* Check if Message Buffer is available. */
@@ -1800,9 +1839,9 @@ int32_t FLEXCAN_WriteFDTxMb(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, const flex
   * @param flex_can FlexCAN peripheral Struct Point.
   * @param mbIdx The FlexCAN Message Buffer index.
   * @param pRxFrame Pointer to CAN message frame structure for reception.
-  * @retval Status_Flexcan_Success            - Rx Message Buffer is full and has been read successfully.
+  * @retval Status_Flexcan_Success    - Rx Message Buffer is full and has been read successfully.
   * @retval Status_Flexcan_RxOverflow - Rx Message Buffer is already overflowed and has been read successfully.
-  * @retval Status_Flexcan_Fail               - Rx Message Buffer is empty.
+  * @retval Status_Flexcan_Fail       - Rx Message Buffer is empty.
   */
 int32_t FLEXCAN_ReadRxMb(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, flexcan_frame_t *pRxFrame)
 {
@@ -1826,8 +1865,8 @@ int32_t FLEXCAN_ReadRxMb(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, flexcan_frame
                            (uint8_t)Enum_Flexcan_FrameFormatStandard;
 
         /* Get the message type. */
-        pRxFrame->type =
-            (cs_temp & FLEXCAN_CS_RTR_Msk) != 0U ? (uint8_t)Enum_Flexcan_FrameTypeRemote : (uint8_t)Enum_Flexcan_FrameTypeData;
+        pRxFrame->type =   (cs_temp & FLEXCAN_CS_RTR_Msk) != 0U ? (uint8_t)Enum_Flexcan_FrameTypeRemote : 
+		                   (uint8_t)Enum_Flexcan_FrameTypeData;
 
         /* Get the message length. */
         pRxFrame->length = (uint8_t)((cs_temp & FLEXCAN_CS_DLC_Msk) >> FLEXCAN_CS_DLC_Pos);
@@ -1910,8 +1949,8 @@ int32_t FLEXCAN_ReadFDRxMb(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, flexcan_fd_
                            (uint8_t)Enum_Flexcan_FrameFormatStandard;
 
         /* Get the message type. */
-        pRxFrame->type =
-            (cs_temp & FLEXCAN_CS_RTR_Msk) != 0U ? (uint8_t)Enum_Flexcan_FrameTypeRemote : (uint8_t)Enum_Flexcan_FrameTypeData;
+        pRxFrame->type =   (cs_temp & FLEXCAN_CS_RTR_Msk) != 0U ? (uint8_t)Enum_Flexcan_FrameTypeRemote : 
+		                   (uint8_t)Enum_Flexcan_FrameTypeData;
 
         /* Get the message length. */
         pRxFrame->length = (uint8_t)((cs_temp & FLEXCAN_CS_DLC_Msk) >> FLEXCAN_CS_DLC_Pos);
@@ -1919,8 +1958,7 @@ int32_t FLEXCAN_ReadFDRxMb(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, flexcan_fd_
         /* Get the time stamp. */
         pRxFrame->timestamp = (uint16_t)((cs_temp & FLEXCAN_CS_TIME_STAMP_Msk) >> FLEXCAN_CS_TIME_STAMP_Pos);
 
-        /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64
-           Bytes payload. */
+        /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64 Bytes payload. */
         for (cnt = 0; cnt < (dataSize + 1U); cnt++)
         {
             payload_dword *= 2U;
@@ -1985,8 +2023,8 @@ int32_t FLEXCAN_ReadRxFifo(FLEXCAN_TypeDef *flex_can, flexcan_frame_t *pRxFrame)
                            (uint8_t)Enum_Flexcan_FrameFormatStandard;
 
         /* Get the message type. */
-        pRxFrame->type =
-            (cs_temp & FLEXCAN_CS_RTR_Msk) != 0U ? (uint8_t)Enum_Flexcan_FrameTypeRemote : (uint8_t)Enum_Flexcan_FrameTypeData;
+        pRxFrame->type =   (cs_temp & FLEXCAN_CS_RTR_Msk) != 0U ? (uint8_t)Enum_Flexcan_FrameTypeRemote : 
+		                   (uint8_t)Enum_Flexcan_FrameTypeData;
 
         /* Get the message length. */
         pRxFrame->length = (uint8_t)((cs_temp & FLEXCAN_CS_DLC_Msk) >> FLEXCAN_CS_DLC_Pos);
@@ -2028,18 +2066,18 @@ int32_t FLEXCAN_ReadRxFifo(FLEXCAN_TypeDef *flex_can, flexcan_frame_t *pRxFrame)
 int32_t FLEXCAN_TransferSendBlocking(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, flexcan_frame_t *pTxFrame)
 {
     uint32_t status;
-    uint32_t uint32_tflag = 1;
+    uint32_t u32flag = 1;
 
     /* Write Tx Message Buffer to initiate a data sending. */
     if (Status_Flexcan_Success == FLEXCAN_WriteTxMb(flex_can, mbIdx, (const flexcan_frame_t *)(uint32_t)pTxFrame))
     {
         /* Wait until CAN Message send out. */
-        while (0U == FLEXCAN_GetMbStatusFlags(flex_can, uint32_tflag << mbIdx))
+        while (0U == FLEXCAN_GetMbStatusFlags(flex_can, u32flag << mbIdx))
         {
         }
 
         /* Clean Tx Message Buffer Flag. */
-        FLEXCAN_ClearMbStatusFlags(flex_can, uint32_tflag << mbIdx);
+        FLEXCAN_ClearMbStatusFlags(flex_can, u32flag << mbIdx);
 
         /* After TX MB tranfered success, update the Timestamp from MB[mbIdx].CS register */
         pTxFrame->timestamp = (uint16_t)((flex_can->MB[mbIdx].CS & FLEXCAN_CS_TIME_STAMP_Msk) >> FLEXCAN_CS_TIME_STAMP_Pos);
@@ -2062,21 +2100,21 @@ int32_t FLEXCAN_TransferSendBlocking(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, f
   * @param flex_can FlexCAN peripheral flex_can pointer.
   * @param mbIdx The FlexCAN Message Buffer index.
   * @param pRxFrame Pointer to CAN message frame structure for reception.
-  * @retval Status_Flexcan_Success            - Rx Message Buffer is full and has been read successfully.
+  * @retval Status_Flexcan_Success    - Rx Message Buffer is full and has been read successfully.
   * @retval Status_Flexcan_RxOverflow - Rx Message Buffer is already overflowed and has been read successfully.
-  * @retval Status_Flexcan_Fail               - Rx Message Buffer is empty.
+  * @retval Status_Flexcan_Fail       - Rx Message Buffer is empty.
   */
 int32_t FLEXCAN_TransferReceiveBlocking(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, flexcan_frame_t *pRxFrame)
 {
-    uint32_t uint32_tflag = 1;
+    uint32_t u32flag = 1;
 
     /* Wait until Rx Message Buffer non-empty. */
-    while (0U == FLEXCAN_GetMbStatusFlags(flex_can, uint32_tflag << mbIdx))
+    while (0U == FLEXCAN_GetMbStatusFlags(flex_can, u32flag << mbIdx))
     {
     }
 
     /* Clean Rx Message Buffer Flag. */
-    FLEXCAN_ClearMbStatusFlags(flex_can, uint32_tflag << mbIdx);
+    FLEXCAN_ClearMbStatusFlags(flex_can, u32flag << mbIdx);
 
 
     /* Read Received CAN Message. */
@@ -2102,14 +2140,14 @@ int32_t FLEXCAN_TransferFDSendBlocking(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx,
     if (Status_Flexcan_Success == FLEXCAN_WriteFDTxMb(flex_can, mbIdx, (const flexcan_fd_frame_t *)(uint32_t)pTxFrame))
     {
         /* Wait until CAN Message send out. */
-        uint32_t uint32_tflag = 1;
+        uint32_t u32flag = 1;
 
-        while (0U == FLEXCAN_GetMbStatusFlags(flex_can, uint32_tflag << mbIdx))
+        while (0U == FLEXCAN_GetMbStatusFlags(flex_can, u32flag << mbIdx))
         {
         }
 
         /* Clean Tx Message Buffer Flag. */
-        FLEXCAN_ClearMbStatusFlags(flex_can, uint32_tflag << mbIdx);
+        FLEXCAN_ClearMbStatusFlags(flex_can, u32flag << mbIdx);
 
         /*After TX MB tranfered success, update the Timestamp from flex_can->MB[offset for CANFD].CS register*/
         volatile uint32_t *mbAddr = &(flex_can->MB[0].CS);
@@ -2142,14 +2180,14 @@ int32_t FLEXCAN_TransferFDSendBlocking(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx,
 int32_t FLEXCAN_TransferFDReceiveBlocking(FLEXCAN_TypeDef *flex_can, uint8_t mbIdx, flexcan_fd_frame_t *pRxFrame)
 {
     /* Wait until Rx Message Buffer non-empty. */
-    uint32_t uint32_tflag = 1;
+    uint32_t u32flag = 1;
 
-    while (0U == FLEXCAN_GetMbStatusFlags(flex_can, uint32_tflag << mbIdx))
+    while (0U == FLEXCAN_GetMbStatusFlags(flex_can, u32flag << mbIdx))
     {
     }
 
     /* Clean Rx Message Buffer Flag. */
-    FLEXCAN_ClearMbStatusFlags(flex_can, uint32_tflag << mbIdx);
+    FLEXCAN_ClearMbStatusFlags(flex_can, u32flag << mbIdx);
 
     /* Read Received CAN Message. */
     return (FLEXCAN_ReadFDRxMb(flex_can, mbIdx, pRxFrame));
@@ -2202,7 +2240,7 @@ void FLEXCAN_TransferCreateHandle(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *h
     /* Save the context in global variables to support the double weak mechanism. */
     /* s_flexcanHandle[instance] = handle; */
 
-     /* Register Callback function. */
+    /* Register Callback function. */
     handle->callback = callback;
     handle->userData = userData;
 
@@ -2214,17 +2252,15 @@ void FLEXCAN_TransferCreateHandle(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *h
 
     if (handle->callback != NULL)
     {
-        FLEXCAN_EnableInterrupts(
-            flex_can, (uint32_t)Enum_Flexcan_BusOffInterruptEnable | (uint32_t)Enum_Flexcan_ErrorInterruptEnable |
-            (uint32_t)Enum_Flexcan_RxWarningInterruptEnable | (uint32_t)Enum_Flexcan_TxWarningInterruptEnable |
-            (uint32_t)Enum_Flexcan_WakeUpInterruptEnable);
+        FLEXCAN_EnableInterrupts(flex_can, (uint32_t)Enum_Flexcan_BusOffInterruptEnable | (uint32_t)Enum_Flexcan_ErrorInterruptEnable |
+                                           (uint32_t)Enum_Flexcan_RxWarningInterruptEnable | (uint32_t)Enum_Flexcan_TxWarningInterruptEnable |
+                                           (uint32_t)Enum_Flexcan_WakeUpInterruptEnable);
     }
     else
     {
-        FLEXCAN_DisableInterrupts(
-            flex_can, (uint32_t)Enum_Flexcan_BusOffInterruptEnable | (uint32_t)Enum_Flexcan_ErrorInterruptEnable |
-            (uint32_t)Enum_Flexcan_RxWarningInterruptEnable | (uint32_t)Enum_Flexcan_TxWarningInterruptEnable |
-            (uint32_t)Enum_Flexcan_WakeUpInterruptEnable);
+        FLEXCAN_DisableInterrupts(flex_can, (uint32_t)Enum_Flexcan_BusOffInterruptEnable | (uint32_t)Enum_Flexcan_ErrorInterruptEnable |
+                                            (uint32_t)Enum_Flexcan_RxWarningInterruptEnable | (uint32_t)Enum_Flexcan_TxWarningInterruptEnable |
+                                            (uint32_t)Enum_Flexcan_WakeUpInterruptEnable);
     }
 }
 
@@ -2244,12 +2280,12 @@ void FLEXCAN_TransferCreateHandle(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *h
 int32_t FLEXCAN_TransferSendNonBlocking(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *handle, flexcan_mb_transfer_t *pMbXfer)
 {
     uint32_t status;
-    uint32_t uint32_tmask = 1;
+    uint32_t u32mask = 1;
 
-     /* Check if Message Buffer is idle. */
+    /* Check if Message Buffer is idle. */
     if ((uint8_t)Enum_Flexcan_StateIdle == handle->mbState[pMbXfer->mbIdx])
     {
-         /* Distinguish transmit type. */
+        /* Distinguish transmit type. */
         if ((uint32_t)Enum_Flexcan_FrameTypeRemote == pMbXfer->frame->type)
         {
             handle->mbState[pMbXfer->mbIdx] = (uint8_t)Enum_Flexcan_StateTxRemote;
@@ -2261,8 +2297,8 @@ int32_t FLEXCAN_TransferSendNonBlocking(FLEXCAN_TypeDef *flex_can, flexcan_handl
 
         if (Status_Flexcan_Success == FLEXCAN_WriteTxMb(flex_can, pMbXfer->mbIdx, (const flexcan_frame_t *)(uint32_t)pMbXfer->frame))
         {
-             /* Enable Message Buffer Interrupt. */
-            FLEXCAN_EnableMbInterrupts(flex_can, uint32_tmask << pMbXfer->mbIdx);
+            /* Enable Message Buffer Interrupt. */
+            FLEXCAN_EnableMbInterrupts(flex_can, u32mask << pMbXfer->mbIdx);
 
             status = Status_Flexcan_Success;
         }
@@ -2289,24 +2325,24 @@ int32_t FLEXCAN_TransferSendNonBlocking(FLEXCAN_TypeDef *flex_can, flexcan_handl
   * @param flex_can FlexCAN peripheral Struct Point.
   * @param handle FlexCAN handle pointer.
   * @param pMbXfer FlexCAN Message Buffer transfer structure. See the #flexcan_mb_transfer_t.
-  * @retval Status_Flexcan_Success        - Start Rx Message Buffer receiving process successfully.
-  * @retval Status_Flexcan_RxBusy - Rx Message Buffer is in use.
+  * @retval Status_Flexcan_Success - Start Rx Message Buffer receiving process successfully.
+  * @retval Status_Flexcan_RxBusy  - Rx Message Buffer is in use.
   */
 int32_t FLEXCAN_TransferReceiveNonBlocking(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *handle, flexcan_mb_transfer_t *pMbXfer)
 {
     uint32_t status;
-    uint32_t uint32_tmask = 1;
+    uint32_t u32mask = 1;
 
-     /* Check if Message Buffer is idle. */
+    /* Check if Message Buffer is idle. */
     if ((uint8_t)Enum_Flexcan_StateIdle == handle->mbState[pMbXfer->mbIdx])
     {
         handle->mbState[pMbXfer->mbIdx] = (uint8_t)Enum_Flexcan_StateRxData;
 
-         /* Register Message Buffer. */
+        /* Register Message Buffer. */
         handle->mbFrameBuf[pMbXfer->mbIdx] = pMbXfer->frame;
 
-         /* Enable Message Buffer Interrupt. */
-        FLEXCAN_EnableMbInterrupts(flex_can, uint32_tmask << pMbXfer->mbIdx);
+        /* Enable Message Buffer Interrupt. */
+        FLEXCAN_EnableMbInterrupts(flex_can, u32mask << pMbXfer->mbIdx);
 
 
         status = Status_Flexcan_Success;
@@ -2336,10 +2372,10 @@ int32_t FLEXCAN_TransferFDSendNonBlocking(FLEXCAN_TypeDef *flex_can, flexcan_han
 {
     int32_t status;
 
-     /* Check if Message Buffer is idle. */
+    /* Check if Message Buffer is idle. */
     if ((uint8_t)Enum_Flexcan_StateIdle == handle->mbState[pMbXfer->mbIdx])
     {
-         /* Distinguish transmit type. */
+        /* Distinguish transmit type. */
         if ((uint32_t)Enum_Flexcan_FrameTypeRemote == pMbXfer->framefd->type)
         {
             handle->mbState[pMbXfer->mbIdx] = (uint8_t)Enum_Flexcan_StateTxRemote;
@@ -2352,9 +2388,9 @@ int32_t FLEXCAN_TransferFDSendNonBlocking(FLEXCAN_TypeDef *flex_can, flexcan_han
         if (Status_Flexcan_Success == FLEXCAN_WriteFDTxMb(flex_can, pMbXfer->mbIdx, (const flexcan_fd_frame_t *)(uint32_t)pMbXfer->framefd))
         {
             /* Enable Message Buffer Interrupt. */
-            uint32_t uint32_tmask = 1;
+            uint32_t u32mask = 1;
 
-            FLEXCAN_EnableMbInterrupts(flex_can, uint32_tmask << pMbXfer->mbIdx);
+            FLEXCAN_EnableMbInterrupts(flex_can, u32mask << pMbXfer->mbIdx);
 
             status = Status_Flexcan_Success;
         }
@@ -2388,18 +2424,18 @@ int32_t FLEXCAN_TransferFDReceiveNonBlocking(FLEXCAN_TypeDef *flex_can, flexcan_
 {
     int32_t status;
 
-     /* Check if Message Buffer is idle. */
+    /* Check if Message Buffer is idle. */
     if ((uint8_t)Enum_Flexcan_StateIdle == handle->mbState[pMbXfer->mbIdx])
     {
         handle->mbState[pMbXfer->mbIdx] = (uint8_t)Enum_Flexcan_StateRxData;
 
-         /* Register Message Buffer. */
+        /* Register Message Buffer. */
         handle->mbFDFrameBuf[pMbXfer->mbIdx] = pMbXfer->framefd;
 
-/* Enable Message Buffer Interrupt. */
-        uint32_t uint32_tmask = 1;
+        /* Enable Message Buffer Interrupt. */
+        uint32_t u32mask = 1;
 
-        FLEXCAN_EnableMbInterrupts(flex_can, uint32_tmask << pMbXfer->mbIdx);
+        FLEXCAN_EnableMbInterrupts(flex_can, u32mask << pMbXfer->mbIdx);
 
         status = Status_Flexcan_Success;
     }
@@ -2420,7 +2456,7 @@ int32_t FLEXCAN_TransferFDReceiveNonBlocking(FLEXCAN_TypeDef *flex_can, flexcan_
   * @param flex_can FlexCAN peripheral Struct Point.
   * @param handle FlexCAN handle pointer.
   * @param pFifoXfer FlexCAN Rx FIFO transfer structure. See the ref flexcan_fifo_transfer_t.
-  * @retval Status_Flexcan_Success            - Start Rx FIFO receiving process successfully.
+  * @retval Status_Flexcan_Success    - Start Rx FIFO receiving process successfully.
   * @retval Status_Flexcan_RxFifoBusy - Rx FIFO is currently in use.
   */
 int32_t FLEXCAN_TransferReceiveFifoNonBlocking(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *handle, flexcan_fifo_transfer_t *pFifoXfer)
@@ -2432,10 +2468,10 @@ int32_t FLEXCAN_TransferReceiveFifoNonBlocking(FLEXCAN_TypeDef *flex_can, flexca
     {
         handle->rxFifoState = (uint8_t)Enum_Flexcan_StateRxFifo;
 
-         /* Register Message Buffer. */
+        /* Register Message Buffer. */
         handle->rxFifoFrameBuf = pFifoXfer->frame;
 
-         /* Enable Message Buffer Interrupt. */
+        /* Enable Message Buffer Interrupt. */
         FLEXCAN_EnableMbInterrupts(flex_can, (uint32_t)Enum_Flexcan_RxFifoOverflowFlag | (uint32_t)Enum_Flexcan_RxFifoWarningFlag |
                                    (uint32_t)Enum_Flexcan_RxFifoFrameAvlFlag);
 
@@ -2461,12 +2497,12 @@ int32_t FLEXCAN_TransferReceiveFifoNonBlocking(FLEXCAN_TypeDef *flex_can, flexca
 void FLEXCAN_TransferAbortSend(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *handle, uint8_t mbIdx)
 {
     uint16_t timestamp;
-    uint32_t uint32_tmask = 1;
+    uint32_t u32mask = 1;
 
-     /* Disable Message Buffer Interrupt. */
-    FLEXCAN_DisableMbInterrupts(flex_can, uint32_tmask << mbIdx);
+    /* Disable Message Buffer Interrupt. */
+    FLEXCAN_DisableMbInterrupts(flex_can, u32mask << mbIdx);
 
-     /* Update the TX frame 's time stamp by MB[mbIdx].cs. */
+    /* Update the TX frame 's time stamp by MB[mbIdx].cs. */
     timestamp                = (uint16_t)((flex_can->MB[mbIdx].CS & FLEXCAN_CS_TIME_STAMP_Msk) >> FLEXCAN_CS_TIME_STAMP_Pos);
     handle->timestamp[mbIdx] = timestamp;
 
@@ -2491,18 +2527,18 @@ void FLEXCAN_TransferFDAbortSend(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *ha
     uint32_t offset;
     uint16_t timestamp;
 
-/* Disable Message Buffer Interrupt. */
-    uint32_t uint32_tmask = 1;
+    /* Disable Message Buffer Interrupt. */
+    uint32_t u32mask = 1;
 
-    FLEXCAN_DisableMbInterrupts(flex_can, uint32_tmask << mbIdx);
+    FLEXCAN_DisableMbInterrupts(flex_can, u32mask << mbIdx);
 
-     /* Update the TX frame 's time stamp by flex_can->MB[offset for CANFD].CS. */
+    /* Update the TX frame 's time stamp by flex_can->MB[offset for CANFD].CS. */
     mbAddr                   = &(flex_can->MB[0].CS);
     offset                   = FLEXCAN_GetFDMailboxOffset(flex_can, mbIdx);
     timestamp                = (uint16_t)((mbAddr[offset] & FLEXCAN_CS_TIME_STAMP_Msk) >> FLEXCAN_CS_TIME_STAMP_Pos);
     handle->timestamp[mbIdx] = timestamp;
 
-     /* Clean Message Buffer. */
+    /* Clean Message Buffer. */
     FLEXCAN_FDTxMbConfig(flex_can, mbIdx, ENABLE);
 
     handle->mbState[mbIdx] = (uint8_t)Enum_Flexcan_StateIdle;
@@ -2519,12 +2555,12 @@ void FLEXCAN_TransferFDAbortSend(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *ha
   */
 void FLEXCAN_TransferFDAbortReceive(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *handle, uint8_t mbIdx)
 {
-/* Disable Message Buffer Interrupt. */
-    uint32_t uint32_tmask = 1;
+    /* Disable Message Buffer Interrupt. */
+    uint32_t u32mask = 1;
 
-    FLEXCAN_DisableMbInterrupts(flex_can, uint32_tmask << mbIdx);
+    FLEXCAN_DisableMbInterrupts(flex_can, u32mask << mbIdx);
 
-     /* Un-register handle. */
+    /* Un-register handle. */
     handle->mbFDFrameBuf[mbIdx] = NULL;
     handle->mbState[mbIdx]      = (uint8_t)Enum_Flexcan_StateIdle;
 }
@@ -2540,12 +2576,12 @@ void FLEXCAN_TransferFDAbortReceive(FLEXCAN_TypeDef *flex_can, flexcan_handle_t 
   */
 void FLEXCAN_TransferAbortReceive(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *handle, uint8_t mbIdx)
 {
-    uint32_t uint32_tmask = 1;
+    uint32_t u32mask = 1;
 
-     /* Disable Message Buffer Interrupt. */
-    FLEXCAN_DisableMbInterrupts(flex_can, (uint32_tmask << mbIdx));
+    /* Disable Message Buffer Interrupt. */
+    FLEXCAN_DisableMbInterrupts(flex_can, (u32mask << mbIdx));
 
-     /* Un-register handle. */
+    /* Un-register handle. */
     handle->mbFrameBuf[mbIdx] = NULL;
     handle->mbState[mbIdx]    = (uint8_t)Enum_Flexcan_StateIdle;
 }
@@ -2560,14 +2596,15 @@ void FLEXCAN_TransferAbortReceive(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *h
   */
 void FLEXCAN_TransferAbortReceiveFifo(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *handle)
 {
-     /* Check if Rx FIFO is enabled. */
+    /* Check if Rx FIFO is enabled. */
     if (0U != (flex_can->MCR & FLEXCAN_MCR_RFEN_Msk))
     {
-         /* Disable Rx Message FIFO Interrupts. */
-        FLEXCAN_DisableMbInterrupts(flex_can, (uint32_t)Enum_Flexcan_RxFifoOverflowFlag | (uint32_t)Enum_Flexcan_RxFifoWarningFlag |
-                                    (uint32_t)Enum_Flexcan_RxFifoFrameAvlFlag);
+        /* Disable Rx Message FIFO Interrupts. */
+        FLEXCAN_DisableMbInterrupts(flex_can, (uint32_t)Enum_Flexcan_RxFifoOverflowFlag | 
+		                                      (uint32_t)Enum_Flexcan_RxFifoWarningFlag |
+                                              (uint32_t)Enum_Flexcan_RxFifoFrameAvlFlag);
 
-         /* Un-register handle. */
+        /* Un-register handle. */
         handle->rxFifoFrameBuf = NULL;
     }
 
@@ -2602,7 +2639,7 @@ static bool FLEXCAN_CheckUnhandleInterruptEvents(FLEXCAN_TypeDef *flex_can)
     uint64_t tempflag;
     bool fgRet = false;
 
-     /* Checking exist error flag. */
+    /* Checking exist error flag. */
     if (0U == (FLEXCAN_GetStatusFlags(flex_can) &
                ((uint32_t)Enum_Flexcan_TxWarningIntFlag | (uint32_t)Enum_Flexcan_RxWarningIntFlag |
                 (uint32_t)Enum_Flexcan_BusOffIntFlag | (uint32_t)Enum_Flexcan_ErrorIntFlag )))
@@ -2635,15 +2672,13 @@ static uint32_t FLEXCAN_SubHandlerForDataTransfered(FLEXCAN_TypeDef *flex_can, f
 {
     uint32_t status  = Status_Flexcan_UnHandled;
     uint32_t result  = 0xFFU;
-    uint32_t uint32_tflag = 1;
+    uint32_t u32flag = 1;
 
-     /* For this implementation, we solve the Message with lowest MB index first. */
+    /* For this implementation, we solve the Message with lowest MB index first. */
     for (result = 0U; result < (uint32_t)FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(flex_can); result++)
-
     {
-         /* Get the lowest unhandled Message Buffer */
-        if (0U != FLEXCAN_GetMbStatusFlags(flex_can, uint32_tflag << result))
-
+        /* Get the lowest unhandled Message Buffer */
+        if (0U != FLEXCAN_GetMbStatusFlags(flex_can, u32flag << result))
         {
             if (FLEXCAN_IsMbIntEnabled(flex_can, (uint8_t)result))
             {
@@ -2652,15 +2687,15 @@ static uint32_t FLEXCAN_SubHandlerForDataTransfered(FLEXCAN_TypeDef *flex_can, f
         }
     }
 
-     /* find Message to deal with. */
+    /* find Message to deal with. */
     if (result < (uint32_t)FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(flex_can))
     {
-         /* Solve Legacy Rx FIFO interrupt. */
+        /* Solve Legacy Rx FIFO interrupt. */
         if (((uint8_t)Enum_Flexcan_StateIdle != handle->rxFifoState) && (result <= (uint32_t)FLEXCAN_IFLAG1_BUF7I_Pos))
         {
-            uint32_t uint32_tmask = 1;
+            uint32_t u32mask = 1;
 
-            switch (uint32_tmask << result)
+            switch (u32mask << result)
             {
                 case Enum_Flexcan_RxFifoOverflowFlag:
                     status = Status_Flexcan_RxFifoOverflow;
@@ -2675,7 +2710,7 @@ static uint32_t FLEXCAN_SubHandlerForDataTransfered(FLEXCAN_TypeDef *flex_can, f
 
                     if (Status_Flexcan_Success == status)
                     {
-                         /* Align the current (index 0) rxfifo timestamp to the timestamp array by handle. */
+                        /* Align the current (index 0) rxfifo timestamp to the timestamp array by handle. */
                         handle->timestamp[0] = handle->rxFifoFrameBuf->timestamp;
                         status               = Status_Flexcan_RxFifoIdle;
                     }
@@ -2690,7 +2725,7 @@ static uint32_t FLEXCAN_SubHandlerForDataTransfered(FLEXCAN_TypeDef *flex_can, f
         }
         else
         {
-             /* Get current State of Message Buffer. */
+            /* Get current State of Message Buffer. */
             switch (handle->mbState[result])
             {
                 /* Solve Rx Data Frame. */
@@ -2702,7 +2737,7 @@ static uint32_t FLEXCAN_SubHandlerForDataTransfered(FLEXCAN_TypeDef *flex_can, f
 
                         if (Status_Flexcan_Success == status)
                         {
-                             /* Align the current index of RX MB timestamp to the timestamp array by handle. */
+                            /* Align the current index of RX MB timestamp to the timestamp array by handle. */
                             handle->timestamp[result] = handle->mbFDFrameBuf[result]->timestamp;
                             status                    = Status_Flexcan_RxIdle;
                         }
@@ -2713,7 +2748,7 @@ static uint32_t FLEXCAN_SubHandlerForDataTransfered(FLEXCAN_TypeDef *flex_can, f
 
                         if (Status_Flexcan_Success == status)
                         {
-                             /* Align the current index of RX MB timestamp to the timestamp array by handle. */
+                            /* Align the current index of RX MB timestamp to the timestamp array by handle. */
                             handle->timestamp[result] = handle->mbFrameBuf[result]->timestamp;
                             status                    = Status_Flexcan_RxIdle;
                         }
@@ -2777,9 +2812,9 @@ static uint32_t FLEXCAN_SubHandlerForDataTransfered(FLEXCAN_TypeDef *flex_can, f
 
          /* Clear resolved Message Buffer IRQ. */
 
-        uint32_t uint32_tflag = 1;
+        uint32_t u32flag = 1;
 
-        FLEXCAN_ClearMbStatusFlags(flex_can, uint32_tflag << result);
+        FLEXCAN_ClearMbStatusFlags(flex_can, u32flag << result);
     }
 
     *pResult = result;
@@ -2803,26 +2838,26 @@ void FLEXCAN_TransferHandleIRQ(FLEXCAN_TypeDef *flex_can, flexcan_handle_t *hand
 
     do
     {
-         /* Get Current FlexCAN Module Error and Status. */
+        /* Get Current FlexCAN Module Error and Status. */
         EsrStatus = FLEXCAN_GetStatusFlags(flex_can);
 
-         /* To handle FlexCAN Error and Status Interrupt first. */
+        /* To handle FlexCAN Error and Status Interrupt first. */
         if (0U != (EsrStatus & ((uint32_t)Enum_Flexcan_TxWarningIntFlag | (uint32_t)Enum_Flexcan_RxWarningIntFlag |
                                 (uint32_t)Enum_Flexcan_BusOffIntFlag | (uint32_t)Enum_Flexcan_ErrorIntFlag)))
         {
             status = Status_Flexcan_ErrorStatus;
-             /* Clear FlexCAN Error and Status Interrupt. */
+            /* Clear FlexCAN Error and Status Interrupt. */
             FLEXCAN_ClearStatusFlags(flex_can, (uint32_t)Enum_Flexcan_TxWarningIntFlag | (uint32_t)Enum_Flexcan_RxWarningIntFlag |
-                                     (uint32_t)Enum_Flexcan_BusOffIntFlag | (uint32_t)Enum_Flexcan_ErrorIntFlag);
+                                               (uint32_t)Enum_Flexcan_BusOffIntFlag | (uint32_t)Enum_Flexcan_ErrorIntFlag);
             result = EsrStatus;
         }
         else
         {
-             /* to handle real data transfer. */
+            /* to handle real data transfer. */
             status = FLEXCAN_SubHandlerForDataTransfered(flex_can, handle, &result);
         }
 
-         /* Calling Callback Function if has one. */
+        /* Calling Callback Function if has one. */
         if (handle->callback != NULL)
         {
             handle->callback(flex_can, handle, status, result, handle->userData);

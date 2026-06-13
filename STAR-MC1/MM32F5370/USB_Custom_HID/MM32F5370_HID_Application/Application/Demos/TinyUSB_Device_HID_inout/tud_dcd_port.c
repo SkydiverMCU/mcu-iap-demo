@@ -34,6 +34,7 @@
 #include "hal_usbfs.h"
 #include "mm32_device.h"
 #include "tusb_config.h"
+#include "platform.h"
 
 extern uint32_t SystemCoreClock;
 
@@ -540,6 +541,10 @@ uint32_t board_millis(void)
 void SysTick_Handler(void)
 {
   systime++;
+    if (0 != PLATFORM_DelayTick)
+    {
+        PLATFORM_DelayTick--;
+    }    
 }
 #endif
 

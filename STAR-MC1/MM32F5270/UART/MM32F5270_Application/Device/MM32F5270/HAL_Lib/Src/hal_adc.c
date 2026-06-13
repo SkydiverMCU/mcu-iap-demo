@@ -90,6 +90,19 @@ void ADC_CalibrationConfig(ADC_TypeDef *adc, uint16_t precal)
     {
         __ASM("nop");                  /* __NOP(); */
     }
+
+    adc->ADSTA_EXT |= ADC_ADSTA_EXT_EOCALIF_Msk;
+}
+
+/**
+  * @brief  Jump over the ADC calibration when ADC initialization.
+  * @param  adc: select the ADC peripheral.
+  * @retval None.
+  */
+void ADC_CalibrationEscape(ADC_TypeDef *adc)
+{
+    adc->ANY_CR &= ~(0x01U << ADC_ANY_CR_ADCAL_Pos);
+    adc->ADDATA  = 0x2430;
 }
 
 /**

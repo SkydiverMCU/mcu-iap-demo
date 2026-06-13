@@ -58,8 +58,7 @@
 /* Private variables **************************************************************************************************/
 
 /* Private functions **************************************************************************************************/
-volatile uint8_t USART_RxBuffer[255];
-volatile uint8_t USART_RxLength;
+
 /***********************************************************************************************************************
  * @brief
  * @note   none
@@ -107,70 +106,74 @@ void USART_Configure(uint32_t Baudrate)
 
   USART_ITConfig(USART2, USART_IT_PE, ENABLE);
   USART_ITConfig(USART2, USART_IT_ERR, ENABLE);
-  USART_ITConfig(USART2, USART_IT_IDLE, ENABLE);
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
   USART_Cmd(USART2, ENABLE);
 }
 
 /***********************************************************************************************************************
-  * @brief  This function handles UART2 Handler
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
+ * @brief  This function handles USART2 Handler
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
 void USART2_IRQHandler(void)
 {
-    uint8_t i = 0;
+  uint8_t RxData = 0;
 
-    if ((RESET != USART_GetITStatus(USART2, USART_IT_PE)) ||
-        (RESET != USART_GetITStatus(USART2, USART_IT_ERR)))
+  if ((RESET != USART_GetITStatus(USART2, USART_IT_PE)) ||
+      (RESET != USART_GetITStatus(USART2, USART_IT_ERR)))
+  {
+    USART_ReceiveData(USART2);
+  }
+
+  if (RESET != USART_GetITStatus(USART2, USART_IT_IDLE))
+  {
+    USART_ITConfig(USART2, USART_IT_IDLE, DISABLE);
+    USART_ReceiveData(USART2);
+    UART_RX_STA |= 0x8000;
+  }
+
+  if (RESET != USART_GetITStatus(USART2, USART_IT_RXNE))
+  {
+    RxData = USART_ReceiveData(USART2);
+    if (0 == READ_BIT(USART2->CR1, USART_CR1_IDLEIEN)) // if (RESET == USART_GetITStatus(USART2, USART_IT_IDLE))
     {
-        USART_ReceiveData(USART2);
-    }
-    
-    if (SET == USART_GetITStatus(USART2, USART_IT_IDLE))
-    {
-        USART_ClearITPendingBit(USART2, USART_IT_IDLE);
-
-        for (i = 0; i < USART_RxLength; i++)
-        {
-            USART_SendData(USART2, USART_RxBuffer[i]);
-
-            while (RESET == USART_GetFlagStatus(USART2, USART_FLAG_TC))
-            {
-            }
-        }
-
-        USART_RxLength = 0;
-    }
-
-    if (RESET != USART_GetITStatus(USART2, USART_IT_RXNE))
-    {
-        USART_RxBuffer[USART_RxLength++] = USART_ReceiveData(USART2);
-
-        USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+      /* Enable IDLE Interrupt */
+      USART_ITConfig(USART2, USART_IT_IDLE, ENABLE);
     }
 
-
+    if ((UART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
+    {
+      if (UART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
+      {
+        UART_RxBuff[UART_RX_STA++] = RxData; // 记录接收到的值
+      }
+      else
+      {
+        UART_RX_STA |= 0x8000; // 强制标记接收完成
+      }
+    }
+  }
 }
 
 /***********************************************************************************************************************
-  * @brief
-  * @note   none
-  * @param  none
-  * @retval none
-  *********************************************************************************************************************/
-void USART_ReceiverIdleFrame_Interrupt_Sample(void)
+ * @brief
+ * @note   none
+ * @param  none
+ * @retval none
+ *********************************************************************************************************************/
+void UART_SendGroup(uint8_t *pBuff, uint16_t length)
 {
-    printf("\r\nTest %s", __FUNCTION__);
+  while (length--)
+  {
+    USART_SendData(USART2, (uint8_t)(*pBuff));
 
-    USART_Configure(115200);
-
-    while (1)
+    while (RESET == USART_GetFlagStatus(USART2, USART_FLAG_TC))
     {
-        PLATFORM_LED_Toggle(LED1);
-        PLATFORM_DelayMS(100);
     }
+    pBuff++;
+  }
 }
 
 /**

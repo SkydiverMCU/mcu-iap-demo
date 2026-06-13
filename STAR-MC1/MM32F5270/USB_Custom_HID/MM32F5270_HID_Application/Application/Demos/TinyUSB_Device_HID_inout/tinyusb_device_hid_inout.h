@@ -48,6 +48,7 @@ extern "C" {
 /* Exported functions *************************************************************************************************/
 void TinyUSB_Device_Configure(void);
 void USB_DeviceClockInit(void);
+void USB_SendGroup(uint8_t *pBuff, uint16_t length);
 void hid_task(void);
 
 #ifdef __cplusplus

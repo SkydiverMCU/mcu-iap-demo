@@ -122,22 +122,22 @@ void UART1_IRQHandler(void)
   // Send packet
   if (UART_GetITStatus(UART1, UART_IT_RXIDLE) != RESET)
   {
-    USART_RX_STA |= 0x8000;
+    UART_RX_STA |= 0x8000;
     UART_ClearITPendingBit(UART1, UART_IT_RXIDLE);
   }
   // Recv packet
   if (UART_GetITStatus(UART1, UART_IT_RX) != RESET)
   {
     // recvbyte = UART_ReceiveData(UART1);
-    if ((USART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
+    if ((UART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
     {
-      if (USART_RX_STA < UART_REC_LEN) // 还可以接收数据
+      if (UART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
       {
-        UART_RxBuff[USART_RX_STA++] = UART_ReceiveData(UART1); // 记录接收到的值
+        UART_RxBuff[UART_RX_STA++] = UART_ReceiveData(UART1); // 记录接收到的值
       }
       else
       {
-        USART_RX_STA |= 0x8000; // 强制标记接收完成
+        UART_RX_STA |= 0x8000; // 强制标记接收完成
       }
     }
     UART_ClearITPendingBit(UART1, UART_IT_RX);

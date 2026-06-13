@@ -131,27 +131,27 @@ void USART2_IRQHandler(void)
   {
     USART_ITConfig(USART2, USART_IT_IDLE, DISABLE);
     USART_ReceiveData(USART2);
-    USART_RX_STA |= 0x8000;
+    UART_RX_STA |= 0x8000;
   }
 
   if (RESET != USART_GetITStatus(USART2, USART_IT_RXNE))
   {
     RxData = USART_ReceiveData(USART2);
-    if (0 == READ_BIT(USART2->CR1, USART_CR1_IDLEIEN)) //if (RESET == USART_GetITStatus(USART2, USART_IT_IDLE))
+    if (0 == READ_BIT(USART2->CR1, USART_CR1_IDLEIEN)) // if (RESET == USART_GetITStatus(USART2, USART_IT_IDLE))
     {
       /* Enable IDLE Interrupt */
       USART_ITConfig(USART2, USART_IT_IDLE, ENABLE);
     }
 
-    if ((USART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
+    if ((UART_RX_STA & 0x8000) == 0) // 接收完的一批数据,还没有被处理,则不再接收其他数据
     {
-      if (USART_RX_STA < UART_REC_LEN) // 还可以接收数据
+      if (UART_RX_STA < REPORT_PACKET_SIZE) // 还可以接收数据
       {
-        USART_RxBuff[USART_RX_STA++] = RxData; // 记录接收到的值
+        UART_RxBuff[UART_RX_STA++] = RxData; // 记录接收到的值
       }
       else
       {
-        USART_RX_STA |= 0x8000; // 强制标记接收完成
+        UART_RX_STA |= 0x8000; // 强制标记接收完成
       }
     }
   }

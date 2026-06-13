@@ -38,7 +38,7 @@
 #include "usb_descriptors.h"
 
 /**
- * @addtogroup MM32F5270_TinyUSB
+ * @addtogroup MM32F5370_TinyUSB
  * @{
  */
 

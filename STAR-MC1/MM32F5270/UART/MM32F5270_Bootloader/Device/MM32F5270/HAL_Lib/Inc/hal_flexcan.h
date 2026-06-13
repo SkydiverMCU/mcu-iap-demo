@@ -66,13 +66,6 @@
   */
 #define FLEXCAN_HAS_RX_FIFO_DMA (0)
 
-/**
-  *@brief Is affected by errata with ID 6032 (FlexCAN: A frame with wrong ID or payload is transmitted into the CAN bus
-  * when the Message Buffer under transmission is either aborted or deactivated while the CAN bus is in the Bus Idle state).
-  */
-#define FLEXCAN_HAS_ERRATA_6032 (0)
-
-
 #define FLEXCAN_WAIT_TIMEOUT (1000U)
 
 
@@ -208,6 +201,14 @@
 #define    Status_Flexcan_UnHandled              0x0001000D   /*!< UnHadled Interrupt asserted. */
 #define    Status_Flexcan_RxRemote               0x0001000E   /*!< Rx Remote Message Received in Mail box. */
 #define    Status_Flexcan_RxFifoUnderflow        0x0001000F   /*!< Enhanced Rx Message FIFO is underflow. */
+enum _flexcan_state {
+    Enum_Flexcan_StateIdle     = 0x0,                                           /*!< MB/RxFIFO idle. */
+    Enum_Flexcan_StateRxData   = 0x1,                                           /*!< MB receiving. */
+    Enum_Flexcan_StateRxRemote = 0x2,                                           /*!< MB receiving remote reply. */
+    Enum_Flexcan_StateTxData   = 0x3,                                           /*!< MB transmitting. */
+    Enum_Flexcan_StateTxRemote = 0x4,                                           /*!< MB transmitting remote request. */
+    Enum_Flexcan_StateRxFifo   = 0x5,                                           /*!< RxFIFO receiving. */
+};
 
 /**
   * @brief FlexCAN frame format.
@@ -297,7 +298,7 @@ enum _flexcan_flags
 {
     Enum_Flexcan_SynchFlag            = FLEXCAN_ESR1_SYNCH_Msk,   /*!< CAN Synchronization Status. */
     Enum_Flexcan_TxWarningIntFlag     = FLEXCAN_ESR1_TWRNINT_Msk, /*!< Tx Warning Interrupt Flag. */
-    Enum_Flexcan_RxWarningIntFlag     = FLEXCAN_ESR1_RXWRN_Msk, /*!< Rx Warning Interrupt Flag. */
+    Enum_Flexcan_RxWarningIntFlag     = FLEXCAN_ESR1_RWRNINT_Msk, /*!< Rx Warning Interrupt Flag. */
     Enum_Flexcan_IdleFlag             = FLEXCAN_ESR1_IDLE_Msk,    /*!< CAN IDLE Status Flag. */
     Enum_Flexcan_FaultConfinementFlag = FLEXCAN_ESR1_FLTCONF_Msk, /*!< Fault Confinement State Flag. */
     Enum_Flexcan_TransmittingFlag     = FLEXCAN_ESR1_TX_Msk,      /*!< FlexCAN In Transmission Status. */

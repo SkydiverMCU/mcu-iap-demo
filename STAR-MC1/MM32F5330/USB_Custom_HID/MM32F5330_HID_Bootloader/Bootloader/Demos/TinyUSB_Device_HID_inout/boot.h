@@ -1,6 +1,6 @@
 /***********************************************************************************************************************
     @file    boot.h
-    @author  FAE Team
+    @author  Skydiver
     @date    15-Mar-2023
     @brief   THIS FILE PROVIDES ALL THE SYSTEM FUNCTIONS.
   **********************************************************************************************************************
@@ -36,25 +36,29 @@ extern "C"
 #endif
 
 /* Files include */
+/* Files include */
 #include "hal_conf.h"
-#include "string.h"
-#include "platform.h"
 #include "tinyusb_device_hid_inout.h"
-    
-/* Exported types *****************************************************************************************************/
+#include "string.h"
+#include "crc32_algorithm.h"
+  /* Exported types *****************************************************************************************************/
+
+#define REPORT_PACKET_SIZE 64
 
 /* Exported constants *************************************************************************************************/
-#define BOOT_SIZE   23
-#define FLASH_SIZE  128  //128K
+#define BOOT_SIZE 15
+#define FLASH_SIZE 128 // 128K
 
 #define BootJumpFlagAddress (BOOT_SIZE * 1024 + 0x8000000)
 #define ApplicationAddress (BootJumpFlagAddress + 1024)
 
-#define APP_SIZE (FLASH_SIZE - BOOT_SIZE - 1) // 104KB flash for app
+#define SRAM_LEGAL_ADDRESS_MASK 0x2FFF0000 // SRAM合法地址范围  0x20000000 - 0x20007FFF 32KB
 
-
+#define APP_SIZE (FLASH_SIZE - BOOT_SIZE - 1) // 112KB flash for app
 /* Exported macro *****************************************************************************************************/
 #define BLOCK_NUM 4 // 最多支持4段hex烧录
+
+#define RESPONSE_MASK 0xC0 // 回复MASK
 
 #define GET_VERSION 0x20
 #define ERASE_APP 0x21
@@ -68,9 +72,9 @@ extern "C"
 
   typedef struct
   {
-    u32 BlockStartAddr;
-    u32 BlockLength;
-    u32 BlockCheckSum;
+    uint32_t BlockStartAddr;
+    uint32_t BlockLength;
+    uint32_t BlockCheckSum;
   } FileData_Block;
 /* Exported variables *************************************************************************************************/
 #undef EXTERN
@@ -81,16 +85,14 @@ extern "C"
 #define EXTERN extern
 #endif
 
-  EXTERN uint16_t USART_RX_STA;
+  EXTERN uint16_t USB_RX_STA;
 
-  #define UART_REC_LEN 64
-
-  extern uint8_t UART_RxBuff[UART_REC_LEN];
+  EXTERN uint8_t USB_RxBuff[REPORT_PACKET_SIZE];
 
   /* Exported functions *************************************************************************************************/
 
-  void boot_protocol(u8 *buff, u16 len);
-  void FLASH_Read(u8 *buff, u32 addr, u32 readNumber);
+  void boot_protocol(uint8_t *buff, uint16_t len);
+  void FLASH_Read(uint8_t *buff, uint32_t addr, uint32_t readNumber);
 
 #ifdef __cplusplus
 }

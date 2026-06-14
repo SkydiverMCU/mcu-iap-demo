@@ -177,6 +177,10 @@ void segmentInfo(uint8_t *buff)
     uint32_t segmentLen;
     uint16_t sum = 0;
 
+    code_CurrentLength = 0;
+    code_TotalLength = 0;
+    currentSegment = 0;
+
     for (i = 0; i < BLOCK_NUM; i++)
     {
         appdata_block[i].BlockLength = 0;

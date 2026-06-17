@@ -17,9 +17,9 @@ import crcmod #添加CRC32
 
 class IAPControl:
     #版本信息常量
-    SOFTWARE_VERSION = "Version:0.2.0"
+    SOFTWARE_VERSION = "Version:0.2.1"
     BUILD_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 动态生成构建时间
-    BUILD_NUMBER = "2025122501"
+    BUILD_NUMBER = "2026061701"
     NAME = "Skydiver"
 
     # 宏定义HID设备参数
@@ -40,8 +40,8 @@ class IAPControl:
     MCU_INFO = 0x28  # 获取MCU分给APP空间大小和起始位置
 
     # 通讯超时时间定义
-    DEFAULT_TIMEOUT_VALUE = 500
-    ERASEAPP_TIMEOUT_VALUE = 800  # 擦除应用超时时间
+    DEFAULT_TIMEOUT_VALUE = 20
+    ERASEAPP_TIMEOUT_VALUE = 30  # 擦除应用超时时间
 
     # 响应命令掩码
     RESPONSE_MASK = 0xC0
@@ -455,7 +455,7 @@ class IAPControl:
                 self.hid_handle.send_output_report(hid_packet)
 
                 # 3. 超时等待（只接收与当前命令匹配的响应）
-                max_retries = timeout * 10
+                max_retries = timeout * 10 * 10
                 retry_count = 0
                 while retry_count < max_retries:
                     if self.download_abort:
@@ -478,7 +478,7 @@ class IAPControl:
                                          "ERROR")
                                 self.last_response = None  # 清空错误响应
 
-                    time.sleep(0.001)
+                    time.sleep(0.01)  #
                     retry_count += 1
 
                 # 4. 超时判断
@@ -952,7 +952,7 @@ class IAPControl:
 
             # 5. 擦除应用空间
             self.log("擦除应用空间（预计耗时较长，超时30秒）...", "INFO")
-            erase_page = ( total_firmware_size//1024 ) + 1
+            erase_page = ( total_firmware_size//1024 )
             if total_firmware_size % 1024 != 0:
                 erase_page += 1
             erase_page_byte = erase_page.to_bytes(2, byteorder='big', signed=False)

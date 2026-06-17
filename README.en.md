@@ -34,7 +34,8 @@ mm32-iap-demo
 │  ├─MM32G0005
 │  ├─MM32L0020
 │  ├─MM32L0130
-│  └─MM32L0180
+│  ├─MM32L0180
+│  └─MM32SPIN0260
 |
 ├─Cortex-M3
 │  └─MM32F3270

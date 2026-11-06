@@ -1,13 +1,37 @@
 # MM32-IAP-Demo
 
-#### 项目介绍
-- MM32MCU IAP 上位机/协议/源码，不定期收集分享开源资料，来源于https://gitee.com/jitingai/mm32_-iap_-demo
-- 基于原始开源仓库，更新迭代到V2.0版本
+MM32 全系列 MCU 的 IAP / OTA 串口升级开源方案：可移植的 Bootloader + 上位机 + HEX 合并工具，C 源码全开放，覆盖 M0 / M0+ / M3 / STAR-MC1 共 25 个型号。
 
-#### IAP升级软件流程图
-![image](https://gitee.com/skydiver/mm32-iap-demo/raw/master/Flowchart/IAP_Flowchart.png)
+它回答四个问题：MM32 怎么做 IAP 升级；Bootloader 与 APP 分区、扇区怎么划；串口协议与 CRC32 怎么定；跳转进 APP 就 HardFault 怎么查。
 
-### 项目文件介绍
+分区：Boot 7KB（`BOOT_SIZE`），后接 1KB Information 参数区（跳转标志、APP 长度、三段 CRC32），余下归 APP。
+
+## 覆盖型号
+
+| 内核 | 型号工程 |
+| --- | --- |
+| Cortex-M0 | MM32F0010、F0020、F0040、F0050、F0120、F0130、F0140、F0160、F0270、G0001、G0020、SPIN0230、SPIN0280、SPIN05、SPIN06、SPIN07 |
+| Cortex-M0+ | MM32G0005、L0020、L0130、L0180、SPIN0260 |
+| Cortex-M3 | MM32F3270 |
+| STAR-MC1 | MM32F5270、F5330、F5370 |
+
+## 仓库内容
+
+- **Bootloader 工程**：`boot.c` / `boot.h` / `crc32_algorithm.c` / `crc32_algorithm.h`，按内核分目录
+- **Application 工程**：`app_protocol.c` / `app_protocol.h`，支持接收上位机指令擦除 1K Information 区间后跳回 Bootloader
+- **上位机**：`Tools/IAP_Tools.exe`，Python 源码在 `Python_IAP_Tools_SourceCode`
+- **HEX 合并工具**：`Tools/Merge_Tools.exe`、`Tools/网页版hex合并工具.html`
+- **协议文档**：`IAP协议说明_20251225.xlsx`
+- **流程图**：`Flowchart/IAP_Flowchart.png`
+
+## 快速移植
+
+需改 4 处：`boot.h` 的 `BOOT_SIZE` / `FLASH_SIZE` / `SRAM_LEGAL_ADDRESS_MASK`，以及 `crc_gen_keil.bat` 的 `CRC_ADDRESS`（= Boot 大小 − 4）；再实现 Flash 读写与串口收发即可。M0 需把向量表拷到 SRAM，M0+ / M3 / M4 / M33 / STAR-MC1 直接设 `SCB->VTOR`。逐步说明见下方「项目移植其他 MCU 平台说明」。
+
+## IAP 升级软件流程图
+![image](Flowchart/IAP_Flowchart.png)
+
+## 项目文件介绍
 
 ```
 mm32-iap-demo
@@ -67,7 +91,7 @@ mm32-iap-demo
 
 ```
 
-### V2.0更新说明
+## V2.0更新说明
 
 - 基于原始仓库优化原始协议，更新到IAP协议说明_20251225.xlsx
 - Bootloader工程增加CRC32校验，分别校验Boot区间/APP区间和1K Information区间，同时判断栈顶地址是否合法，保证程序严谨
@@ -78,13 +102,13 @@ mm32-iap-demo
 - 由于原始仓库配套测试上位机没有源码无法修改，所以V2.0版本开始移除原始仓库配套的上位机
 
 
-### 项目移植其他MCU平台说明
+## 项目移植其他MCU平台说明
 
 - 编译后会调用crc_gen_keil.bat批处理把Bootloader区间数据计算CRC32 最终写到Bootloader最末尾
 - 编译后生成的Bootloader.hex通过批处理添加CRC32校验码之后生成Bootloader_CRC.hex，debug调试会通过加载crc_load.ini文件选择烧录Bootloader_CRC.hex
 - Bootloader启动后会按顺序读取校验Bootloader CRC，1K Information CRC和APP区间CRC还有跳转标志，都校验通过才会跳转到App去执行 
 - 如果要要移植到其他MCU平台，需要修改如下地方：
-###### Bootloader:
+### Bootloader:
 > 1. Copy main.c/boot.c/boot.h/crc32_algorithm.c/crc32_algorithm.h 到目标工程，将MDK-ARM 目录下crc_gen_keil.bat/crc_load.ini/mcu_crc.exe 也复制到目标工程下
 > 2. 修改Bootloader Keil工程 Target里面分配Flash空间大小，如果是STAR-MC1内核，请到Keil 工程里面Options for Target -> Linker 修改分散加载文件.sct，添加Options for Target -> User After Build/Rebuild 添加.\crc_gen_keil.bat 脚本执行，用于处理生成Bootloader_CRC.hex
 > 3. 修改boot.h文件里面#define BOOT_SIZE 7 这个宏(配置Boot大小), #define FLASH_SIZE 128(这个宏定义Flash最大空间)，#define SRAM_LEGAL_ADDRESS_MASK 0x2FFFF000 配置SRAM合法地址范围，需要注意main.c if (((*(__IO uint32_t *)ApplicationAddress) & SRAM_LEGAL_ADDRESS_MASK) == 0x20000000) // 检查栈顶地址是否SRAM合法，这个地址需要和实际芯片匹配
@@ -94,7 +118,7 @@ mm32-iap-demo
 > 7. 实现数据发送，以UART升级为例：void UART_SendGroup(uint8_t *pBuff, uint16_t length)
 > 8. 实现Boot.c文件里面Flash读写函数：static void FLASH_Write(const uint8_t *buff, uint32_t addr, uint32_t writeNumber) 和 void FLASH_Read(uint8_t *buff, uint32_t addr, uint32_t readNumber)
 > 9. 需要注意Boot.c文件里面void writeAppFlag(uint8_t *buff) 函数，写1K Information区间也有写Flash操作，需要和实际芯片匹配
-##### Application:
+### Application:
 > 1. Copy main.c/app_protocol.c/app_protocol.h 到目标工程
 > 2. 修改Application Keil工程 Target里面分配Flash空间大小,方法同上
 > 3. 修改app_protocol.h文件，方法同上
@@ -104,12 +128,18 @@ mm32-iap-demo
 
 ## 项目配套工具截图
 
-#### 上位机软件界面截图
-![image](https://gitee.com/skydiver/mm32-iap-demo/raw/master/screenshots/IAP_Tools.png)
+## 上位机软件界面截图
+![image](screenshots/IAP_Tools.png)
 
-#### 网页版hex合并工具界面截图
-![image](https://gitee.com/skydiver/mm32-iap-demo/raw/master/screenshots/Merge_tools_for_web.png)
+## 网页版hex合并工具界面截图
+![image](screenshots/Merge_tools_for_web.png)
 
-#### hex合并工具界面截图
-![image](https://gitee.com/skydiver/mm32-iap-demo/raw/master/screenshots/Merge_Tools.png)
+## hex合并工具界面截图
+![image](screenshots/Merge_Tools.png)
 
+## 来源与相关链接
+
+- 本仓库同步自 Gitee 主仓库：https://gitee.com/skydiver/mm32-iap-demo
+- 原始开源仓库：https://gitee.com/jitingai/mm32_-iap_-demo
+- 协议文档：`IAP协议说明_20251225.xlsx`
+- 许可证：[Apache-2.0](LICENSE)

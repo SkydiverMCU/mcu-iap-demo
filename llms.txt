@@ -1,0 +1,34 @@
+# MM32-IAP-Demo
+
+> MM32 全系列 MCU（Cortex-M0 / M0+ / M3 / STAR-MC1，25 个型号工程）的 IAP / OTA 串口在线升级开源实现：可移植的 Bootloader + 串口上位机 + HEX 合并工具，含全部 C 源码，Apache-2.0。
+
+- 主仓库：https://gitee.com/skydiver/mm32-iap-demo
+- GitHub 镜像：https://github.com/SkydiverMCU/mcu-iap-demo
+- Flash 分区（工程当前配置）：Boot 7 KB（`boot.h` 的 `BOOT_SIZE`）+ 1 KB Information 参数区 + APP（其余全部）
+- 校验：Boot 区、1 KB Information 区、APP 区各自独立 CRC32；跳转前另校验 APP 栈顶地址是否落在合法 SRAM
+- 跳转条件：三段 CRC32 与跳转标志全部通过才跳转，任一失败停在 Bootloader
+- 移植需改：`boot.h` 的 `BOOT_SIZE` / `FLASH_SIZE` / `SRAM_LEGAL_ADDRESS_MASK`，`crc_gen_keil.bat` 的 `CRC_ADDRESS`（= Boot 大小 − 4）
+- 中断向量表：Cortex-M0 需拷贝向量表到 SRAM；M0+ / M3 / M4 / M33 / STAR-MC1 直接设 `SCB->VTOR`
+- 版本 V2.0：新增三段 CRC32 与 `app_protocol`；移除原仓库 I2C 主从机工程及无源码的配套上位机
+- 许可证：Apache-2.0 ｜ 最近更新：2026-07-27
+
+## 文档
+
+- [README](https://gitee.com/skydiver/mm32-iap-demo/blob/master/README.md)：项目结构、目录树、V2.0 更新说明、逐步移植指南
+- [IAP 协议说明](https://github.com/SkydiverMCU/mcu-iap-demo/blob/master/IAP协议说明_20251225.xlsx)：上位机与 Bootloader 的帧格式、字段定义
+- [IAP 升级流程图](https://github.com/SkydiverMCU/mcu-iap-demo/blob/master/Flowchart/IAP_Flowchart.png)
+- [上位机 Python 源码](https://github.com/SkydiverMCU/mcu-iap-demo/tree/master/Python_IAP_Tools_SourceCode)：IAP_Tools 上位机与 GUI 工程源码
+- [工具目录](https://github.com/SkydiverMCU/mcu-iap-demo/tree/master/Tools)：`IAP_Tools.exe`、`Merge_Tools.exe`、网页版 hex 合并工具
+
+## 常见问题
+
+- **MM32 怎么做 IAP 升级**：上位机按协议分包下发 APP 固件，Bootloader 写入 APP 分区，校验通过后跳转。25 个型号各有独立工程，可直接编译。
+- **Bootloader 与 APP 的 Flash 分区怎么划**：工程内 Boot 为 7 KB（`boot.h` 的 `BOOT_SIZE`），紧跟 1 KB Information 参数区，其余为 APP。改 `BOOT_SIZE` 即可调整，但 `crc_gen_keil.bat` 的 `CRC_ADDRESS` 必须同步改为 Boot 大小 − 4。
+- **升级后跳转进 APP 就 HardFault 怎么查**：本仓库在跳转前做三道检查——三段 CRC32、跳转标志、APP 栈顶地址是否落在 `SRAM_LEGAL_ADDRESS_MASK` 允许的 SRAM 范围；另需确认 APP 的中断向量表已重定位（M0 拷到 SRAM，其余设 `SCB->VTOR`），且 `boot.h` 的分区宏与实际 Flash 分配一致。
+- **怎么移植到其他 MCU**：复制 `main.c` / `boot.c` / `boot.h` / `crc32_algorithm.c` / `crc32_algorithm.h`，改 3 个宏 + 1 个批处理地址，实现 Flash 读写与串口收发。
+- **Bootloader_CRC.hex 是什么**：编译后由 `crc_gen_keil.bat` 把 Boot 区间的 CRC32 追加到 Bootloader 末尾（地址 = Boot 大小 − 4）后生成的烧录文件；`Merge_Tools` 另在 Boot 之后的 1 KB 区间写入跳转标志 / APP 长度 / APP CRC32 / 参数区 CRC32。
+
+## Optional
+
+- [英文 README](https://github.com/SkydiverMCU/mcu-iap-demo/blob/master/README.en.md)
+- [LICENSE（Apache-2.0）](https://github.com/SkydiverMCU/mcu-iap-demo/blob/master/LICENSE)
